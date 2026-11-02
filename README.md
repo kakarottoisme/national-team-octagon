@@ -7,3 +7,7 @@
 
 ## 追加一天
 收盘后（15:05 以后，北京时间）在仓库根目录运行 `python3 archive.py`，然后 commit 并 push `data/`。腾讯分时接口只返回当天数据，错过的日子无法补录。
+
+## 两融余额 · 指数对比（margin.html）
+`data/margin_balance.json`：两融余额（沪+深，亿元，2010-03-31 起）与创业板指 399006、科创50 000688、中证500 000905、中证1000 000852、沪深300 000300、上证50 000016 日收盘（全量历史）。
+收盘后（建议 17:00 以后/次日，交易所两融披露滞后约 1 交易日）运行 `python3 margin.py`（需 akshare，可用 /workspace/.venv-nt），然后 commit 并 push `data/margin_balance.json`。脚本每次全量重拉，漏跑无影响。
