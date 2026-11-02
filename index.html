@@ -6,7 +6,7 @@ header{padding:14px 18px;border-bottom:1px solid #222}h1{margin:0;font-size:20px
 .note{font-size:12px;color:#889;margin-top:6px}button{margin-left:10px;background:#222;color:#ddd;border:1px solid #444;border-radius:4px;padding:3px 10px;cursor:pointer}
 .g{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px}@media(max-width:1100px){.g{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.g{grid-template-columns:1fr}}
 .c{background:#161a21;border:1px solid #262b35;border-radius:8px;padding:8px}.t{font-size:14px;font-weight:600}.t b{color:#ff5b5b;margin-left:6px}.ch{height:330px}</style></head><body>
-<header><h1>国家队 · 分时八宫格</h1><span id="st">加载中…</span><button onclick="refresh()">立即刷新</button>
+<header><h1>国家队 · 分时八宫格</h1><span id="st">加载中…</span><button id="rb" onclick="refresh()">手动刷新</button>
 <div class="note">红柱 = 单分钟成交额 &gt; 1 亿；救市金额估算 = 当日红柱成交额合计；MACD(12,26,9)。每 60 秒自动刷新。⚠ 这是成交额阈值代理，非官方国家队认定，也不是监管披露的护盘资金。数据：腾讯行情。</div></header>
 <div class="g" id="g"></div>
 <script>
@@ -39,9 +39,9 @@ async function sse(h){const k=(await j("https://proxy.finance.qq.com/ifzqgtimg/a
  charts[7].setOption({backgroundColor:"transparent",animation:false,tooltip:{trigger:"axis"},legend:{top:0,textStyle:{fontSize:10},itemWidth:10,itemHeight:8},grid:{top:48,left:46,right:44,bottom:28},
   xAxis:{type:"category",data:ds.map(s=>s.slice(5)),axisLabel:{fontSize:10}},yAxis:[{scale:true,splitLine:{lineStyle:{color:"#2a2f3a"}},axisLabel:{fontSize:10}},{name:"亿",splitLine:{show:false},axisLabel:{fontSize:10}}],
   series:[{name:"上证指数",type:"line",data:rows.map(r=>+r[2]),symbolSize:5,lineStyle:{color:"#e6e6e6"},itemStyle:{color:"#e6e6e6"},z:5}].concat(E.map((e,i)=>({name:e[0],type:"bar",stack:"r",yAxisIndex:1,itemStyle:{color:COL[i]},data:ds.map(d=>{const x=h[d];return x&&x[e[0]]!=null?+x[e[0]].toFixed(2):null})})))})}
-async function refresh(){const st=document.getElementById("st");try{const r=await Promise.all(E.map((_,i)=>etf(i)));const day=r[0][0],ds=day.slice(0,4)+"-"+day.slice(4,6)+"-"+day.slice(6);
+let busy=false;async function refresh(){if(busy)return;busy=true;const rb=document.getElementById("rb");rb.disabled=true;rb.textContent="刷新中…";const st=document.getElementById("st");try{const r=await Promise.all(E.map((_,i)=>etf(i)));const day=r[0][0],ds=day.slice(0,4)+"-"+day.slice(4,6)+"-"+day.slice(6);
  const h=hist(),o={};E.forEach((e,i)=>o[e[0]]=r[i][1]);h[ds]=o;try{localStorage.setItem(KEY,JSON.stringify(h))}catch(e){}
  const tot=r.reduce((s,x)=>s+x[1],0);document.getElementById("t7").innerHTML="上证指数 · 救市金额估算<b>今日 "+tot.toFixed(2)+"亿</b>";await sse(h);
- const d=bj();st.textContent="最后刷新 "+d.toLocaleString("zh-CN",{hour12:false})+"（北京时间）· "+(trading()?"交易中":"非交易时段")+" · 每60秒刷新"}catch(e){st.textContent="刷新失败："+e.message+"，60秒后重试"}}
+ const d=bj();st.textContent="最后刷新 "+d.toLocaleString("zh-CN",{hour12:false})+"（北京时间）· "+(trading()?"交易中":"非交易时段")+" · 每60秒刷新"}catch(e){st.textContent="刷新失败："+e.message+"，60秒后重试"}finally{busy=false;rb.disabled=false;rb.textContent="手动刷新"}}
 refresh();setInterval(refresh,60000);
 </script></body></html>
