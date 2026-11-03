@@ -2,39 +2,114 @@
 <link rel="icon" href="favicon.ico?v=3" sizes="any"><link rel="apple-touch-icon" href="apple-touch-icon.png?v=3"><title>两融余额 · 指数对比</title>
 <script src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <style>
-:root{--bg:#f3f5f8;--surface:#fff;--line:#e3e7ed;--line-soft:#eef1f5;--ink:#26303d;--ink-2:#4c5664;--muted:#8a93a0;--faint:#a7afba;--accent:#4e6e94;--r:10px;
- --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif}
+:root{
+ --page:#f5f6f8;--card:#fff;--line:#e6e8ec;--line-2:#f0f1f4;
+ --ink:#1f2733;--ink-2:#4a5260;--muted:#868e9a;--faint:#b0b6bf;
+ --accent:#3d6a9e;--accent-bg:#edf2f8;--chip:#f2f4f7;
+ --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink-2);font:14px/1.5 var(--font);font-variant-numeric:tabular-nums}
-a{color:var(--accent);text-decoration:none}a:hover{color:#3a587c;text-decoration:underline}
-a:focus-visible{outline:2px solid #9db3cf;outline-offset:1px}
-.wrap{max-width:1680px;margin:0 auto;padding:0 12px}
-.top{background:var(--surface);border-bottom:1px solid var(--line)}
-.top .wrap{padding-top:14px;padding-bottom:12px}
-.bar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 16px}
-h1{margin:0;font-size:18px;line-height:1.3;font-weight:600;color:var(--ink)}
-.sub{margin:2px 0 0;font-size:13px;color:var(--muted)}
-.lnk{font-size:14px}
-#st{display:block;margin-top:8px;font-size:13px;color:var(--muted)}
-details.note{margin-top:6px;font-size:13px;color:var(--muted)}
-details.note summary{cursor:pointer;color:var(--ink-2);width:max-content;list-style:none}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink-2);font:14px/1.55 var(--font);font-variant-numeric:tabular-nums}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid #9fb6d3;outline-offset:2px}
+.wrap{max-width:1600px;margin:0 auto;padding:0 14px}
+.top{background:var(--card);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;padding-top:12px;padding-bottom:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.mark{width:28px;height:28px;border-radius:7px;background:var(--accent-bg);display:grid;place-items:center;flex:none}
+h1{margin:0;font-size:17px;font-weight:600;color:var(--ink);line-height:1.3}
+.crumb{font-size:12px;color:var(--muted)}
+.ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+button{font:inherit;font-size:14px;color:var(--ink);background:#fff;border:1px solid #d9dde3;border-radius:6px;height:34px;padding:0 12px;cursor:pointer}
+button:hover{border-color:#b3bcc8}button:disabled{color:var(--muted);cursor:default}
+.tab{display:inline-flex;align-items:center;height:34px;padding:0 12px;border-radius:6px;font-size:14px;color:var(--ink-2)}
+.tab:hover{background:var(--chip);text-decoration:none}
+.sec{margin:16px 0 10px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
+h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
+#st{display:block;margin-top:14px;font-size:12px;color:var(--muted)}
+details.note{position:relative;flex:0 0 auto;margin-left:auto;font-size:12px;color:var(--muted)}
+details.note summary{cursor:pointer;list-style:none;display:block;white-space:nowrap;border-radius:4px}
 details.note summary::-webkit-details-marker{display:none}
-details.note summary::before{content:"";display:inline-block;border-left:5px solid #9aa3b0;border-top:4px solid transparent;border-bottom:4px solid transparent;margin-right:6px;vertical-align:1px}
-details.note[open] summary::before{transform:rotate(90deg)}
-details.note p{margin:6px 0 0;max-width:72em;line-height:1.7}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin:12px 0 20px;padding:10px 10px 4px}
-#ch{height:calc(100vh - 190px);min-height:440px}
-@media(min-width:700px){.wrap{padding:0 20px}.card{margin:16px 0 24px;padding:12px 14px 6px}h1{font-size:19px}}
+details.note summary span{color:var(--accent)}
+details.note p{position:absolute;right:0;top:100%;z-index:20;width:min(520px,calc(100vw - 48px));max-height:60vh;overflow:auto;margin:8px 0 0;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(31,39,51,.10);line-height:1.75;color:var(--ink-2)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:28px;padding:10px 6px 0}
+#ch{height:calc(100vh - 210px);min-height:440px}
+.foot{padding:9px 10px 12px;font-size:12px;color:var(--muted);border-top:1px solid var(--line-2)}
+.share-status{position:fixed;right:20px;bottom:20px;z-index:60;max-width:min(420px,calc(100vw - 40px));padding:12px 16px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);box-shadow:0 4px 18px rgba(31,39,51,.10);font-size:14px}
+.share-status:empty{display:none}
+.share-fallback{position:fixed;right:20px;bottom:110px;z-index:60;max-width:calc(100vw - 40px);padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:14px}
+.share-fallback[hidden]{display:none}
+@media(min-width:700px){.wrap{padding:0 24px}.panel{padding:12px 12px 0}}
 </style></head><body>
 <header class="top"><div class="wrap">
- <div class="bar">
-  <div><h1>两融余额 · 指数对比</h1><p class="sub">沪深两市融资融券余额与主要宽基指数日收盘</p></div>
-  <a class="lnk" href="index.html">返回 分时概览</a>
+ <div class="brand">
+  <span class="mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3d6a9e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 18h7M17.5 14.5v7"/></svg></span>
+  <div><h1>两融余额 · 指数对比</h1><div class="crumb">沪深两市 · 日度数据</div></div>
  </div>
- <span id="st"></span>
- <details class="note"><summary>口径说明</summary><p>日频收盘数据（非分钟级）。两融余额 = 沪市 + 深市融资融券余额（亿元，左轴），交易所次日披露，通常滞后 1 个交易日。指数为收盘点位（右轴，对数刻度）；点击图例开关。科创板用科创50（000688）。数据：akshare（交易所/新浪）。</p></details>
+ <div class="ctl">
+  <button type="button" onclick="location.reload()">刷新</button>
+  <button id="shareBtn" type="button" onclick="copyMarginImage()" title="将当前显示范围的两融与指数图复制为一张图片">复制为图片</button>
+  <a class="tab" href="index.html">分时概览</a>
+ </div>
 </div></header>
-<main class="wrap"><div class="card"><div id="ch"></div></div></main>
+<main class="wrap" id="dashboard">
+ <span id="st">加载中…</span>
+ <div class="sec"><h2>两融与指数走势</h2><details class="note"><summary><span>口径说明</span></summary><p>日频收盘数据（非分钟级）。两融余额 = 沪市 + 深市融资融券余额（亿元，左轴），交易所次日披露，通常滞后 1 个交易日。指数为收盘点位（右轴，对数刻度）；点击图例开关。科创板用科创50（000688）。数据：akshare（交易所/新浪）。</p></details></div>
+ <section class="panel"><div id="ch"></div><div class="foot">日频收盘数据，非实时行情 · 点击图例开关，拖动底部滑块调整显示范围</div></section>
+</main>
+<div id="shareStatus" class="share-status" role="status" aria-live="polite" aria-atomic="true"></div>
+<a id="shareDownload" class="share-fallback" hidden>保存图片（复制受限时备用）</a>
+<script>
+const notePanel=document.querySelector('details.note');
+document.addEventListener('click',ev=>{if(notePanel.open&&!notePanel.contains(ev.target))notePanel.open=false});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&notePanel.open){notePanel.open=false;notePanel.querySelector('summary').focus()}});
+let shareInProgress=false,shareDownloadURL=null,shareStatusTimer=null;
+function shareNotice(text){clearTimeout(shareStatusTimer);document.getElementById('shareStatus').textContent=text;shareStatusTimer=setTimeout(()=>{document.getElementById('shareStatus').textContent=''},12000)}
+function showShareDownload(blob){
+ if(shareDownloadURL)URL.revokeObjectURL(shareDownloadURL);
+ shareDownloadURL=URL.createObjectURL(blob);
+ const link=document.getElementById('shareDownload');link.href=shareDownloadURL;link.download='两融余额-指数对比.png';link.hidden=false;
+}
+async function renderMarginImage(option,status){
+ // 只复制已显示的配置/日期范围/图例状态，不额外取数据，不改变原图。
+ const host=document.createElement('div');host.style.cssText='position:fixed;left:-100000px;top:0;width:1230px;height:560px;pointer-events:none';host.setAttribute('aria-hidden','true');document.body.appendChild(host);
+ let chart;
+ try{
+  if(document.fonts)await Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,2000))]);
+  chart=echarts.init(host,null,{renderer:'canvas',devicePixelRatio:2});
+  chart.setOption({...option,animation:false,tooltip:{show:false}},true);
+  const image=new Image();image.src=chart.getDataURL({type:'png',pixelRatio:2,backgroundColor:'#fff',excludeComponents:['tooltip']});await image.decode();
+  const canvas=document.createElement('canvas');canvas.width=2560;canvas.height=1392;
+  const ctx=canvas.getContext('2d');if(!ctx)throw new Error('图片画布不可用');ctx.scale(2,2);
+  ctx.fillStyle='#f5f6f8';ctx.fillRect(0,0,1280,696);
+  const font=getComputedStyle(document.body).fontFamily;
+  ctx.fillStyle='#1f2733';ctx.font='600 18px '+font;ctx.fillText('两融余额 · 指数对比',24,34);
+  ctx.fillStyle='#868e9a';ctx.font='12px '+font;ctx.fillText(status,24,58);
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.roundRect(24,76,1232,586,10);ctx.fill();
+  ctx.drawImage(image,25,88,1230,560);
+  ctx.fillStyle='#868e9a';ctx.font='12px '+font;ctx.fillText('日频收盘数据 · 两融余额：亿元（左轴）；指数：点位，对数刻度（右轴） · 当前显示范围',24,682);
+  return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('PNG编码失败')),'image/png'));
+ }finally{if(chart&&!chart.isDisposed())chart.dispose();host.remove()}
+}
+async function copyMarginImage(){
+ if(shareInProgress)return;
+ const chart=echarts.getInstanceByDom(document.getElementById('ch'));
+ if(!chart||!chart.getOption().series?.length){shareNotice('页面正在加载，请等数据加载完成后再复制。');return}
+ shareInProgress=true;const button=document.getElementById('shareBtn');button.disabled=true;button.textContent='正在复制…';document.getElementById('shareDownload').hidden=true;
+ if(shareDownloadURL){URL.revokeObjectURL(shareDownloadURL);shareDownloadURL=null}
+ let pngPromise;
+ try{
+  pngPromise=renderMarginImage(chart.getOption(),document.getElementById('st').textContent);pngPromise.catch(()=>{});
+  if(!window.isSecureContext||!navigator.clipboard?.write||!window.ClipboardItem||(ClipboardItem.supports&&!ClipboardItem.supports('image/png'))){showShareDownload(await pngPromise);shareNotice('当前浏览器不支持复制图片，可点击“保存图片”备用。');return}
+  await navigator.clipboard.write([new ClipboardItem({'image/png':pngPromise})]);shareNotice('整张图片已复制，可切换窗口按 ⌘V / Ctrl+V 粘贴。');
+ }catch(error){
+  let blob=null;try{if(pngPromise)blob=await pngPromise}catch(captureError){error=captureError}
+  if(blob){showShareDownload(blob);shareNotice('浏览器未允许复制。请允许剪贴板权限后重试，或点击“保存图片”。')}
+  else shareNotice('未能生成图片，请稍后重试。'+(error instanceof Error?error.message:''));
+ }finally{shareInProgress=false;button.disabled=false;button.textContent='复制为图片'}
+}
+</script>
 <script>
 fetch("data/margin_balance.json?"+Date.now()).then(r=>r.json()).then(d=>{
  const dates=[...new Set([...Object.keys(d.margin),...Object.values(d.index).flatMap(Object.keys)])].filter(x=>x>=Object.keys(d.margin).sort()[0]).sort();
@@ -45,13 +120,13 @@ fetch("data/margin_balance.json?"+Date.now()).then(r=>r.json()).then(d=>{
  const series=[{name:"两融余额(亿)",type:"line",yAxisIndex:0,showSymbol:false,connectNulls:true,lineStyle:{width:2},areaStyle:{opacity:.07},z:3,data:dates.map(x=>d.margin[x]??null)}];
  for(const k in d.index)series.push({name:`${k}(${d.codes[k].slice(2)})`,type:"line",yAxisIndex:1,showSymbol:false,connectNulls:true,lineStyle:{width:1.1},data:dates.map(x=>d.index[k][x]??null)});
  const c=echarts.init(document.getElementById("ch"));
- const ax="#9aa3af";
+ const ax="#9aa1ab";
  c.setOption({backgroundColor:"transparent",color:cols,animation:false,
-  tooltip:{trigger:"axis",backgroundColor:"#fff",borderColor:"#e3e7ed",borderWidth:1,padding:[6,10],textStyle:{color:"#3a4452",fontSize:12},extraCssText:"box-shadow:0 4px 14px rgba(30,41,59,.08);border-radius:6px;",axisPointer:{type:"line",lineStyle:{color:"#b8c2cf"}}},
-  legend:{top:4,left:0,right:0,icon:"roundRect",itemWidth:12,itemHeight:6,itemGap:14,textStyle:{color:"#5c6573",fontSize:12}},grid:{top:56,left:58,right:58,bottom:72},
-  xAxis:{type:"category",data:dates,axisLabel:{color:ax,fontSize:11,hideOverlap:true},axisTick:{show:false},axisLine:{lineStyle:{color:"#d6dce4"}}},
-  yAxis:[{type:"value",name:"亿元",scale:true,nameTextStyle:{color:ax,fontSize:11},axisLabel:{color:ax,fontSize:11},splitLine:{lineStyle:{color:"#edf0f4",type:"dashed"}}},{type:"log",name:"点位",nameTextStyle:{color:ax,fontSize:11},axisLabel:{color:ax,fontSize:11},splitLine:{show:false}}],
-  dataZoom:[{type:"inside",start:70},{type:"slider",start:70,height:22,bottom:16,borderColor:"#e3e7ed",backgroundColor:"#f7f8fa",fillerColor:"rgba(78,110,148,0.10)",dataBackground:{lineStyle:{color:"#c3ccd7"},areaStyle:{color:"#e6eaf0"}},selectedDataBackground:{lineStyle:{color:"#8fa3b8"},areaStyle:{color:"#d5dde8"}},handleStyle:{color:"#fff",borderColor:"#9fb0c4"},moveHandleStyle:{color:"#c3ccd7"},textStyle:{color:ax,fontSize:11}}],series});
+  tooltip:{trigger:"axis",confine:true,backgroundColor:"#fff",borderColor:"#e6e8ec",borderWidth:1,padding:[6,10],textStyle:{color:"#3a4250",fontSize:12},extraCssText:"box-shadow:0 6px 18px rgba(31,39,51,.08);border-radius:6px;",axisPointer:{type:"line",lineStyle:{color:"#c3cad3"}}},
+  legend:{type:"scroll",top:4,left:4,right:4,icon:"roundRect",itemWidth:10,itemHeight:6,itemGap:12,textStyle:{color:"#6f7782",fontSize:12},pageTextStyle:{color:ax},pageIconColor:"#3d6a9e",pageIconInactiveColor:"#e1e4e9"},grid:{top:64,left:58,right:58,bottom:72},
+  xAxis:{type:"category",data:dates,axisLabel:{color:ax,fontSize:11,hideOverlap:true},axisTick:{show:false},axisLine:{lineStyle:{color:"#e1e4e9"}}},
+  yAxis:[{type:"value",name:"亿元",scale:true,nameTextStyle:{color:ax,fontSize:11},axisLabel:{color:ax,fontSize:11},splitLine:{lineStyle:{color:"#f0f1f4"}}},{type:"log",name:"点位",nameTextStyle:{color:ax,fontSize:11},axisLabel:{color:ax,fontSize:11},splitLine:{show:false}}],
+  dataZoom:[{type:"inside",start:70},{type:"slider",start:70,height:22,bottom:16,borderColor:"#e6e8ec",backgroundColor:"#f5f6f8",fillerColor:"rgba(61,106,158,0.10)",dataBackground:{lineStyle:{color:"#c3ccd7"},areaStyle:{color:"#e6eaf0"}},selectedDataBackground:{lineStyle:{color:"#8fa3b8"},areaStyle:{color:"#d5dde8"}},handleStyle:{color:"#fff",borderColor:"#9fb0c4"},moveHandleStyle:{color:"#c3ccd7"},textStyle:{color:ax,fontSize:11}}],series});
  addEventListener("resize",()=>c.resize());
 });
 </script></body></html>

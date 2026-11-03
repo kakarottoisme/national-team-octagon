@@ -122,7 +122,7 @@ tr.sel{background:var(--accent-bg)}
  <div class="ctl">
   <label for="ds">日期<select id="ds"><option value="live">今日实时</option></select></label>
   <button id="rb" onclick="refresh()">刷新</button>
-  <button id="shareBtn" type="button" onclick="copyDashboardImage()" title="复制当前日期的概览、分时走势和完整日度汇总为一张图片">分享 · 复制图片</button>
+  <button id="shareBtn" type="button" onclick="copyDashboardImage()" title="复制当前日期的概览、分时走势和完整日度汇总为一张图片">复制为图片</button>
   <a class="tab" href="margin.html">两融余额</a>
  </div>
 </div></header>
@@ -260,7 +260,7 @@ async function copyDashboardImage(){
   let blob=null;try{if(pngPromise)blob=await pngPromise}catch(captureError){error=captureError}
   if(blob){showShareDownload(blob,snapshot.filename);shareNotice('浏览器未允许复制。请允许剪贴板权限后重试，或点击“保存图片”。');}
   else shareNotice('未能生成图片，请稍后重试。'+(error instanceof Error?error.message:''));
- }finally{shareInProgress=false;button.disabled=false;button.textContent='分享 · 复制图片';}
+ }finally{shareInProgress=false;button.disabled=false;button.textContent='复制为图片';}
 }
 </script>
 <script>
@@ -295,7 +295,8 @@ function drawEtf(i,m){const [n,code]=E[i];document.getElementById("n"+i).style.d
   grid:[{top:6,height:"52%",left:44,right:8},{top:"62%",height:"16%",left:44,right:8},{top:"82%",height:"9%",left:44,right:8}],
   xAxis:[ax(0),ax(1),ax(2)],yAxis:[
    ya(0,{scale:true,splitNumber:3,splitLine:{lineStyle:{color:V.grid}},axisLabel:{fontSize:10,color:V.axis,showMinLabel:false,formatter:v=>v.toFixed(2)+"%"}}),
-   ya(1,{axisLabel:{fontSize:10,color:V.axis,formatter:"{value}亿",showMinLabel:false}}),
+   // 每个标的按当前分钟成交额自适应上限，留10%呼吸空间；零基线和1亿参考线保留。
+   ya(1,{min:0,max:extent=>Math.max(extent.max,1)*1.1,axisLabel:{fontSize:10,color:V.axis,formatter:v=>Number(v.toFixed(2))+"亿",showMinLabel:false,showMaxLabel:false}}),
    ya(2,{axisLabel:{show:false}})],
   series:[{name:"涨跌幅%",type:"line",data:pct,showSymbol:false,lineStyle:{color:V.line,width:1.4},
     markLine:{symbol:"none",silent:true,label:{show:false},lineStyle:{color:V.zero,type:"solid",width:1},data:[{yAxis:0}]}},
