@@ -1,26 +1,26 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="favicon.ico?v=3" sizes="any"><link rel="icon" type="image/png" href="favicon-32.png?v=3" sizes="64x64"><link rel="apple-touch-icon" href="apple-touch-icon.png?v=3"><title>国家队·分时八宫格</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-<style>body{margin:0;background:#12141a;color:#c8ccd4;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif}
-header{padding:14px 18px;border-bottom:1px solid #2a2e36}h1{margin:0 12px 0 0;font-size:20px;display:inline;font-weight:600;color:#d2d6de}#st{margin-left:10px;font-size:13px;color:#8b909a}
-.note{font-size:12px;color:#7a808a;margin-top:6px}button,select{margin-left:8px;background:#1c2028;color:#c8ccd4;border:1px solid #3a404c;border-radius:4px;padding:3px 10px;cursor:pointer}
+<style>body{margin:0;background:#f4f5f7;color:#3d4450;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif}
+header{padding:14px 18px;border-bottom:1px solid #e2e5ea;background:#fff}h1{margin:0 12px 0 0;font-size:20px;display:inline;font-weight:600;color:#2f3540}#st{margin-left:10px;font-size:13px;color:#6b7280}
+.note{font-size:12px;color:#6b7280;margin-top:6px}button,select{margin-left:8px;background:#fff;color:#3d4450;border:1px solid #cfd5de;border-radius:4px;padding:3px 10px;cursor:pointer}button:hover,select:hover{border-color:#9aa3b0}
 .g{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px}@media(max-width:1100px){.g{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.g{grid-template-columns:1fr}}
-.c{background:#171a21;border:1px solid #2a303a;border-radius:8px;padding:8px;position:relative}.t{font-size:14px;font-weight:600;color:#c8ccd4}.t b{color:#b08989;margin-left:6px;font-weight:600}.ch{height:330px}
-.na{position:absolute;inset:40px 8px 8px;display:flex;align-items:center;justify-content:center;color:#7a808a;font-size:13px;text-align:center}
-#banner{display:none;margin:10px 10px 0;padding:8px 12px;border:1px solid #4a4538;background:#1e1c18;border-radius:6px;font-size:13px;color:#a89b7a}
-.tw{padding:0 10px 20px}h2{font-size:16px;margin:10px 0;color:#c8ccd4}table{border-collapse:collapse;width:100%;max-width:760px;font-size:13px}
-th,td{padding:6px 10px;border-bottom:1px solid #2a303a;text-align:right;color:#b0b6c0}th:first-child,td:first-child{text-align:left}tbody tr{cursor:pointer}tbody tr:hover{background:#1c212a}tr.sel{background:#222832}.up{color:#b08989}.dn{color:#7a9a86}a{color:#7a96b0;text-decoration:none}a:hover{color:#9ab0c4}</style></head><body>
+.c{background:#fff;border:1px solid #e2e5ea;border-radius:8px;padding:8px;position:relative;box-shadow:0 1px 2px rgba(15,23,42,.04)}.t{font-size:14px;font-weight:600;color:#2f3540}.t b{color:#5a7a9a;margin-left:6px;font-weight:600}.ch{height:330px}
+.na{position:absolute;inset:40px 8px 8px;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:13px;text-align:center}
+#banner{display:none;margin:10px 10px 0;padding:8px 12px;border:1px solid #d8dce3;background:#f0f2f5;border-radius:6px;font-size:13px;color:#5a6170}
+.tw{padding:0 10px 20px}h2{font-size:16px;margin:10px 0;color:#2f3540}table{border-collapse:collapse;width:100%;max-width:760px;font-size:13px;background:#fff;border:1px solid #e2e5ea;border-radius:8px;overflow:hidden}
+th,td{padding:6px 10px;border-bottom:1px solid #e8ebf0;text-align:right;color:#4a5160}th{background:#f8f9fb;color:#5a6170;font-weight:600}th:first-child,td:first-child{text-align:left}tbody tr{cursor:pointer}tbody tr:hover{background:#f0f3f7}tr.sel{background:#e8eef5}.up{color:#4a6fa5}.dn{color:#6b7280}a{color:#4a6fa5;text-decoration:none}a:hover{color:#355a8a}</style></head><body>
 <header><h1>国家队 · 分时八宫格</h1>日期<select id="ds"><option value="live">今日实时</option></select><button id="rb" onclick="refresh()">手动刷新</button><a href="margin.html" style="margin-left:10px">两融余额对比 →</a><span id="st">加载中…</span>
-<div class="note">上图为相对昨收的涨跌幅%；中图红柱 = 单分钟成交额 &gt; 1 亿；救市金额估算 = 当日红柱成交额合计；MACD(12,26,9)。仅「今日实时」每 60 秒自动刷新，历史日为存档静态数据。⚠ 这是成交额阈值代理，非官方国家队认定，也不是监管披露的护盘资金。数据：腾讯行情（经站点缓存）。</div></header>
+<div class="note">上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；救市金额估算 = 当日蓝柱成交额合计；MACD(12,26,9)。仅「今日实时」每 60 秒自动刷新，历史日为存档静态数据。⚠ 这是成交额阈值代理，非官方国家队认定，也不是监管披露的护盘资金。数据：腾讯行情（经站点缓存）。</div></header>
 <div id="banner"></div>
 <div class="g" id="g"></div>
 <div class="tw"><h2>日度汇总</h2><table><thead><tr><th>日期</th><th>估算合计(亿)</th><th>上证收盘</th><th>上证涨跌幅</th><th>简评</th></tr></thead><tbody id="tb"></tbody></table>
 <div class="note">点击一行切换到该日。历史只含已归档日期（data/history.json），不补造。</div></div>
 <script>
 const E=[["上证50","sh510050"],["沪深300","sh510300"],["中证A500","sz159352"],["中证500","sh510500"],["中证1000","sh512100"],["创业板","sz159915"],["科创50","sh588000"]];
-const KEY="nt-octagon-history",COL=["#a88888","#7a96b0","#a89878","#789898","#8a8498","#a89078","#7a9888"];
+const KEY="nt-octagon-history",COL=["#7a9cc4","#8aa8b8","#6b8fad","#9aafc4","#7396b0","#85a0b8","#6f8fa8"];
 const g=document.getElementById("g"),charts=[],sel=document.getElementById("ds");let H={},view="live",busy=false,SSEK=null,LIVE=null;
-E.concat([["上证指数 · 救市金额估算","sum"]]).forEach((e,i)=>{g.insertAdjacentHTML("beforeend",'<div class="c"><div class="t" id="t'+i+'">'+e[0]+'</div><div class="ch" id="c'+i+'"></div><div class="na" id="n'+i+'" style="display:none"></div></div>');charts.push(echarts.init(document.getElementById("c"+i),"dark"))});
+E.concat([["上证指数 · 救市金额估算","sum"]]).forEach((e,i)=>{g.insertAdjacentHTML("beforeend",'<div class="c"><div class="t" id="t'+i+'">'+e[0]+'</div><div class="ch" id="c'+i+'"></div><div class="na" id="n'+i+'" style="display:none"></div></div>');charts.push(echarts.init(document.getElementById("c"+i)))});
 addEventListener("resize",()=>charts.forEach(c=>c.resize()));
 const ema=(a,n)=>{const k=2/(n+1),o=[];a.forEach((v,i)=>o.push(i?v*k+o[i-1]*(1-k):v));return o};
 const bj=()=>new Date(Date.now()+(new Date().getTimezoneOffset()+480)*6e4);
@@ -34,27 +34,27 @@ function drawEtf(i,m){const [n,code]=E[i];document.getElementById("n"+i).style.d
  const est=a.reduce((s,v)=>v>1?s+v:s,0),e12=ema(p,12),e26=ema(p,26),dif=p.map((v,k)=>e12[k]-e26[k]),dea=ema(dif,9),mac=dif.map((v,k)=>2*(v-dea[k]));
  const last=pct.length?pct[pct.length-1]:0;
  document.getElementById("t"+i).innerHTML=n+" "+code.slice(2)+"<b>估算 "+est.toFixed(2)+"亿 · "+(last>=0?"+":"")+last.toFixed(2)+"%</b>";
- const ax=k=>({type:"category",data:t,gridIndex:k,axisLabel:{show:k==2,fontSize:10,color:"#6a707a"},axisTick:{show:false},axisLine:{lineStyle:{color:"#2a303a"}}});
+ const ax=k=>({type:"category",data:t,gridIndex:k,axisLabel:{show:k==2,fontSize:10,color:"#8a919c"},axisTick:{show:false},axisLine:{lineStyle:{color:"#d8dce3"}}});
  charts[i].setOption({backgroundColor:"transparent",animation:false,tooltip:{trigger:"axis",valueFormatter:v=>v},axisPointer:{link:[{xAxisIndex:"all"}]},
   grid:[{top:8,height:"38%",left:48,right:8},{top:"46%",height:"24%",left:48,right:8},{top:"74%",height:"18%",left:48,right:8}],
   xAxis:[ax(0),ax(1),ax(2)],yAxis:[
-   {scale:true,gridIndex:0,splitLine:{lineStyle:{color:"#252a33"}},axisLabel:{fontSize:10,color:"#6a707a",formatter:v=>v.toFixed(2)+"%"},axisLine:{show:false}},
-   {gridIndex:1,splitLine:{show:false},axisLabel:{fontSize:10,color:"#6a707a",formatter:"{value}亿"},axisLine:{show:false}},
-   {gridIndex:2,splitLine:{show:false},axisLabel:{fontSize:9,color:"#6a707a"},axisLine:{show:false}}],
-  series:[{name:"涨跌幅%",type:"line",data:pct,showSymbol:false,lineStyle:{color:"#7a96b0",width:1.3},areaStyle:{color:"rgba(122,150,176,0.08)"}},
-  {name:"成交额(亿)",type:"bar",xAxisIndex:1,yAxisIndex:1,data:a.map(v=>({value:+v.toFixed(3),itemStyle:{color:v>1?"#a88888":"#4a5058"}})),markLine:{symbol:"none",silent:true,label:{show:false},lineStyle:{color:"#8a7070",type:"dashed",opacity:0.7},data:[{yAxis:1}]}},
-  {name:"MACD",type:"bar",xAxisIndex:2,yAxisIndex:2,data:mac.map(v=>({value:+v.toFixed(5),itemStyle:{color:v>=0?"#a88888":"#7a9888"}}))},
-  {name:"DIF",type:"line",xAxisIndex:2,yAxisIndex:2,data:dif.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:"#a89878",width:1}},
-  {name:"DEA",type:"line",xAxisIndex:2,yAxisIndex:2,data:dea.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:"#8a8498",width:1}},
+   {scale:true,gridIndex:0,splitLine:{lineStyle:{color:"#e8ebf0"}},axisLabel:{fontSize:10,color:"#8a919c",formatter:v=>v.toFixed(2)+"%"},axisLine:{show:false}},
+   {gridIndex:1,splitLine:{show:false},axisLabel:{fontSize:10,color:"#8a919c",formatter:"{value}亿"},axisLine:{show:false}},
+   {gridIndex:2,splitLine:{show:false},axisLabel:{fontSize:9,color:"#8a919c"},axisLine:{show:false}}],
+  series:[{name:"涨跌幅%",type:"line",data:pct,showSymbol:false,lineStyle:{color:"#5a7fa8",width:1.4},areaStyle:{color:"rgba(90,127,168,0.08)"}},
+  {name:"成交额(亿)",type:"bar",xAxisIndex:1,yAxisIndex:1,data:a.map(v=>({value:+v.toFixed(3),itemStyle:{color:v>1?"#6b8fad":"#c5ccd6"}})),markLine:{symbol:"none",silent:true,label:{show:false},lineStyle:{color:"#9aafc4",type:"dashed",opacity:0.75},data:[{yAxis:1}]}},
+  {name:"MACD",type:"bar",xAxisIndex:2,yAxisIndex:2,data:mac.map(v=>({value:+v.toFixed(5),itemStyle:{color:v>=0?"#7a9cc4":"#a8b4c0"}}))},
+  {name:"DIF",type:"line",xAxisIndex:2,yAxisIndex:2,data:dif.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:"#8a9aab",width:1}},
+  {name:"DEA",type:"line",xAxisIndex:2,yAxisIndex:2,data:dea.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:"#6b7c8e",width:1}},
   {name:"价格",type:"line",data:p,showSymbol:false,lineStyle:{width:0},itemStyle:{opacity:0},tooltip:{valueFormatter:v=>v}}]},true);return est}
 function noMin(i,est){const [n,code]=E[i];charts[i].clear();document.getElementById("t"+i).innerHTML=n+" "+code.slice(2)+(est!=null?"<b>估算 "+(+est).toFixed(2)+"亿</b>":"");const x=document.getElementById("n"+i);x.style.display="flex";x.textContent="该日分时未存档，仅显示汇总估算"}
 async function sseRows(){if(view=="live"&&LIVE&&LIVE.sse){SSEK=LIVE.sse;return SSEK}if(!SSEK||view=="live"){const k=(await j("https://proxy.finance.qq.com/ifzqgtimg/appstock/app/newfqkline/get?param=sh000001,day,,,60,qfq")).data.sh000001;SSEK=(k.day||k.qfqday)}return SSEK}
 function drawSum(rows,cur){const r=rows.filter(x=>x[0]>="2026-10-15"),ds=r.map(x=>x[0]);const tot=H[cur]&&H[cur]["合计"];
  document.getElementById("t7").innerHTML="上证指数 · 救市金额估算"+(tot!=null?"<b>"+cur.slice(5)+" "+(+tot).toFixed(2)+"亿</b>":"");
- charts[7].setOption({backgroundColor:"transparent",animation:false,tooltip:{trigger:"axis"},legend:{top:0,textStyle:{fontSize:10,color:"#8b909a"},itemWidth:10,itemHeight:8},grid:{top:48,left:46,right:44,bottom:28},
-  xAxis:{type:"category",data:ds.map(s=>s.slice(5)),axisLabel:{fontSize:10,color:"#6a707a"},axisLine:{lineStyle:{color:"#2a303a"}}},
-  yAxis:[{scale:true,splitLine:{lineStyle:{color:"#252a33"}},axisLabel:{fontSize:10,color:"#6a707a"},axisLine:{show:false}},{name:"亿",splitLine:{show:false},axisLabel:{fontSize:10,color:"#6a707a"},axisLine:{show:false},nameTextStyle:{color:"#6a707a"}}],
-  series:[{name:"上证指数",type:"line",data:r.map(x=>({value:+x[2],symbolSize:x[0]==cur?10:5})),lineStyle:{color:"#b0b6c0"},itemStyle:{color:"#b0b6c0"},z:5}].concat(E.map((e,i)=>({name:e[0],type:"bar",stack:"r",yAxisIndex:1,itemStyle:{color:COL[i]},data:ds.map(d=>{const x=H[d];return x&&x[e[0]]!=null?+(+x[e[0]]).toFixed(2):null})})))},true)}
+ charts[7].setOption({backgroundColor:"transparent",animation:false,tooltip:{trigger:"axis"},legend:{top:0,textStyle:{fontSize:10,color:"#6b7280"},itemWidth:10,itemHeight:8},grid:{top:48,left:46,right:44,bottom:28},
+  xAxis:{type:"category",data:ds.map(s=>s.slice(5)),axisLabel:{fontSize:10,color:"#8a919c"},axisLine:{lineStyle:{color:"#d8dce3"}}},
+  yAxis:[{scale:true,splitLine:{lineStyle:{color:"#e8ebf0"}},axisLabel:{fontSize:10,color:"#8a919c"},axisLine:{show:false}},{name:"亿",splitLine:{show:false},axisLabel:{fontSize:10,color:"#8a919c"},axisLine:{show:false},nameTextStyle:{color:"#8a919c"}}],
+  series:[{name:"上证指数",type:"line",data:r.map(x=>({value:+x[2],symbolSize:x[0]==cur?10:5})),lineStyle:{color:"#5a6575"},itemStyle:{color:"#5a6575"},z:5}].concat(E.map((e,i)=>({name:e[0],type:"bar",stack:"r",yAxisIndex:1,itemStyle:{color:COL[i]},data:ds.map(d=>{const x=H[d];return x&&x[e[0]]!=null?+(+x[e[0]]).toFixed(2):null})})))},true)}
 function table(cur){const tb=document.getElementById("tb");tb.innerHTML="";Object.keys(H).sort().reverse().forEach(d=>{const h=H[d],c=h["上证涨跌幅"],tr=document.createElement("tr");if(d==cur)tr.className="sel";
  tr.innerHTML="<td>"+d+"</td><td>"+(h["合计"]!=null?(+h["合计"]).toFixed(2):"-")+"</td><td>"+(h["上证收盘"]!=null?(+h["上证收盘"]).toFixed(2):"-")+"</td><td class='"+(c>0?"up":c<0?"dn":"")+"'>"+(c!=null?(c>0?"+":"")+(+c).toFixed(2)+"%":"-")+"</td><td class='"+(c>0?"up":c<0?"dn":"")+"'>"+(c==null?"-":c>0?"涨":c<0?"跌":"平")+"</td>";
  tr.onclick=()=>{const live=todayStr();sel.value=d==live?"live":d;onSel()};tb.appendChild(tr)})}
