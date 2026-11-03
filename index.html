@@ -11,7 +11,7 @@ header{padding:14px 18px;border-bottom:1px solid #e2e5ea;background:#fff}h1{marg
 .tw{padding:0 10px 20px}h2{font-size:16px;margin:10px 0;color:#2f3540}table{border-collapse:collapse;width:100%;max-width:760px;font-size:13px;background:#fff;border:1px solid #e2e5ea;border-radius:8px;overflow:hidden}
 th,td{padding:6px 10px;border-bottom:1px solid #e8ebf0;text-align:right;color:#4a5160}th{background:#f8f9fb;color:#5a6170;font-weight:600}th:first-child,td:first-child{text-align:left}tbody tr{cursor:pointer}tbody tr:hover{background:#f0f3f7}tr.sel{background:#e8eef5}.up{color:#4a6fa5}.dn{color:#6b7280}a{color:#4a6fa5;text-decoration:none}a:hover{color:#355a8a}</style></head><body>
 <header><h1>国家队 · 分时八宫格</h1>日期<select id="ds"><option value="live">今日实时</option></select><button id="rb" onclick="refresh()">手动刷新</button><a href="margin.html" style="margin-left:10px">两融余额对比 →</a><span id="st">加载中…</span>
-<div class="note">上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；救市金额估算 = 当日蓝柱成交额合计；MACD(12,26,9)。仅「今日实时」页面约每 60 秒重读站点缓存；缓存本身由服务端约每 5 分钟更新一次（不是 30 秒）。历史日为存档静态数据。⚠ 这是成交额阈值代理，非官方国家队认定，也不是监管披露的护盘资金。数据：腾讯行情（经站点缓存）。</div></header>
+<div class="note">上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；救市金额估算 = 当日蓝柱成交额合计；MACD(12,26,9)。仅「今日实时」页面约每 30 秒重读站点缓存；缓存由本机直连腾讯后约每 1 分钟中转推送（非券商级实时）。历史日为存档静态数据。⚠ 这是成交额阈值代理，非官方国家队认定，也不是监管披露的护盘资金。数据：腾讯行情（经站点缓存）。</div></header>
 <div id="banner"></div>
 <div class="g" id="g"></div>
 <div class="tw"><h2>日度汇总</h2><table><thead><tr><th>日期</th><th>估算合计(亿)</th><th>上证收盘</th><th>上证涨跌幅</th><th>简评</th></tr></thead><tbody id="tb"></tbody></table>
@@ -69,12 +69,12 @@ async function refresh(){if(busy)return;busy=true;const rb=document.getElementBy
    if(LIVE.estimates){Object.assign(o,LIVE.estimates);s=LIVE.estimates["合计"]??s}else o["合计"]=+s.toFixed(2);
    const ix=rows.findIndex(x=>x[0]==TODAY);if(ix>0&&o["上证收盘"]==null){o["上证收盘"]=+rows[ix][2];o["上证涨跌幅"]=+((rows[ix][2]/rows[ix-1][2]-1)*100).toFixed(2)}
    H[TODAY]=Object.assign({},H[TODAY]||{},o);let l={};try{l=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}l[TODAY]=H[TODAY];try{localStorage.setItem(KEY,JSON.stringify(l))}catch(e){}
-   fillSel();drawSum(rows,TODAY);table(TODAY);const lastBar=(ms[0]&&ms[0].t&&ms[0].t.length)?ms[0].t[ms[0].t.length-1]:"";const cut=lastBar?(lastBar.slice(0,2)+":"+lastBar.slice(2)):"";st.textContent="缓存 "+(LIVE.updated||bj().toLocaleString("zh-CN",{hour12:false}))+(cut?" · 行情截止 "+cut:"")+" · 来源"+(LIVE.src||"站点")+" · "+(trading()?"交易中":"非交易时段")+" · 约5分钟更新"}
+   fillSel();drawSum(rows,TODAY);table(TODAY);const lastBar=(ms[0]&&ms[0].t&&ms[0].t.length)?ms[0].t[ms[0].t.length-1]:"";const cut=lastBar?(lastBar.slice(0,2)+":"+lastBar.slice(2)):"";st.textContent="缓存 "+(LIVE.updated||bj().toLocaleString("zh-CN",{hour12:false}))+(cut?" · 行情截止 "+cut:"")+" · 来源"+(LIVE.src||"站点")+" · "+(trading()?"交易中":"非交易时段")+" · 约1分钟中转"}
   else{const rows=await sseRows();const d=view,h=H[d]||{};let m=null;try{m=await j("./data/minutes/"+d+".json")}catch(e){}
    E.forEach((e,i)=>{const x=m&&m.etfs[e[1]];x?drawEtf(i,x):noMin(i,h[e[0]])});
    if(!m){bn.style.display="block";bn.textContent=d+"：分时未存档，仅显示汇总数字（合计 "+(h["合计"]!=null?(+h["合计"]).toFixed(2)+" 亿":"无")+"）。"}else bn.style.display="none";
    drawSum(rows,d);table(d);st.textContent="查看存档 "+d+" · 静态数据，不自动刷新"}
  }catch(e){st.textContent="刷新失败："+e.message+(view=="live"?"，60秒后重试":"")}finally{busy=false;rb.disabled=false;rb.textContent="手动刷新"}}
 function onSel(){view=sel.value;refresh()}sel.onchange=onSel;
-(async()=>{await loadHist();fillSel();await refresh();setInterval(()=>{if(view=="live")refresh()},60000)})();
+(async()=>{await loadHist();fillSel();await refresh();setInterval(()=>{if(view=="live")refresh()},30000)})();
 </script></body></html>
