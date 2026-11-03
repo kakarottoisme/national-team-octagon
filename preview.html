@@ -90,8 +90,10 @@ tr.sel{background:var(--accent-bg)}
  .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
  .g{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 }
-@media(min-width:1240px){
- .g{grid-template-columns:repeat(4,minmax(0,1fr))}
+/* 按页面可用宽度判断：桌面打开浏览器侧栏后也保持四列，不依赖屏幕物理像素。 */
+@media(min-width:960px){
+ .g{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+ .c.sum .t .cd{white-space:normal}
  .ch{height:210px}
  .c.sum .ch{height:256px}
 }
