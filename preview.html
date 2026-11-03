@@ -43,11 +43,26 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
 .kpi .vl small{font-size:13px;font-weight:400;color:var(--muted);margin-left:3px}
 .kpi .ft{margin-top:2px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #st{font-size:12px;color:var(--muted)}
-details.note{font-size:12px;color:var(--muted)}
-details.note summary{cursor:pointer;list-style:none;display:inline}
+details.note{position:relative;flex:0 0 auto;margin-left:auto;font-size:12px;color:var(--muted)}
+details.note summary{cursor:pointer;list-style:none;display:block;white-space:nowrap;border-radius:4px}
 details.note summary::-webkit-details-marker{display:none}
 details.note summary span{color:var(--accent)}
-details.note p{margin:8px 0 0;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:8px;line-height:1.75;color:var(--ink-2)}
+details.note p{position:absolute;right:0;top:100%;z-index:20;width:min(520px,calc(100vw - 48px));max-height:60vh;overflow:auto;margin:8px 0 0;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(31,39,51,.10);line-height:1.75;color:var(--ink-2)}
+.share-status{position:fixed;right:20px;bottom:20px;z-index:60;max-width:min(420px,calc(100vw - 40px));padding:12px 16px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);box-shadow:0 4px 18px rgba(31,39,51,.10);font-size:14px}
+.share-status:empty{display:none}
+.share-fallback{position:fixed;right:20px;bottom:110px;z-index:60;max-width:calc(100vw - 40px);padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:14px}
+.share-fallback[hidden]{display:none}
+/* 分享仅渲染当前已显示内容的副本；不截取浏览器或其他窗口，不重新取数。 */
+.share-snapshot{position:fixed;left:-100000px;top:0;max-width:none!important;margin:0!important;padding:4px 24px 12px!important;background:var(--page);pointer-events:none}
+.share-snapshot .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.share-snapshot .g{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.share-snapshot .c.sum .t .cd{white-space:normal}
+.share-snapshot .ch{height:210px}
+.share-snapshot .c.sum .ch{height:256px}
+.share-snapshot .ch img{display:block;width:100%;height:100%}
+.share-snapshot .tbx{overflow:visible}
+.share-snapshot .panel{margin-bottom:0}
+.share-snapshot .share-footnote{margin-top:8px;font-size:12px;color:var(--muted)}
 #banner{display:none;margin-top:10px;padding:9px 12px;border-radius:8px;background:var(--chip);font-size:13px;color:var(--ink-2)}
 
 /* ===== 八宫格 ===== */
@@ -107,11 +122,12 @@ tr.sel{background:var(--accent-bg)}
  <div class="ctl">
   <label for="ds">日期<select id="ds"><option value="live">今日实时</option></select></label>
   <button id="rb" onclick="refresh()">刷新</button>
-  <a class="tab" href="margin-preview.html">两融余额</a>
+  <button id="shareBtn" type="button" onclick="copyDashboardImage()" title="复制当前日期的概览、分时走势和完整日度汇总为一张图片">分享 · 复制图片</button>
+  <a class="tab" href="margin.html">两融余额</a>
  </div>
 </div></header>
 
-<main class="wrap">
+<main class="wrap" id="dashboard">
 <!-- ===== 概览 ===== -->
 <div class="sec"><h2 id="kt">当日概览</h2><span class="side" id="st">加载中…</span></div>
 <div class="kpis">
@@ -134,6 +150,119 @@ tr.sel{background:var(--accent-bg)}
  <div class="foot">历史只含已归档日期（data/history.json），不补造。</div>
 </section>
 </main>
+<div id="shareStatus" class="share-status" role="status" aria-live="polite" aria-atomic="true"></div>
+<a id="shareDownload" class="share-fallback" hidden>保存图片（复制受限时备用）</a>
+<script>
+/* 口径说明不参与标题行宽度计算；点击外部或 Escape 关闭。 */
+const notePanel=document.querySelector('details.note');
+document.addEventListener('click',ev=>{if(notePanel.open&&!notePanel.contains(ev.target))notePanel.open=false});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&notePanel.open){notePanel.open=false;notePanel.querySelector('summary').focus()}});
+
+/* PNG 分享：只在用户点击时写剪贴板；不会读取剪贴板，也不上传图片。 */
+let shareInProgress=false,shareDownloadURL=null,shareStatusTimer=null,captureLibraryPromise=null;
+function shareNotice(text){
+ clearTimeout(shareStatusTimer);
+ document.getElementById('shareStatus').textContent=text;
+ shareStatusTimer=setTimeout(()=>{document.getElementById('shareStatus').textContent=''},12000);
+}
+function loadCaptureLibrary(){
+ if(window.html2canvas)return Promise.resolve(window.html2canvas);
+ if(captureLibraryPromise)return captureLibraryPromise;
+ const urls=['https://fastly.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'];
+ const load=url=>new Promise((resolve,reject)=>{
+  const script=document.createElement('script');script.src=url;script.crossOrigin='anonymous';
+  const timer=setTimeout(()=>{script.remove();reject(new Error('截图组件加载超时'))},10000);
+  script.onload=()=>{clearTimeout(timer);window.html2canvas?resolve(window.html2canvas):reject(new Error('截图组件不可用'))};
+  script.onerror=()=>{clearTimeout(timer);script.remove();reject(new Error('截图组件加载失败'))};
+  document.head.appendChild(script);
+ });
+ captureLibraryPromise=load(urls[0]).catch(()=>load(urls[1])).catch(error=>{captureLibraryPromise=null;throw error});
+ return captureLibraryPromise;
+}
+function takeDashboardSnapshot(){
+ const root=document.getElementById('dashboard').cloneNode(true);
+ root.removeAttribute('id');root.classList.add('share-snapshot');root.setAttribute('aria-hidden','true');root.inert=true;
+ root.style.width='1280px';
+ root.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+ root.querySelectorAll('details.note').forEach(el=>el.remove());
+ // 冻结当前DOM和现有图表数据，异步生成期间刷新/切日不会混入新一帧。
+ const options=charts.map(c=>c.getOption());
+ const nodes=[...root.querySelectorAll('.ch')];
+ if(nodes.length!==8||options.length!==8)throw new Error('图表尚未就绪');
+ nodes.forEach(el=>{el.replaceChildren();el.removeAttribute('_echarts_instance_')});
+ const footer=document.createElement('div');footer.className='share-footnote';
+ footer.textContent='分钟成交额 > 1 亿为阈值代理，非官方资金认定；仅分享页面当前显示的数据。';
+ root.appendChild(footer);
+ const label=document.getElementById('kt').textContent;
+ const date=(label.match(/\d{4}-\d{2}-\d{2}/)||['当前日期'])[0];
+ document.body.appendChild(root);
+ return {root,options,nodes,filename:'宽基ETF概览-'+date+'.png'};
+}
+async function renderDashboardImage(snapshot){
+ const exportCharts=[];
+ try{
+  const capture=await loadCaptureLibrary();
+  if(document.fonts)await Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,2000))]);
+  const height=Math.ceil(snapshot.root.scrollHeight);
+  const scale=Math.min(2,16000/height,Math.sqrt(24000000/(1280*height)));
+  if(scale<1)throw new Error('汇总过长，无法生成清晰的单张图片');
+  // 用同一份ECharts配置在副本中重排为四列；不重新请求行情或重算指标。
+  for(let i=0;i<snapshot.nodes.length;i++){
+   const node=snapshot.nodes[i],option=snapshot.options[i];
+   if(!option.series||!option.series.length)continue; // 历史缺失数据保留原有提示，不补造。
+   const chart=echarts.init(node,null,{renderer:'canvas',devicePixelRatio:scale});exportCharts.push(chart);
+   // 汇总图为双轴，给多行图例与轴名称留出各自空间，避免导出时重叠。
+   const exportOption={...option,animation:false,tooltip:{show:false}};
+   if(i===7)exportOption.grid=option.grid.map(grid=>({...grid,top:72}));
+   chart.setOption(exportOption,true);
+   const image=new Image();image.src=chart.getDataURL({type:'png',pixelRatio:scale,backgroundColor:'#fff',excludeComponents:['tooltip']});
+   await image.decode();chart.dispose();node.replaceChildren(image);
+  }
+  const canvas=await capture(snapshot.root,{
+   backgroundColor:'#f5f6f8',scale,width:1280,height:Math.ceil(snapshot.root.scrollHeight),
+   windowWidth:1280,windowHeight:900,scrollX:0,scrollY:0,logging:false,useCORS:true,allowTaint:false,
+   onclone:doc=>{const el=doc.querySelector('.share-snapshot');el.style.position='absolute';el.style.left='0';el.style.top='0';}
+  });
+  if(!canvas.width||!canvas.height)throw new Error('图片生成失败');
+  return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('图片编码失败')),'image/png'));
+ }finally{
+  exportCharts.forEach(chart=>{if(!chart.isDisposed())chart.dispose()});snapshot.root.remove();
+ }
+}
+function showShareDownload(blob,filename){
+ if(shareDownloadURL)URL.revokeObjectURL(shareDownloadURL);
+ shareDownloadURL=URL.createObjectURL(blob);
+ const link=document.getElementById('shareDownload');link.href=shareDownloadURL;link.download=filename;link.hidden=false;
+}
+async function copyDashboardImage(){
+ if(shareInProgress)return;
+ if(busy||!TODAY||!document.querySelector('#tb tr')){shareNotice('页面正在加载，请等数据加载完成后再分享。');return;}
+ shareInProgress=true;
+ const button=document.getElementById('shareBtn');button.disabled=true;button.textContent='正在复制…';
+ document.getElementById('shareDownload').hidden=true;
+ if(shareDownloadURL){URL.revokeObjectURL(shareDownloadURL);shareDownloadURL=null;}
+ let snapshot,pngPromise;
+ try{
+  snapshot=takeDashboardSnapshot();pngPromise=renderDashboardImage(snapshot);
+  // 在点击回调中立即调用 write，并把PNG Promise交给ClipboardItem，保留Safari用户激活。
+  pngPromise.catch(()=>{});
+  if(!window.isSecureContext||!navigator.clipboard?.write||!window.ClipboardItem){
+   const blob=await pngPromise;showShareDownload(blob,snapshot.filename);
+   shareNotice('当前浏览器不支持复制图片；可先保存图片，或用 Chrome / Safari 的 HTTPS 页面重试。');return;
+  }
+  if(ClipboardItem.supports&&!ClipboardItem.supports('image/png')){
+   const blob=await pngPromise;showShareDownload(blob,snapshot.filename);
+   shareNotice('当前浏览器不支持 PNG 剪贴板；图片已生成，可点击保存。');return;
+  }
+  await navigator.clipboard.write([new ClipboardItem({'image/png':pngPromise})]);
+  shareNotice('整张图片已复制，可切换窗口按 ⌘V / Ctrl+V 粘贴。');
+ }catch(error){
+  let blob=null;try{if(pngPromise)blob=await pngPromise}catch(captureError){error=captureError}
+  if(blob){showShareDownload(blob,snapshot.filename);shareNotice('浏览器未允许复制。请允许剪贴板权限后重试，或点击“保存图片”。');}
+  else shareNotice('未能生成图片，请稍后重试。'+(error instanceof Error?error.message:''));
+ }finally{shareInProgress=false;button.disabled=false;button.textContent='分享 · 复制图片';}
+}
+</script>
 <script>
 const E=[["上证50","sh510050"],["沪深300","sh510300"],["中证A500","sz159352"],["中证500","sh510500"],["中证1000","sh512100"],["创业板","sz159915"],["科创50","sh588000"]];
 const KEY="nt-octagon-history";

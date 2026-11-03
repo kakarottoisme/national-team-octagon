@@ -1,25 +1,57 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="favicon.ico?v=3" sizes="any"><link rel="apple-touch-icon" href="apple-touch-icon.png?v=3"><title>两融余额 · 指数对比</title>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-<style>body{margin:0;background:#f4f5f7;color:#3d4450;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif}
-header{padding:10px 14px;background:#fff;border-bottom:1px solid #e2e5ea}h1{font-size:18px;margin:0 12px 0 0;display:inline;color:#2f3540}a{color:#4a6fa5;text-decoration:none}a:hover{color:#355a8a}.note{font-size:12px;color:#6b7280;margin-top:6px}#st{margin-left:8px;font-size:13px;color:#6b7280}
-#ch{height:calc(100vh - 120px);min-height:420px;margin:10px;background:#fff;border:1px solid #e2e5ea;border-radius:8px;box-shadow:0 1px 2px rgba(15,23,42,.04)}</style></head><body>
-<header><h1>两融余额 · 指数对比</h1><a href="index.html">← 国家队·分时八宫格</a> <span id="st"></span>
-<div class="note">日频收盘数据（非分钟级）。两融余额 = 沪市 + 深市融资融券余额（亿元，左轴），交易所次日披露，通常滞后 1 个交易日。指数为收盘点位（右轴，对数刻度）；点击图例开关。科创板用科创50（000688）。数据：akshare（交易所/新浪）。</div></header>
-<div id="ch"></div>
+<script src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+:root{--bg:#f3f5f8;--surface:#fff;--line:#e3e7ed;--line-soft:#eef1f5;--ink:#26303d;--ink-2:#4c5664;--muted:#8a93a0;--faint:#a7afba;--accent:#4e6e94;--r:10px;
+ --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink-2);font:14px/1.5 var(--font);font-variant-numeric:tabular-nums}
+a{color:var(--accent);text-decoration:none}a:hover{color:#3a587c;text-decoration:underline}
+a:focus-visible{outline:2px solid #9db3cf;outline-offset:1px}
+.wrap{max-width:1680px;margin:0 auto;padding:0 12px}
+.top{background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{padding-top:14px;padding-bottom:12px}
+.bar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 16px}
+h1{margin:0;font-size:18px;line-height:1.3;font-weight:600;color:var(--ink)}
+.sub{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.lnk{font-size:14px}
+#st{display:block;margin-top:8px;font-size:13px;color:var(--muted)}
+details.note{margin-top:6px;font-size:13px;color:var(--muted)}
+details.note summary{cursor:pointer;color:var(--ink-2);width:max-content;list-style:none}
+details.note summary::-webkit-details-marker{display:none}
+details.note summary::before{content:"";display:inline-block;border-left:5px solid #9aa3b0;border-top:4px solid transparent;border-bottom:4px solid transparent;margin-right:6px;vertical-align:1px}
+details.note[open] summary::before{transform:rotate(90deg)}
+details.note p{margin:6px 0 0;max-width:72em;line-height:1.7}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin:12px 0 20px;padding:10px 10px 4px}
+#ch{height:calc(100vh - 190px);min-height:440px}
+@media(min-width:700px){.wrap{padding:0 20px}.card{margin:16px 0 24px;padding:12px 14px 6px}h1{font-size:19px}}
+</style></head><body>
+<header class="top"><div class="wrap">
+ <div class="bar">
+  <div><h1>两融余额 · 指数对比</h1><p class="sub">沪深两市融资融券余额与主要宽基指数日收盘</p></div>
+  <a class="lnk" href="index.html">返回 分时概览</a>
+ </div>
+ <span id="st"></span>
+ <details class="note"><summary>口径说明</summary><p>日频收盘数据（非分钟级）。两融余额 = 沪市 + 深市融资融券余额（亿元，左轴），交易所次日披露，通常滞后 1 个交易日。指数为收盘点位（右轴，对数刻度）；点击图例开关。科创板用科创50（000688）。数据：akshare（交易所/新浪）。</p></details>
+</div></header>
+<main class="wrap"><div class="card"><div id="ch"></div></div></main>
 <script>
 fetch("data/margin_balance.json?"+Date.now()).then(r=>r.json()).then(d=>{
  const dates=[...new Set([...Object.keys(d.margin),...Object.values(d.index).flatMap(Object.keys)])].filter(x=>x>=Object.keys(d.margin).sort()[0]).sort();
  const ks=Object.keys(d.margin).sort();
  document.getElementById("st").textContent=`两融 ${ks[0]} ~ ${ks.at(-1)}，更新于 ${d.updated}`;
- const cols=["#5a7fa8","#7a9cc4","#8aa8b8","#6b8fad","#9aafc4","#7396b0","#85a0b8"];
- const series=[{name:"两融余额(亿)",type:"line",yAxisIndex:0,showSymbol:false,connectNulls:true,lineStyle:{width:2},areaStyle:{opacity:.1},data:dates.map(x=>d.margin[x]??null)}];
- for(const k in d.index)series.push({name:`${k}(${d.codes[k].slice(2)})`,type:"line",yAxisIndex:1,showSymbol:false,connectNulls:true,lineStyle:{width:1.2},data:dates.map(x=>d.index[k][x]??null)});
+ /* 视觉：两融余额为主线（深蓝灰+浅面积），指数为同色系由深到浅的细线 */
+ const cols=["#3f5f86","#6b8aae","#8fa3b8","#a6b6c8","#7d8a99","#b9c5d3","#5d6b7c"];
+ const series=[{name:"两融余额(亿)",type:"line",yAxisIndex:0,showSymbol:false,connectNulls:true,lineStyle:{width:2},areaStyle:{opacity:.07},z:3,data:dates.map(x=>d.margin[x]??null)}];
+ for(const k in d.index)series.push({name:`${k}(${d.codes[k].slice(2)})`,type:"line",yAxisIndex:1,showSymbol:false,connectNulls:true,lineStyle:{width:1.1},data:dates.map(x=>d.index[k][x]??null)});
  const c=echarts.init(document.getElementById("ch"));
- c.setOption({backgroundColor:"transparent",color:cols,animation:false,tooltip:{trigger:"axis"},legend:{top:6,textStyle:{color:"#5a6170"}},grid:{top:50,left:60,right:60,bottom:70},
-  xAxis:{type:"category",data:dates,axisLabel:{color:"#8a919c"},axisLine:{lineStyle:{color:"#d8dce3"}}},
-  yAxis:[{type:"value",name:"亿元",scale:true,nameTextStyle:{color:"#8a919c"},axisLabel:{color:"#8a919c"},splitLine:{lineStyle:{color:"#e8ebf0"}}},{type:"log",name:"点位",nameTextStyle:{color:"#8a919c"},axisLabel:{color:"#8a919c"},splitLine:{show:false}}],
-  dataZoom:[{type:"inside",start:70},{type:"slider",start:70,borderColor:"#d8dce3",fillerColor:"rgba(90,127,168,0.15)",handleStyle:{color:"#7a9cc4"}}],series});
+ const ax="#9aa3af";
+ c.setOption({backgroundColor:"transparent",color:cols,animation:false,
+  tooltip:{trigger:"axis",backgroundColor:"#fff",borderColor:"#e3e7ed",borderWidth:1,padding:[6,10],textStyle:{color:"#3a4452",fontSize:12},extraCssText:"box-shadow:0 4px 14px rgba(30,41,59,.08);border-radius:6px;",axisPointer:{type:"line",lineStyle:{color:"#b8c2cf"}}},
+  legend:{top:4,left:0,right:0,icon:"roundRect",itemWidth:12,itemHeight:6,itemGap:14,textStyle:{color:"#5c6573",fontSize:12}},grid:{top:56,left:58,right:58,bottom:72},
+  xAxis:{type:"category",data:dates,axisLabel:{color:ax,fontSize:11,hideOverlap:true},axisTick:{show:false},axisLine:{lineStyle:{color:"#d6dce4"}}},
+  yAxis:[{type:"value",name:"亿元",scale:true,nameTextStyle:{color:ax,fontSize:11},axisLabel:{color:ax,fontSize:11},splitLine:{lineStyle:{color:"#edf0f4",type:"dashed"}}},{type:"log",name:"点位",nameTextStyle:{color:ax,fontSize:11},axisLabel:{color:ax,fontSize:11},splitLine:{show:false}}],
+  dataZoom:[{type:"inside",start:70},{type:"slider",start:70,height:22,bottom:16,borderColor:"#e3e7ed",backgroundColor:"#f7f8fa",fillerColor:"rgba(78,110,148,0.10)",dataBackground:{lineStyle:{color:"#c3ccd7"},areaStyle:{color:"#e6eaf0"}},selectedDataBackground:{lineStyle:{color:"#8fa3b8"},areaStyle:{color:"#d5dde8"}},handleStyle:{color:"#fff",borderColor:"#9fb0c4"},moveHandleStyle:{color:"#c3ccd7"},textStyle:{color:ax,fontSize:11}}],series});
  addEventListener("resize",()=>c.resize());
 });
 </script></body></html>

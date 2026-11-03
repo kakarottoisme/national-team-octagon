@@ -1,26 +1,279 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" href="favicon.ico?v=3" sizes="any"><link rel="icon" type="image/png" href="favicon-32.png?v=3" sizes="64x64"><link rel="apple-touch-icon" href="apple-touch-icon.png?v=3"><title>国家队·分时八宫格</title>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-<style>body{margin:0;background:#f4f5f7;color:#3d4450;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif}
-header{padding:14px 18px;border-bottom:1px solid #e2e5ea;background:#fff}h1{margin:0 12px 0 0;font-size:20px;display:inline;font-weight:600;color:#2f3540}#st{margin-left:10px;font-size:13px;color:#6b7280}
-.note{font-size:12px;color:#6b7280;margin-top:6px}button,select{margin-left:8px;background:#fff;color:#3d4450;border:1px solid #cfd5de;border-radius:4px;padding:3px 10px;cursor:pointer}button:hover,select:hover{border-color:#9aa3b0}
-.g{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px}@media(max-width:1100px){.g{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.g{grid-template-columns:1fr}}
-.c{background:#fff;border:1px solid #e2e5ea;border-radius:8px;padding:8px;position:relative;box-shadow:0 1px 2px rgba(15,23,42,.04)}.t{font-size:14px;font-weight:600;color:#2f3540}.t b{color:#5a7a9a;margin-left:6px;font-weight:600}.ch{height:330px}
-.na{position:absolute;inset:40px 8px 8px;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:13px;text-align:center}
-#banner{display:none;margin:10px 10px 0;padding:8px 12px;border:1px solid #d8dce3;background:#f0f2f5;border-radius:6px;font-size:13px;color:#5a6170}
-.tw{padding:0 10px 20px}h2{font-size:16px;margin:10px 0;color:#2f3540}table{border-collapse:collapse;width:100%;max-width:760px;font-size:13px;background:#fff;border:1px solid #e2e5ea;border-radius:8px;overflow:hidden}
-th,td{padding:6px 10px;border-bottom:1px solid #e8ebf0;text-align:right;color:#4a5160}th{background:#f8f9fb;color:#5a6170;font-weight:600}th:first-child,td:first-child{text-align:left}tbody tr{cursor:pointer}tbody tr:hover{background:#f0f3f7}tr.sel{background:#e8eef5}.up{color:#4a6fa5}.dn{color:#6b7280}a{color:#4a6fa5;text-decoration:none}a:hover{color:#355a8a}</style></head><body>
-<header><h1>国家队 · 分时八宫格</h1>日期<select id="ds"><option value="live">今日实时</option></select><button id="rb" onclick="refresh()">手动刷新</button><a href="margin.html" style="margin-left:10px">两融余额对比 →</a><span id="st">加载中…</span>
-<div class="note">上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；救市金额估算 = 当日蓝柱成交额合计；MACD(12,26,9)。仅「今日实时」页面约每 30 秒重读站点缓存；缓存由本机直连腾讯后约每 1 分钟中转推送（非券商级实时）。历史日为存档静态数据。⚠ 这是成交额阈值代理，非官方国家队认定，也不是监管披露的护盘资金。数据：腾讯行情（经站点缓存）。</div></header>
+<link rel="icon" href="favicon.ico?v=3" sizes="any"><link rel="icon" type="image/png" href="favicon-32.png?v=3" sizes="64x64"><link rel="apple-touch-icon" href="apple-touch-icon.png?v=3"><title>宽基 ETF 分时概览</title>
+<script src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+/* ===== 色板：中性灰为主，单一低饱和蓝作强调；无红绿 ===== */
+:root{
+ --page:#f5f6f8;--card:#fff;--line:#e6e8ec;--line-2:#f0f1f4;
+ --ink:#1f2733;--ink-2:#4a5260;--muted:#868e9a;--faint:#b0b6bf;
+ --accent:#3d6a9e;--accent-bg:#edf2f8;--chip:#f2f4f7;
+ --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink-2);font:14px/1.55 var(--font);font-variant-numeric:tabular-nums}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid #9fb6d3;outline-offset:2px}
+.wrap{max-width:1600px;margin:0 auto;padding:0 14px}
+
+/* ===== 顶栏：像内部系统的页面头 ===== */
+.top{background:var(--card);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;padding-top:12px;padding-bottom:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.mark{width:28px;height:28px;border-radius:7px;background:var(--accent-bg);display:grid;place-items:center;flex:none}
+h1{margin:0;font-size:17px;font-weight:600;color:var(--ink);line-height:1.3}
+.crumb{font-size:12px;color:var(--muted)}
+.ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ctl label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+select,button{font:inherit;font-size:14px;color:var(--ink);background:#fff;border:1px solid #d9dde3;border-radius:6px;height:34px;padding:0 12px;cursor:pointer}
+select{min-width:132px;padding-right:8px}
+select:hover,button:hover{border-color:#b3bcc8}
+button:disabled{color:var(--muted);cursor:default}
+.tab{display:inline-flex;align-items:center;height:34px;padding:0 12px;border-radius:6px;font-size:14px;color:var(--ink-2)}
+.tab:hover{background:var(--chip);text-decoration:none}
+
+/* ===== 概览：一行指标 ===== */
+.sec{margin:16px 0 10px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
+h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
+.sec .side{font-size:12px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.kpi{background:var(--card);padding:12px 16px;min-width:0}
+.kpi .lb{font-size:12px;color:var(--muted)}
+.kpi .vl{margin-top:2px;font-size:24px;line-height:1.25;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .vl small{font-size:13px;font-weight:400;color:var(--muted);margin-left:3px}
+.kpi .ft{margin-top:2px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#st{font-size:12px;color:var(--muted)}
+details.note{position:relative;flex:0 0 auto;margin-left:auto;font-size:12px;color:var(--muted)}
+details.note summary{cursor:pointer;list-style:none;display:block;white-space:nowrap;border-radius:4px}
+details.note summary::-webkit-details-marker{display:none}
+details.note summary span{color:var(--accent)}
+details.note p{position:absolute;right:0;top:100%;z-index:20;width:min(520px,calc(100vw - 48px));max-height:60vh;overflow:auto;margin:8px 0 0;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(31,39,51,.10);line-height:1.75;color:var(--ink-2)}
+.share-status{position:fixed;right:20px;bottom:20px;z-index:60;max-width:min(420px,calc(100vw - 40px));padding:12px 16px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);box-shadow:0 4px 18px rgba(31,39,51,.10);font-size:14px}
+.share-status:empty{display:none}
+.share-fallback{position:fixed;right:20px;bottom:110px;z-index:60;max-width:calc(100vw - 40px);padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:14px}
+.share-fallback[hidden]{display:none}
+/* 分享仅渲染当前已显示内容的副本；不截取浏览器或其他窗口，不重新取数。 */
+.share-snapshot{position:fixed;left:-100000px;top:0;max-width:none!important;margin:0!important;padding:4px 24px 12px!important;background:var(--page);pointer-events:none}
+.share-snapshot .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.share-snapshot .g{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.share-snapshot .c.sum .t .cd{white-space:normal}
+.share-snapshot .ch{height:210px}
+.share-snapshot .c.sum .ch{height:256px}
+.share-snapshot .ch img{display:block;width:100%;height:100%}
+.share-snapshot .tbx{overflow:visible}
+.share-snapshot .panel{margin-bottom:0}
+.share-snapshot .share-footnote{margin-top:8px;font-size:12px;color:var(--muted)}
+#banner{display:none;margin-top:10px;padding:9px 12px;border-radius:8px;background:var(--chip);font-size:13px;color:var(--ink-2)}
+
+/* ===== 八宫格 ===== */
+.g{display:grid;grid-template-columns:1fr;gap:12px}
+.c{background:var(--card);border:1px solid var(--line);border-radius:10px;position:relative;min-width:0;display:flex;flex-direction:column}
+.t{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:2px 8px;padding:10px 12px 6px}
+.t .nm{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t .cd{grid-column:1;font-size:11px;color:var(--faint);white-space:nowrap}
+.t .pc{grid-row:1/3;grid-column:2;align-self:center;font-size:12px;font-weight:500;color:var(--ink-2);background:var(--chip);border-radius:5px;padding:2px 7px;white-space:nowrap}
+.t .es{grid-column:1/3;margin-top:4px;display:flex;align-items:baseline;gap:5px}
+.t .es .k{font-size:11px;color:var(--muted)}
+.t .es .v{font-size:17px;line-height:1.2;font-weight:600;color:var(--ink)}
+.t .es .u{font-size:11px;color:var(--muted)}
+.ch{height:200px;margin:0 4px 2px}
+.c.sum .ch{height:246px}
+.na{position:absolute;left:12px;right:12px;bottom:12px;top:84px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font-size:13px;text-align:center;padding:0 12px}
+.lg{display:flex;flex-wrap:wrap;gap:3px 10px;padding:0 12px 8px;font-size:11px;color:var(--muted)}
+.lg i{display:inline-block;width:9px;height:3px;border-radius:2px;vertical-align:middle;margin-right:4px}
+
+/* ===== 日度汇总 ===== */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:28px}
+.tbx{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;table-layout:fixed;font-size:14px}
+th,td{padding:10px 16px;text-align:right;white-space:nowrap}
+th{font-size:12px;font-weight:500;color:var(--muted);border-bottom:1px solid var(--line)}
+td{color:var(--ink-2);border-bottom:1px solid var(--line-2)}
+th:first-child,td:first-child{text-align:left}
+td:first-child{color:var(--ink);font-weight:500}
+tbody tr{cursor:pointer}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#f8f9fb}
+tr.sel{background:var(--accent-bg)}
+.up{color:var(--accent)!important}.dn{color:var(--ink-2)!important}
+.tag{display:inline-block;min-width:28px;text-align:center;font-size:12px;border-radius:4px;padding:1px 6px;background:var(--chip);color:var(--ink-2)}
+.tag.up{background:var(--accent-bg)}
+.foot{padding:9px 16px 12px;font-size:12px;color:var(--faint);border-top:1px solid var(--line-2)}
+
+@media(min-width:700px){
+ .wrap{padding:0 24px}
+ .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .g{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+}
+/* 按页面可用宽度判断：桌面打开浏览器侧栏后也保持四列，不依赖屏幕物理像素。 */
+@media(min-width:960px){
+ .g{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+ .c.sum .t .cd{white-space:normal}
+ .ch{height:210px}
+ .c.sum .ch{height:256px}
+}
+</style></head><body>
+<!-- ===== 顶栏 ===== -->
+<header class="top"><div class="wrap">
+ <div class="brand">
+  <span class="mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3d6a9e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 18h7M17.5 14.5v7"/></svg></span>
+  <div><h1>宽基 ETF 分时概览</h1><div class="crumb">国家队 · 分时八宫格</div></div>
+ </div>
+ <div class="ctl">
+  <label for="ds">日期<select id="ds"><option value="live">今日实时</option></select></label>
+  <button id="rb" onclick="refresh()">刷新</button>
+  <button id="shareBtn" type="button" onclick="copyDashboardImage()" title="复制当前日期的概览、分时走势和完整日度汇总为一张图片">分享 · 复制图片</button>
+  <a class="tab" href="margin.html">两融余额</a>
+ </div>
+</div></header>
+
+<main class="wrap" id="dashboard">
+<!-- ===== 概览 ===== -->
+<div class="sec"><h2 id="kt">当日概览</h2><span class="side" id="st">加载中…</span></div>
+<div class="kpis">
+ <div class="kpi"><div class="lb">估算合计</div><div class="vl" id="k1">—</div><div class="ft">七只 ETF 分钟成交额 &gt; 1 亿合计</div></div>
+ <div class="kpi"><div class="lb">上证收盘</div><div class="vl" id="k2">—</div><div class="ft" id="k2f">上证指数</div></div>
+ <div class="kpi"><div class="lb">估算最高</div><div class="vl" id="k3">—</div><div class="ft" id="k3f">七只 ETF 中</div></div>
+ <div class="kpi"><div class="lb">已归档天数</div><div class="vl" id="k4">—</div><div class="ft" id="k4f">data/history.json</div></div>
+</div>
 <div id="banner"></div>
+
+<!-- ===== 八宫格 ===== -->
+<div class="sec"><h2>分时走势</h2><details class="note"><summary><span>口径说明</span></summary><p>上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；救市金额估算 = 当日蓝柱成交额合计；MACD(12,26,9)。仅「今日实时」页面约每 30 秒重读站点缓存；缓存由本机直连腾讯后约每 1 分钟中转推送（非券商级实时）。历史日为存档静态数据。注意：这是成交额阈值代理，非官方国家队认定，也不是监管披露的护盘资金。数据：腾讯行情（经站点缓存）。</p></details></div>
 <div class="g" id="g"></div>
-<div class="tw"><h2>日度汇总</h2><table><thead><tr><th>日期</th><th>估算合计(亿)</th><th>上证收盘</th><th>上证涨跌幅</th><th>简评</th></tr></thead><tbody id="tb"></tbody></table>
-<div class="note">点击一行切换到该日。历史只含已归档日期（data/history.json），不补造。</div></div>
+
+<!-- ===== 日度汇总 ===== -->
+<div class="sec"><h2>日度汇总</h2><span class="side">点击一行切换到该日</span></div>
+<section class="panel">
+ <div class="tbx"><table><colgroup><col style="width:22%"><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:18%"></colgroup>
+ <thead><tr><th>日期</th><th>估算合计(亿)</th><th>上证收盘</th><th>上证涨跌幅</th><th>简评</th></tr></thead><tbody id="tb"></tbody></table></div>
+ <div class="foot">历史只含已归档日期（data/history.json），不补造。</div>
+</section>
+</main>
+<div id="shareStatus" class="share-status" role="status" aria-live="polite" aria-atomic="true"></div>
+<a id="shareDownload" class="share-fallback" hidden>保存图片（复制受限时备用）</a>
+<script>
+/* 口径说明不参与标题行宽度计算；点击外部或 Escape 关闭。 */
+const notePanel=document.querySelector('details.note');
+document.addEventListener('click',ev=>{if(notePanel.open&&!notePanel.contains(ev.target))notePanel.open=false});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&notePanel.open){notePanel.open=false;notePanel.querySelector('summary').focus()}});
+
+/* PNG 分享：只在用户点击时写剪贴板；不会读取剪贴板，也不上传图片。 */
+let shareInProgress=false,shareDownloadURL=null,shareStatusTimer=null,captureLibraryPromise=null;
+function shareNotice(text){
+ clearTimeout(shareStatusTimer);
+ document.getElementById('shareStatus').textContent=text;
+ shareStatusTimer=setTimeout(()=>{document.getElementById('shareStatus').textContent=''},12000);
+}
+function loadCaptureLibrary(){
+ if(window.html2canvas)return Promise.resolve(window.html2canvas);
+ if(captureLibraryPromise)return captureLibraryPromise;
+ const urls=['https://fastly.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'];
+ const load=url=>new Promise((resolve,reject)=>{
+  const script=document.createElement('script');script.src=url;script.crossOrigin='anonymous';
+  const timer=setTimeout(()=>{script.remove();reject(new Error('截图组件加载超时'))},10000);
+  script.onload=()=>{clearTimeout(timer);window.html2canvas?resolve(window.html2canvas):reject(new Error('截图组件不可用'))};
+  script.onerror=()=>{clearTimeout(timer);script.remove();reject(new Error('截图组件加载失败'))};
+  document.head.appendChild(script);
+ });
+ captureLibraryPromise=load(urls[0]).catch(()=>load(urls[1])).catch(error=>{captureLibraryPromise=null;throw error});
+ return captureLibraryPromise;
+}
+function takeDashboardSnapshot(){
+ const root=document.getElementById('dashboard').cloneNode(true);
+ root.removeAttribute('id');root.classList.add('share-snapshot');root.setAttribute('aria-hidden','true');root.inert=true;
+ root.style.width='1280px';
+ root.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+ root.querySelectorAll('details.note').forEach(el=>el.remove());
+ // 冻结当前DOM和现有图表数据，异步生成期间刷新/切日不会混入新一帧。
+ const options=charts.map(c=>c.getOption());
+ const nodes=[...root.querySelectorAll('.ch')];
+ if(nodes.length!==8||options.length!==8)throw new Error('图表尚未就绪');
+ nodes.forEach(el=>{el.replaceChildren();el.removeAttribute('_echarts_instance_')});
+ const footer=document.createElement('div');footer.className='share-footnote';
+ footer.textContent='分钟成交额 > 1 亿为阈值代理，非官方资金认定；仅分享页面当前显示的数据。';
+ root.appendChild(footer);
+ const label=document.getElementById('kt').textContent;
+ const date=(label.match(/\d{4}-\d{2}-\d{2}/)||['当前日期'])[0];
+ document.body.appendChild(root);
+ return {root,options,nodes,filename:'宽基ETF概览-'+date+'.png'};
+}
+async function renderDashboardImage(snapshot){
+ const exportCharts=[];
+ try{
+  const capture=await loadCaptureLibrary();
+  if(document.fonts)await Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,2000))]);
+  const height=Math.ceil(snapshot.root.scrollHeight);
+  const scale=Math.min(2,16000/height,Math.sqrt(24000000/(1280*height)));
+  if(scale<1)throw new Error('汇总过长，无法生成清晰的单张图片');
+  // 用同一份ECharts配置在副本中重排为四列；不重新请求行情或重算指标。
+  for(let i=0;i<snapshot.nodes.length;i++){
+   const node=snapshot.nodes[i],option=snapshot.options[i];
+   if(!option.series||!option.series.length)continue; // 历史缺失数据保留原有提示，不补造。
+   const chart=echarts.init(node,null,{renderer:'canvas',devicePixelRatio:scale});exportCharts.push(chart);
+   // 汇总图为双轴，给多行图例与轴名称留出各自空间，避免导出时重叠。
+   const exportOption={...option,animation:false,tooltip:{show:false}};
+   if(i===7)exportOption.grid=option.grid.map(grid=>({...grid,top:72}));
+   chart.setOption(exportOption,true);
+   const image=new Image();image.src=chart.getDataURL({type:'png',pixelRatio:scale,backgroundColor:'#fff',excludeComponents:['tooltip']});
+   await image.decode();chart.dispose();node.replaceChildren(image);
+  }
+  const canvas=await capture(snapshot.root,{
+   backgroundColor:'#f5f6f8',scale,width:1280,height:Math.ceil(snapshot.root.scrollHeight),
+   windowWidth:1280,windowHeight:900,scrollX:0,scrollY:0,logging:false,useCORS:true,allowTaint:false,
+   onclone:doc=>{const el=doc.querySelector('.share-snapshot');el.style.position='absolute';el.style.left='0';el.style.top='0';}
+  });
+  if(!canvas.width||!canvas.height)throw new Error('图片生成失败');
+  return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('图片编码失败')),'image/png'));
+ }finally{
+  exportCharts.forEach(chart=>{if(!chart.isDisposed())chart.dispose()});snapshot.root.remove();
+ }
+}
+function showShareDownload(blob,filename){
+ if(shareDownloadURL)URL.revokeObjectURL(shareDownloadURL);
+ shareDownloadURL=URL.createObjectURL(blob);
+ const link=document.getElementById('shareDownload');link.href=shareDownloadURL;link.download=filename;link.hidden=false;
+}
+async function copyDashboardImage(){
+ if(shareInProgress)return;
+ if(busy||!TODAY||!document.querySelector('#tb tr')){shareNotice('页面正在加载，请等数据加载完成后再分享。');return;}
+ shareInProgress=true;
+ const button=document.getElementById('shareBtn');button.disabled=true;button.textContent='正在复制…';
+ document.getElementById('shareDownload').hidden=true;
+ if(shareDownloadURL){URL.revokeObjectURL(shareDownloadURL);shareDownloadURL=null;}
+ let snapshot,pngPromise;
+ try{
+  snapshot=takeDashboardSnapshot();pngPromise=renderDashboardImage(snapshot);
+  // 在点击回调中立即调用 write，并把PNG Promise交给ClipboardItem，保留Safari用户激活。
+  pngPromise.catch(()=>{});
+  if(!window.isSecureContext||!navigator.clipboard?.write||!window.ClipboardItem){
+   const blob=await pngPromise;showShareDownload(blob,snapshot.filename);
+   shareNotice('当前浏览器不支持复制图片；可先保存图片，或用 Chrome / Safari 的 HTTPS 页面重试。');return;
+  }
+  if(ClipboardItem.supports&&!ClipboardItem.supports('image/png')){
+   const blob=await pngPromise;showShareDownload(blob,snapshot.filename);
+   shareNotice('当前浏览器不支持 PNG 剪贴板；图片已生成，可点击保存。');return;
+  }
+  await navigator.clipboard.write([new ClipboardItem({'image/png':pngPromise})]);
+  shareNotice('整张图片已复制，可切换窗口按 ⌘V / Ctrl+V 粘贴。');
+ }catch(error){
+  let blob=null;try{if(pngPromise)blob=await pngPromise}catch(captureError){error=captureError}
+  if(blob){showShareDownload(blob,snapshot.filename);shareNotice('浏览器未允许复制。请允许剪贴板权限后重试，或点击“保存图片”。');}
+  else shareNotice('未能生成图片，请稍后重试。'+(error instanceof Error?error.message:''));
+ }finally{shareInProgress=false;button.disabled=false;button.textContent='分享 · 复制图片';}
+}
+</script>
 <script>
 const E=[["上证50","sh510050"],["沪深300","sh510300"],["中证A500","sz159352"],["中证500","sh510500"],["中证1000","sh512100"],["创业板","sz159915"],["科创50","sh588000"]];
-const KEY="nt-octagon-history",COL=["#7a9cc4","#8aa8b8","#6b8fad","#9aafc4","#7396b0","#85a0b8","#6f8fa8"];
+const KEY="nt-octagon-history";
+/* ===== 视觉常量（只影响样式，不影响计算） ===== */
+const COL=["#2f4f75","#43668f","#5b7ea6","#7695ba","#93acca","#b1c4da","#cfdbe8"];
+const V={axis:"#9aa1ab",grid:"#f0f1f4",base:"#e1e4e9",line:"#334155",zero:"#c9ced6",
+ barHi:"#3d6a9e",barLo:"#e3e6eb",thr:"#9fb4cc",macP:"#c3cad3",macN:"#e1e4e9",dif:"#8c949f",dea:"#c3cad3",sse:"#334155"};
+const TIP={trigger:"axis",backgroundColor:"#fff",borderColor:"#e6e8ec",borderWidth:1,padding:[6,10],textStyle:{color:"#3a4250",fontSize:12},
+ extraCssText:"box-shadow:0 6px 18px rgba(31,39,51,.08);border-radius:6px;",axisPointer:{type:"line",lineStyle:{color:"#c3cad3",width:1}}};
 const g=document.getElementById("g"),charts=[],sel=document.getElementById("ds");let H={},view="live",busy=false,SSEK=null,LIVE=null;
-E.concat([["上证指数 · 救市金额估算","sum"]]).forEach((e,i)=>{g.insertAdjacentHTML("beforeend",'<div class="c"><div class="t" id="t'+i+'">'+e[0]+'</div><div class="ch" id="c'+i+'"></div><div class="na" id="n'+i+'" style="display:none"></div></div>');charts.push(echarts.init(document.getElementById("c"+i)))});
+E.concat([["上证指数 · 救市金额估算","sum"]]).forEach((e,i)=>{const isSum=e[1]=="sum";g.insertAdjacentHTML("beforeend",'<div class="c'+(isSum?' sum':'')+'"><div class="t" id="t'+i+'"><span class="nm">'+e[0]+'</span>'+(isSum?'<span class="cd">近期每日估算合计（右轴）与上证收盘（左轴）</span>':'<span class="cd">'+e[1].slice(2)+'</span>')+'</div><div class="ch" id="c'+i+'"></div>'+(isSum?'':'<div class="lg"><span><i style="background:#334155"></i>涨跌幅</span><span><i style="background:#3d6a9e"></i>分钟成交额 &gt; 1 亿</span><span><i style="background:#c3cad3"></i>MACD</span></div>')+'<div class="na" id="n'+i+'" style="display:none"></div></div>');charts.push(echarts.init(document.getElementById("c"+i)))});
 addEventListener("resize",()=>charts.forEach(c=>c.resize()));
 const ema=(a,n)=>{const k=2/(n+1),o=[];a.forEach((v,i)=>o.push(i?v*k+o[i-1]*(1-k):v));return o};
 const bj=()=>new Date(Date.now()+(new Date().getTimezoneOffset()+480)*6e4);
@@ -29,35 +282,48 @@ async function j(u){const r=await fetch(u,{cache:"no-store"});if(!r.ok)throw new
 async function loadLive(){try{LIVE=await j("./data/live.json?t="+Date.now());LIVE.src="站点"}catch(e){LIVE=null;try{const ms=await Promise.all(E.map(x=>liveEtfTx(x[1])));LIVE={src:"腾讯直连",updated:bj().toLocaleString("zh-CN",{hour12:false}),etfs:Object.fromEntries(E.map((x,i)=>[x[1],ms[i]])),date:ms[0].date}}catch(e2){throw new Error("站点实时数据 live.json 读取失败（"+e.message+"），请稍后刷新")}}return LIVE}
 async function liveEtfTx(code){const raw=(await j("https://web.ifzq.gtimg.cn/appstock/app/minute/query?code="+code)).data[code];const d=raw.data;let pa=0;const t=[],p=[],a=[];
  d.data.forEach(s=>{const r=s.split(" ");t.push(r[0]);p.push(+r[1]);const am=+r[3];a.push((am-pa)/1e8);pa=am});let pre=p[0];try{pre=+raw.qt[code][4]}catch(e){}return {date:d.date,t,p,a,pre}}
+/* 卡片标题：名称 / 代码 / 涨跌幅标签 / 估算大数字（涨跌只用符号，不用颜色） */
+function head(n,code,est,pct){return '<span class="nm">'+n+'</span><span class="cd">'+code+'</span>'+(pct!=null?'<span class="pc">'+(pct>=0?"+":"")+pct.toFixed(2)+'%</span>':'')+'<div class="es"><span class="k">估算</span><span class="v">'+(est!=null?(+est).toFixed(2):"—")+'</span><span class="u">亿</span></div>'}
 function drawEtf(i,m){const [n,code]=E[i];document.getElementById("n"+i).style.display="none";const t=m.t.map(s=>s.slice(0,2)+":"+s.slice(2)),p=m.p,a=m.a;
  const pre=(m.pre!=null&&m.pre>0)?+m.pre:(p[0]||1);const pct=p.map(v=>+((v/pre-1)*100).toFixed(3));
  const est=a.reduce((s,v)=>v>1?s+v:s,0),e12=ema(p,12),e26=ema(p,26),dif=p.map((v,k)=>e12[k]-e26[k]),dea=ema(dif,9),mac=dif.map((v,k)=>2*(v-dea[k]));
  const last=pct.length?pct[pct.length-1]:0;
- document.getElementById("t"+i).innerHTML=n+" "+code.slice(2)+"<b>估算 "+est.toFixed(2)+"亿 · "+(last>=0?"+":"")+last.toFixed(2)+"%</b>";
- const ax=k=>({type:"category",data:t,gridIndex:k,axisLabel:{show:k==2,fontSize:10,color:"#8a919c"},axisTick:{show:false},axisLine:{lineStyle:{color:"#d8dce3"}}});
- charts[i].setOption({backgroundColor:"transparent",animation:false,tooltip:{trigger:"axis",valueFormatter:v=>v},axisPointer:{link:[{xAxisIndex:"all"}]},
-  grid:[{top:8,height:"38%",left:48,right:8},{top:"46%",height:"24%",left:48,right:8},{top:"74%",height:"18%",left:48,right:8}],
+ document.getElementById("t"+i).innerHTML=head(n,code.slice(2),est,last);
+ const ax=k=>({type:"category",data:t,gridIndex:k,axisLabel:{show:k==2,fontSize:10,color:V.axis,margin:6,hideOverlap:true},axisTick:{show:false},axisLine:{show:k==2,lineStyle:{color:V.base}}});
+ const ya=(k,extra)=>Object.assign({gridIndex:k,splitNumber:2,splitLine:{show:false},axisLabel:{fontSize:10,color:V.axis},axisLine:{show:false},axisTick:{show:false}},extra);
+ charts[i].setOption({backgroundColor:"transparent",animation:false,tooltip:Object.assign({valueFormatter:v=>v},TIP),axisPointer:{link:[{xAxisIndex:"all"}]},
+  grid:[{top:6,height:"52%",left:44,right:8},{top:"62%",height:"16%",left:44,right:8},{top:"82%",height:"9%",left:44,right:8}],
   xAxis:[ax(0),ax(1),ax(2)],yAxis:[
-   {scale:true,gridIndex:0,splitLine:{lineStyle:{color:"#e8ebf0"}},axisLabel:{fontSize:10,color:"#8a919c",formatter:v=>v.toFixed(2)+"%"},axisLine:{show:false}},
-   {gridIndex:1,splitLine:{show:false},axisLabel:{fontSize:10,color:"#8a919c",formatter:"{value}亿"},axisLine:{show:false}},
-   {gridIndex:2,splitLine:{show:false},axisLabel:{fontSize:9,color:"#8a919c"},axisLine:{show:false}}],
-  series:[{name:"涨跌幅%",type:"line",data:pct,showSymbol:false,lineStyle:{color:"#5a7fa8",width:1.4},areaStyle:{color:"rgba(90,127,168,0.08)"}},
-  {name:"成交额(亿)",type:"bar",xAxisIndex:1,yAxisIndex:1,data:a.map(v=>({value:+v.toFixed(3),itemStyle:{color:v>1?"#6b8fad":"#c5ccd6"}})),markLine:{symbol:"none",silent:true,label:{show:false},lineStyle:{color:"#9aafc4",type:"dashed",opacity:0.75},data:[{yAxis:1}]}},
-  {name:"MACD",type:"bar",xAxisIndex:2,yAxisIndex:2,data:mac.map(v=>({value:+v.toFixed(5),itemStyle:{color:v>=0?"#7a9cc4":"#a8b4c0"}}))},
-  {name:"DIF",type:"line",xAxisIndex:2,yAxisIndex:2,data:dif.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:"#8a9aab",width:1}},
-  {name:"DEA",type:"line",xAxisIndex:2,yAxisIndex:2,data:dea.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:"#6b7c8e",width:1}},
+   ya(0,{scale:true,splitNumber:3,splitLine:{lineStyle:{color:V.grid}},axisLabel:{fontSize:10,color:V.axis,showMinLabel:false,formatter:v=>v.toFixed(2)+"%"}}),
+   ya(1,{axisLabel:{fontSize:10,color:V.axis,formatter:"{value}亿",showMinLabel:false}}),
+   ya(2,{axisLabel:{show:false}})],
+  series:[{name:"涨跌幅%",type:"line",data:pct,showSymbol:false,lineStyle:{color:V.line,width:1.4},
+    markLine:{symbol:"none",silent:true,label:{show:false},lineStyle:{color:V.zero,type:"solid",width:1},data:[{yAxis:0}]}},
+  {name:"成交额(亿)",type:"bar",xAxisIndex:1,yAxisIndex:1,barCategoryGap:"15%",data:a.map(v=>({value:+v.toFixed(3),itemStyle:{color:v>1?V.barHi:V.barLo}})),markLine:{symbol:"none",silent:true,label:{show:false},lineStyle:{color:V.thr,type:"dashed",width:1},data:[{yAxis:1}]}},
+  {name:"MACD",type:"bar",xAxisIndex:2,yAxisIndex:2,data:mac.map(v=>({value:+v.toFixed(5),itemStyle:{color:v>=0?V.macP:V.macN}}))},
+  {name:"DIF",type:"line",xAxisIndex:2,yAxisIndex:2,data:dif.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:V.dif,width:1}},
+  {name:"DEA",type:"line",xAxisIndex:2,yAxisIndex:2,data:dea.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:V.dea,width:1}},
   {name:"价格",type:"line",data:p,showSymbol:false,lineStyle:{width:0},itemStyle:{opacity:0},tooltip:{valueFormatter:v=>v}}]},true);return est}
-function noMin(i,est){const [n,code]=E[i];charts[i].clear();document.getElementById("t"+i).innerHTML=n+" "+code.slice(2)+(est!=null?"<b>估算 "+(+est).toFixed(2)+"亿</b>":"");const x=document.getElementById("n"+i);x.style.display="flex";x.textContent="该日分时未存档，仅显示汇总估算"}
+function noMin(i,est){const [n,code]=E[i];charts[i].clear();document.getElementById("t"+i).innerHTML=head(n,code.slice(2),est!=null?est:null,null);const x=document.getElementById("n"+i);x.style.display="flex";x.textContent="该日分时未存档，仅显示汇总估算"}
 async function sseRows(){if(view=="live"&&LIVE&&LIVE.sse){SSEK=LIVE.sse;return SSEK}if(!SSEK||view=="live"){const k=(await j("https://proxy.finance.qq.com/ifzqgtimg/appstock/app/newfqkline/get?param=sh000001,day,,,60,qfq")).data.sh000001;SSEK=(k.day||k.qfqday)}return SSEK}
 function drawSum(rows,cur){const r=rows.filter(x=>x[0]>="2026-10-15"),ds=r.map(x=>x[0]);const tot=H[cur]&&H[cur]["合计"];
- document.getElementById("t7").innerHTML="上证指数 · 救市金额估算"+(tot!=null?"<b>"+cur.slice(5)+" "+(+tot).toFixed(2)+"亿</b>":"");
- charts[7].setOption({backgroundColor:"transparent",animation:false,tooltip:{trigger:"axis"},legend:{top:0,textStyle:{fontSize:10,color:"#6b7280"},itemWidth:10,itemHeight:8},grid:{top:48,left:46,right:44,bottom:28},
-  xAxis:{type:"category",data:ds.map(s=>s.slice(5)),axisLabel:{fontSize:10,color:"#8a919c"},axisLine:{lineStyle:{color:"#d8dce3"}}},
-  yAxis:[{scale:true,splitLine:{lineStyle:{color:"#e8ebf0"}},axisLabel:{fontSize:10,color:"#8a919c"},axisLine:{show:false}},{name:"亿",splitLine:{show:false},axisLabel:{fontSize:10,color:"#8a919c"},axisLine:{show:false},nameTextStyle:{color:"#8a919c"}}],
-  series:[{name:"上证指数",type:"line",data:r.map(x=>({value:+x[2],symbolSize:x[0]==cur?10:5})),lineStyle:{color:"#5a6575"},itemStyle:{color:"#5a6575"},z:5}].concat(E.map((e,i)=>({name:e[0],type:"bar",stack:"r",yAxisIndex:1,itemStyle:{color:COL[i]},data:ds.map(d=>{const x=H[d];return x&&x[e[0]]!=null?+(+x[e[0]]).toFixed(2):null})})))},true)}
+ document.getElementById("t7").innerHTML='<span class="nm">上证指数 · 救市金额估算</span><span class="cd">近期每日估算合计（右轴）与上证收盘（左轴）</span><div class="es"><span class="k">'+cur.slice(5)+' 合计</span><span class="v">'+(tot!=null?(+tot).toFixed(2):"—")+'</span><span class="u">亿</span></div>';
+ charts[7].setOption({backgroundColor:"transparent",animation:false,tooltip:TIP,legend:{top:0,left:4,right:4,icon:"roundRect",itemWidth:10,itemHeight:6,itemGap:10,textStyle:{fontSize:11,color:"#6f7782"}},grid:{top:52,left:44,right:40,bottom:24},
+  xAxis:{type:"category",data:ds.map(s=>s.slice(5)),axisLabel:{fontSize:10,color:V.axis,hideOverlap:true},axisTick:{show:false},axisLine:{lineStyle:{color:V.base}}},
+  yAxis:[{scale:true,splitNumber:4,splitLine:{lineStyle:{color:V.grid}},axisLabel:{fontSize:10,color:V.axis},axisLine:{show:false}},{name:"亿",splitNumber:4,splitLine:{show:false},axisLabel:{fontSize:10,color:V.axis},axisLine:{show:false},nameTextStyle:{color:V.axis,fontSize:10}}],
+  series:[{name:"上证指数",type:"line",data:r.map(x=>({value:+x[2],symbolSize:x[0]==cur?9:4})),symbol:"circle",lineStyle:{color:V.sse,width:1.5},itemStyle:{color:V.sse,borderColor:"#fff",borderWidth:1},z:5}].concat(E.map((e,i)=>({name:e[0],type:"bar",stack:"r",yAxisIndex:1,barMaxWidth:18,itemStyle:{color:COL[i]},data:ds.map(d=>{const x=H[d];return x&&x[e[0]]!=null?+(+x[e[0]]).toFixed(2):null})})))},true)}
+/* 概览指标：只读取已在 H 中的数字，不另取数据 */
+function kpi(cur){const h=H[cur]||{},f=v=>v==null?"—":(+v).toFixed(2);
+ document.getElementById("kt").textContent=(view=="live"?"今日概览":"当日概览")+(cur?" · "+cur:"");
+ document.getElementById("k1").innerHTML=h["合计"]!=null?f(h["合计"])+"<small>亿</small>":"—";
+ const c=h["上证涨跌幅"];document.getElementById("k2").textContent=f(h["上证收盘"]);
+ document.getElementById("k2f").textContent=c!=null?"较前收 "+(c>0?"+":"")+(+c).toFixed(2)+"%":"上证指数";
+ let best=null;E.forEach(e=>{const v=h[e[0]];if(v!=null&&(best==null||+v>best[1]))best=[e[0],+v]});
+ document.getElementById("k3").innerHTML=best?best[1].toFixed(2)+"<small>亿</small>":"—";document.getElementById("k3f").textContent=best?best[0]:"七只 ETF 中";
+ const ks=Object.keys(H).sort();document.getElementById("k4").innerHTML=ks.length+"<small>天</small>";document.getElementById("k4f").textContent=ks.length?ks[0]+" 起":"data/history.json"}
 function table(cur){const tb=document.getElementById("tb");tb.innerHTML="";Object.keys(H).sort().reverse().forEach(d=>{const h=H[d],c=h["上证涨跌幅"],tr=document.createElement("tr");if(d==cur)tr.className="sel";
- tr.innerHTML="<td>"+d+"</td><td>"+(h["合计"]!=null?(+h["合计"]).toFixed(2):"-")+"</td><td>"+(h["上证收盘"]!=null?(+h["上证收盘"]).toFixed(2):"-")+"</td><td class='"+(c>0?"up":c<0?"dn":"")+"'>"+(c!=null?(c>0?"+":"")+(+c).toFixed(2)+"%":"-")+"</td><td class='"+(c>0?"up":c<0?"dn":"")+"'>"+(c==null?"-":c>0?"涨":c<0?"跌":"平")+"</td>";
- tr.onclick=()=>{const live=todayStr();sel.value=d==live?"live":d;onSel()};tb.appendChild(tr)})}
+ tr.tabIndex=0;tr.innerHTML="<td>"+d+"</td><td>"+(h["合计"]!=null?(+h["合计"]).toFixed(2):"-")+"</td><td>"+(h["上证收盘"]!=null?(+h["上证收盘"]).toFixed(2):"-")+"</td><td>"+(c!=null?(c>0?"+":"")+(+c).toFixed(2)+"%":"-")+"</td><td><span class='tag "+(c>0?"up":"")+"'>"+(c==null?"-":c>0?"涨":c<0?"跌":"平")+"</span></td>";
+ tr.onclick=()=>{const live=todayStr();sel.value=d==live?"live":d;onSel()};tr.onkeydown=ev=>{if(ev.key=="Enter"||ev.key==" "){ev.preventDefault();tr.onclick()}};tb.appendChild(tr)});kpi(cur)}
 let TODAY=null;const todayStr=()=>TODAY;
 function fillSel(){const v=sel.value;sel.innerHTML='<option value="live">今日实时</option>'+Object.keys(H).sort().reverse().filter(d=>d!=TODAY).map(d=>'<option value="'+d+'">'+d+'</option>').join("");sel.value=[...sel.options].some(o=>o.value==v)?v:"live"}
 async function loadHist(){let r={};try{r=await j("./data/history.json")}catch(e){}let l={};try{l=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}H=Object.assign({},l,r)}
@@ -74,7 +340,7 @@ async function refresh(){if(busy)return;busy=true;const rb=document.getElementBy
    E.forEach((e,i)=>{const x=m&&m.etfs[e[1]];x?drawEtf(i,x):noMin(i,h[e[0]])});
    if(!m){bn.style.display="block";bn.textContent=d+"：分时未存档，仅显示汇总数字（合计 "+(h["合计"]!=null?(+h["合计"]).toFixed(2)+" 亿":"无")+"）。"}else bn.style.display="none";
    drawSum(rows,d);table(d);st.textContent="查看存档 "+d+" · 静态数据，不自动刷新"}
- }catch(e){st.textContent="刷新失败："+e.message+(view=="live"?"，60秒后重试":"")}finally{busy=false;rb.disabled=false;rb.textContent="手动刷新"}}
+ }catch(e){st.textContent="刷新失败："+e.message+(view=="live"?"，60秒后重试":"")}finally{busy=false;rb.disabled=false;rb.textContent="刷新"}}
 function onSel(){view=sel.value;refresh()}sel.onchange=onSel;
 (async()=>{await loadHist();fillSel();await refresh();setInterval(()=>{if(view=="live")refresh()},30000)})();
 </script></body></html>
