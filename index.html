@@ -19,14 +19,16 @@ th,td{padding:6px 10px;border-bottom:1px solid #262b35;text-align:right}th:first
 <script>
 const E=[["上证50","sh510050"],["沪深300","sh510300"],["中证A500","sz159352"],["中证500","sh510500"],["中证1000","sh512100"],["创业板","sz159915"],["科创50","sh588000"]];
 const KEY="nt-octagon-history",COL=["#ff4d4f","#1890ff","#faad14","#13c2c2","#722ed1","#fa8c16","#52c41a"];
-const g=document.getElementById("g"),charts=[],sel=document.getElementById("ds");let H={},view="live",busy=false,SSEK=null;
+const g=document.getElementById("g"),charts=[],sel=document.getElementById("ds");let H={},view="live",busy=false,SSEK=null,LIVE=null;
 E.concat([["上证指数 · 救市金额估算","sum"]]).forEach((e,i)=>{g.insertAdjacentHTML("beforeend",'<div class="c"><div class="t" id="t'+i+'">'+e[0]+'</div><div class="ch" id="c'+i+'"></div><div class="na" id="n'+i+'" style="display:none"></div></div>');charts.push(echarts.init(document.getElementById("c"+i),"dark"))});
 addEventListener("resize",()=>charts.forEach(c=>c.resize()));
 const ema=(a,n)=>{const k=2/(n+1),o=[];a.forEach((v,i)=>o.push(i?v*k+o[i-1]*(1-k):v));return o};
 const bj=()=>new Date(Date.now()+(new Date().getTimezoneOffset()+480)*6e4);
 function trading(){const d=bj(),w=d.getDay(),m=d.getHours()*60+d.getMinutes();return w>0&&w<6&&((m>=570&&m<=690)||(m>=780&&m<=900))}
 async function j(u){const r=await fetch(u,{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.json()}
-async function liveEtf(code){const d=(await j("https://web.ifzq.gtimg.cn/appstock/app/minute/query?code="+code)).data[code].data;let pa=0;const t=[],p=[],a=[];
+async function loadLive(){try{LIVE=await j("./data/live.json?t="+Date.now());LIVE.src="站点"}catch(e){LIVE=null;try{const ms=await Promise.all(E.map(x=>liveEtfTx(x[1])));LIVE={src:"腾讯直连",updated:bj().toLocaleString("zh-CN",{hour12:false}),etfs:Object.fromEntries(E.map((x,i)=>[x[1],ms[i]])),date:ms[0].date}}catch(e2){throw new Error("站点实时数据 live.json 读取失败（"+e.message+"），请稍后刷新")}}return LIVE}
+async function liveEtf(code){return LIVE.etfs[code]}
+async function liveEtfTx(code){const d=(await j("https://web.ifzq.gtimg.cn/appstock/app/minute/query?code="+code)).data[code].data;let pa=0;const t=[],p=[],a=[];
  d.data.forEach(s=>{const r=s.split(" ");t.push(r[0]);p.push(+r[1]);const am=+r[3];a.push((am-pa)/1e8);pa=am});return {date:d.date,t,p,a}}
 function drawEtf(i,m){const [n,code]=E[i];document.getElementById("n"+i).style.display="none";const t=m.t.map(s=>s.slice(0,2)+":"+s.slice(2)),p=m.p,a=m.a;
  const est=a.reduce((s,v)=>v>1?s+v:s,0),e12=ema(p,12),e26=ema(p,26),dif=p.map((v,k)=>e12[k]-e26[k]),dea=ema(dif,9),mac=dif.map((v,k)=>2*(v-dea[k]));
@@ -41,7 +43,7 @@ function drawEtf(i,m){const [n,code]=E[i];document.getElementById("n"+i).style.d
   {name:"DIF",type:"line",xAxisIndex:2,yAxisIndex:2,data:dif.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:"#f5a623",width:1}},
   {name:"DEA",type:"line",xAxisIndex:2,yAxisIndex:2,data:dea.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:"#9b6bff",width:1}}]},true);return est}
 function noMin(i,est){const [n,code]=E[i];charts[i].clear();document.getElementById("t"+i).innerHTML=n+" "+code.slice(2)+(est!=null?"<b>估算 "+(+est).toFixed(2)+"亿</b>":"");const x=document.getElementById("n"+i);x.style.display="flex";x.textContent="该日分时未存档，仅显示汇总估算"}
-async function sseRows(){if(!SSEK||view=="live"){const k=(await j("https://proxy.finance.qq.com/ifzqgtimg/appstock/app/newfqkline/get?param=sh000001,day,,,60,qfq")).data.sh000001;SSEK=(k.day||k.qfqday)}return SSEK}
+async function sseRows(){if(view=="live"&&LIVE&&LIVE.sse){SSEK=LIVE.sse;return SSEK}if(!SSEK||view=="live"){const k=(await j("https://proxy.finance.qq.com/ifzqgtimg/appstock/app/newfqkline/get?param=sh000001,day,,,60,qfq")).data.sh000001;SSEK=(k.day||k.qfqday)}return SSEK}
 function drawSum(rows,cur){const r=rows.filter(x=>x[0]>="2026-10-15"),ds=r.map(x=>x[0]);const tot=H[cur]&&H[cur]["合计"];
  document.getElementById("t7").innerHTML="上证指数 · 救市金额估算"+(tot!=null?"<b>"+cur.slice(5)+" "+(+tot).toFixed(2)+"亿</b>":"");
  charts[7].setOption({backgroundColor:"transparent",animation:false,tooltip:{trigger:"axis"},legend:{top:0,textStyle:{fontSize:10},itemWidth:10,itemHeight:8},grid:{top:48,left:46,right:44,bottom:28},
@@ -54,12 +56,12 @@ let TODAY=null;const todayStr=()=>TODAY;
 function fillSel(){const v=sel.value;sel.innerHTML='<option value="live">今日实时</option>'+Object.keys(H).sort().reverse().filter(d=>d!=TODAY).map(d=>'<option value="'+d+'">'+d+'</option>').join("");sel.value=[...sel.options].some(o=>o.value==v)?v:"live"}
 async function loadHist(){let r={};try{r=await j("./data/history.json")}catch(e){}let l={};try{l=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}H=Object.assign({},l,r)}
 async function refresh(){if(busy)return;busy=true;const rb=document.getElementById("rb"),st=document.getElementById("st"),bn=document.getElementById("banner");rb.disabled=true;rb.textContent="刷新中…";
- try{const rows=await sseRows();
+ try{if(view=="live")await loadLive();const rows=await sseRows();
   if(view=="live"){bn.style.display="none";const ms=await Promise.all(E.map(e=>liveEtf(e[1])));const d=ms[0].date;TODAY=d.slice(0,4)+"-"+d.slice(4,6)+"-"+d.slice(6);
    const o={};let s=0;ms.forEach((m,i)=>{const v=drawEtf(i,m);o[E[i][0]]=+v.toFixed(2);s+=v});o["合计"]=+s.toFixed(2);
    const ix=rows.findIndex(x=>x[0]==TODAY);if(ix>0){o["上证收盘"]=+rows[ix][2];o["上证涨跌幅"]=+((rows[ix][2]/rows[ix-1][2]-1)*100).toFixed(2)}
    H[TODAY]=Object.assign({},H[TODAY]||{},o);let l={};try{l=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}l[TODAY]=H[TODAY];try{localStorage.setItem(KEY,JSON.stringify(l))}catch(e){}
-   fillSel();drawSum(rows,TODAY);table(TODAY);st.textContent="最后刷新 "+bj().toLocaleString("zh-CN",{hour12:false})+"（北京时间）· "+(trading()?"交易中":"非交易时段")+" · 每60秒刷新"}
+   fillSel();drawSum(rows,TODAY);table(TODAY);st.textContent="数据更新 "+LIVE.updated+"（北京时间，"+LIVE.src+"，约5分钟一更）· "+(trading()?"交易中":"非交易时段")+" · 每60秒刷新"}
   else{const d=view,h=H[d]||{};let m=null;try{m=await j("./data/minutes/"+d+".json")}catch(e){}
    E.forEach((e,i)=>{const x=m&&m.etfs[e[1]];x?drawEtf(i,x):noMin(i,h[e[0]])});
    if(!m){bn.style.display="block";bn.textContent=d+"：分时未存档，仅显示汇总数字（合计 "+(h["合计"]!=null?(+h["合计"]).toFixed(2)+" 亿":"无")+"）。"}else bn.style.display="none";
