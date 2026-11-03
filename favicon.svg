@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="signal-blue" x1="12" y1="49" x2="38" y2="13" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#507CEA"/><stop offset="1" stop-color="#64A5ED"/>
+    </linearGradient>
+    <linearGradient id="signal-cyan" x1="33" y1="44" x2="52" y2="22" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#58BED2"/><stop offset="1" stop-color="#83D8DB"/>
+    </linearGradient>
+  </defs>
+  <path d="M9 46 25 16c2-4 7-4 9 0l16 30c2 4-1 7-5 7h-5L28 29 17 49c-2 4-10 3-8-3Z" fill="url(#signal-blue)"/>
+  <path d="m32 47 13-24c2-4 8-1 6 3L40 49c-3 6-11 3-8-2Z" fill="url(#signal-cyan)"/>
+  <circle cx="51" cy="14" r="5" fill="#77CFD9"/>
+</svg>
