@@ -6,7 +6,7 @@
  "futures_history": {
   "as_of": "2026-11-04",
   "errors": [],
-  "last_attempt": "2026-11-04T20:32:54+08:00",
+  "last_attempt": "2026-11-04T20:48:21+08:00",
   "products": {
    "IC": {
     "date": "2026-11-04",
@@ -38,28 +38,25 @@
    }
   }
  },
- "generated_at": "2026-11-04T20:32:54+08:00",
- "global": "failed_nonblocking",
+ "generated_at": "2026-11-04T20:48:21+08:00",
+ "global": "ok",
  "global_detail": {
-  "connected": 1,
+  "connected": 6,
   "connected_stale": 0,
   "errors": [
-   "ust_10y_real: HTTP Error 502: Bad Gateway",
-   "sofr: HTTP Error 502: Bad Gateway",
-   "acm_tp_10y: The read operation timed out",
    "iorb: The read operation timed out",
    "nfci: The read operation timed out",
-   "sahm: HTTP Error 502: Bad Gateway"
+   "sahm: The read operation timed out"
   ],
   "link_only": 25,
-  "metrics_total": 39,
+  "metrics_total": 40,
   "missing": 2,
-  "module_state": "degraded_partial",
-  "path": "/home/user/Doubao/chats/38448346890959362/national-team-octagon/preview-data/global.json",
-  "pending": 9,
+  "module_state": "ok",
+  "path": "/home/runner/work/national-team-octagon/national-team-octagon/preview-data/global.json",
+  "pending": 5,
   "restricted": 2
  },
- "run_status": "partial",
+ "run_status": "ok",
  "schema_version": "1.0.0",
  "sources": [
   {
