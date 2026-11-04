@@ -37,6 +37,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           export GIT_TERMINAL_PROMPT=0
 
+      - name: Setup Python + preview-tools deps (ACM .xls 需要 pinned xlrd)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install preview-tools requirements
+        shell: bash
+        run: python3 -m pip install --disable-pip-version-check -r preview-tools/requirements.txt
+
       - name: Run collector (官方SSE+CFFEX; global容错)
         shell: bash
         run: python3 preview-tools/collect_preview.py
