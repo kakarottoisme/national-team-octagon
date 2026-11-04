@@ -136,7 +136,7 @@ tbody tr:last-child td{border-bottom:0}
   <dt>发布时点</dt><dd id="dPublish">—</dd>
   <dt>原始来源</dt><dd>CFFEX 每日约16:30 公布分品种分合约前20会员多空持仓（GBK CSV）。</dd>
   <dt>边界说明</dt><dd>中信期货=该会员全部客户(代客)合计，非自营；未上榜合约不计入，未上榜≠0；换月会跳变。</dd>
-  <dt>更新方式</dt><dd>尚未自动接入：离线快照 preview-data/domestic.json；发布日与交易日异步（ETF份额约23:00，期货约16:30）。</dd>
+  <dt>更新方式</dt><dd>独立预览自动任务每日运行（北京约 23:30），读取 preview-data/official/snapshot-latest.json；源发布时间不保证。</dd>
  </dl>
  <div class="note" id="drawerNote">口径注意加载后显示。</div>
 </aside>
@@ -210,7 +210,8 @@ async function refresh(){
   }
   DATA=d;$('banner').style.display='none';
   const f=d.futures;
-  $('st').innerHTML='官方快照 · 期货截至 '+f.as_of+' · ETF 截至 '+(d.as_of||'—')+(f.async_with_etf?' · <span style="color:#8a6d2f">期指与 ETF 异步（期货 11-04 / ETF 11-03）</span>':'')+' · '+f.member+' · 未接自动更新'+staleChip(f.as_of);
+  let lastRun='—';try{const sr=await fetch('preview-data/status.json?t='+Date.now(),{cache:'no-store'});if(sr.ok){const sj=await sr.json();if(sj.last_run)lastRun=sj.last_run.slice(0,16).replace('T',' ')}}catch(e){}
+  $('st').innerHTML='官方快照 · 期货截至 '+f.as_of+' · ETF 截至 '+(d.as_of||'—')+(f.async_with_etf?' · <span style="color:#8a6d2f">期指与 ETF 异步（期货 '+f.as_of+' / ETF '+d.as_of+'）</span>':'')+' · '+f.member+' · 预览任务已运行 '+lastRun+staleChip(f.as_of);
   $('dMember').textContent=f.member+'：CFFEX 前20上榜合约汇总；'+(f.products&&Object.values(f.products)[0]?Object.values(f.products)[0].note:'')+'';
   $('dAsOf').textContent=f.as_of;
   $('dPublish').textContent='期货约16:30公布，与ETF份额(约23:00)不同时刻；本快照已标 async_with_etf 不并日。';

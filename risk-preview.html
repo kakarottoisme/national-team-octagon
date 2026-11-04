@@ -82,7 +82,7 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
 <div class="groups" id="groups"></div>
 <div id="banner"></div>
 <div class="grid" id="grid"></div>
-<div class="foot">schema 2.0-safe：仅 Treasury 名义曲线为 connected 直取（as_of 2026-11-03）；其余按 link_only（跳源）/restricted（版权受限不转录）/pending（待公开源接入）/missing（缺数据）陈列，不渲染受限数值、不补造、不评级、不继承 L0–L4。本看板未自动接入，重读仅加载本地快照。</div>
+<div class="foot" id="riskFoot">schema 2.0-safe：仅 Treasury 名义曲线为 connected 直取；其余按 link_only（跳源）/restricted（版权受限不转录）/pending（待公开源接入）/missing（缺数据）陈列，不渲染受限数值、不补造、不评级、不继承 L0–L4。独立预览自动任务每日运行，数据为本地快照，源发布时间不保证。</div>
 </main>
 
 <div class="drawer-mask" id="mask" onclick="closeDrawer()"></div>
@@ -180,7 +180,8 @@ async function refresh(){
   let d=null;try{const r=await fetch('preview-data/global.json?t='+Date.now(),{cache:'no-store'});if(r.ok)d=await r.json()}catch(e){}
   if(!d||!Array.isArray(d.metrics)){$('banner').style.display='block';$('banner').textContent='未读取到本地快照 preview-data/global.json';$('st').textContent='快照未加载';$('grid').innerHTML='';$('groups').innerHTML='';return}
   DATA=d;$('banner').style.display='none';
-  $('st').textContent='schema '+d.schema_version+' · 生成 '+(d.generated_at||'').slice(0,10)+' · connected '+(d.metrics.filter(m=>m.status==='connected').length)+' 项 · 其余跳源/受限/待接入 · 未自动更新';
+  let lastRun='—';try{const sr=await fetch('preview-data/status.json?t='+Date.now(),{cache:'no-store'});if(sr.ok){const sj=await sr.json();if(sj.last_run)lastRun=sj.last_run.slice(0,16).replace('T',' ')}}catch(e){}
+  $('st').textContent='schema '+d.schema_version+' · 生成 '+(d.generated_at||'').slice(0,10)+' · 预览任务已运行 '+lastRun+' · connected '+(d.metrics.filter(m=>m.status==='connected').length)+' 项 · 其余跳源/受限/待接入';
   renderGroups();render();
  }finally{busy=false;rb.disabled=false;rb.textContent='重读本地快照'}
 }
