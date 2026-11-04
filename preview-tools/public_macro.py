@@ -11,8 +11,10 @@ preview-tools/public_macro.py — 合法公开宏观数据(只读,无副作用)�
   - 美国国债实际收益率(TIPS) CSV (home.treasury.gov)
   - NYFed SOFR API (markets.newyorkfed.org)
   - NYFed ACM 期限溢价 .xls (newyorkfed.org;旧版OLE2格式,需 pip 安装 preview-tools/requirements.txt 的 xlrd)
-  - IORB / NFCI: FRED fredgraph.csv 免key镜像(无API key),原始来源标注清楚;
-    SAHM: series id/口径未核证(SAHM/SAHMREALTIME/SAHMCURRENT不同),pending待核,不冒充实时规则;
+  - IORB / NFCI / SAHM: FRED fredgraph.csv 免key镜像(无API key);
+    SAHM = SAHMREALTIME(实时规则,单位百分点pp,已独审核列名 observation_date,SAHMREALTIME);
+    fetch_fred 严格要求以 "observation_date," 开头,HTML错误页不解析;
+    网络失败=status pending/failed with known semantics,非series未知。
     FRED 仅镜像,具体 series 许可见 source_url
 计算口径:
   - 10Y 盈亏平衡通胀 = 名义10Y - 实际10Y,仅同日 intersection;名义/实际不混。
@@ -38,9 +40,19 @@ SOFR_API = ("https://markets.newyorkfed.org/api/rates/secured/sofr/search.json"
             "?startDate={s}&endDate={e}")
 ACM_URL = "https://www.newyorkfed.org/medialibrary/media/research/data_indicators/ACMTermPremium.xlsx"
 FRED_CSV = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}"
-FRED_LICENSE = "https://fred.stlouisfed.org/"
+FRED_LICENSE = "https://fred.stlouisfed.org/legal/"
 TREAS_LICENSE = "https://home.treasury.gov/policy-issues/financing-the-government/interest-rate-statistics"
-NYFED_LICENSE = "https://www.newyorkfed.org/disclosure/terms"
+TREAS_REUSE = "https://fiscal.treasury.gov/fiscal-services/reporting/report-templates.html"
+NYFED_TERMS = "https://resources.newyorkfed.org/privacy/termsofuse"
+NYFED_DISCLAIMER = ("数据来源纽约联储(SOFR/ACM)。本看板为第三方汇编,非纽约联储官方发布;"
+                    "纽约联储不对本看板的再发布负责、不背书本产品、不承担任何责任。")
+NYFED_NOTICE_EN = ("The SOFR is subject to the Terms of Use posted at newyorkfed.org. "
+                   "The New York Fed is not responsible for publication of the SOFR by this dashboard, "
+                   "does not sanction or endorse any particular republication, and has no liability for your use.")
+ACM_COPYRIGHT = ("©2026 Federal Reserve Bank of New York. Content from the New York Fed is subject to the "
+                 "New York Fed Terms of Use (newyorkfed.org). ACM term premia: source research by "
+                 "Adrian, Crump, Moench; this dashboard's derived/calculated values are not attributable to "
+                 "the New York Fed or the authors.")
 
 
 def _now_iso():
@@ -96,7 +108,8 @@ def collect_public_macro(existing=None, years=(2026, 2025, 2024), fetcher=None, 
     status = {}
     errors = []
 
-    def add(id_, name, unit, src, lic, freq, series, note=""):
+    def add(id_, name, unit, src, lic, freq, series, note="",
+            attribution="", disclaimer="", copyright_notice="", terms_notice_en=""):
         series = _guard(series, today)
         if not series:
             status[id_] = {"state": "pending", "reason": "no valid data"}
@@ -107,12 +120,17 @@ def collect_public_macro(existing=None, years=(2026, 2025, 2024), fetcher=None, 
             "value": series[dates[-1]], "as_of": dates[-1],
             "history": [{"date": d, "value": series[d]} for d in dates],
             "source_url": src, "license_url": lic, "frequency": freq,
+            "attribution": attribution, "disclaimer": disclaimer,
+            "copyright_notice": copyright_notice, "terms_notice_en": terms_notice_en,
             "collected_at": _now_iso(), "note": note})
         status[id_] = {"state": "ok", "as_of": dates[-1], "n": len(dates)}
 
-    # 1) Treasury 名义曲线(多年CSV合并,取10Y)
+    # 1) Treasury 名义曲线(多年CSV合并; 同时取10Y标量与全期限曲线,无额外网络)
+    TENORS_NOM = ["1 Mo", "3 Mo", "6 Mo", "1 Yr", "2 Yr", "3 Yr", "5 Yr",
+                  "7 Yr", "10 Yr", "20 Yr", "30 Yr"]
+    TENORS_REAL = ["5 YR", "7 YR", "10 YR", "20 YR", "30 YR"]
     try:
-        nom = {}
+        nom = {}; nom_curve = {}
         for yr in years:
             st, raw = g(TREAS_NOM.format(yr=yr))
             if st != 200:
@@ -123,18 +141,35 @@ def collect_public_macro(existing=None, years=(2026, 2025, 2024), fetcher=None, 
                     dd = dt.datetime.strptime(d, "%m/%d/%Y").date().isoformat()
                 except ValueError:
                     continue
+                curve = {t: _num(row.get(t)) for t in TENORS_NOM}
+                curve = {k: v for k, v in curve.items() if v is not None}
+                if curve:
+                    nom_curve[dd] = curve
+                if dd > dt.date.fromisoformat(today).isoformat() or dd > today:
+                    continue
                 v = _num(row.get("10 Yr"))
                 if v is not None:
                     nom[dd] = v
         add("ust_10y_nominal", "美国10年期国债名义收益率", "%",
             TREAS_NOM.format(yr="2026"), TREAS_LICENSE, "daily",
             list(nom.items()), "一手:美国财政部每日国债收益率曲线")
+        # 全期限名义曲线 value={tenor:num} history[{date,{tenor:num}}]
+        cdates = sorted(d for d in nom_curve if d <= today)
+        if cdates:
+            metrics.append({
+                "id": "ust_curve_nominal", "name": "美国国债名义收益率曲线(全期限)", "unit": "%",
+                "value": nom_curve[cdates[-1]], "as_of": cdates[-1],
+                "history": [{"date": d, "value": nom_curve[d]} for d in cdates],
+                "source_url": TREAS_NOM.format(yr="2026"), "license_url": TREAS_LICENSE,
+                "frequency": "daily", "attribution": "Source: U.S. Treasury yield curve",
+                "collected_at": _now_iso(), "note": "一手美国财政部;tenor见key(1Mo/3Mo/..30Y);至少1年历史"})
+            status["ust_curve_nominal"] = {"state": "ok", "as_of": cdates[-1], "n": len(cdates)}
     except Exception as e:  # noqa
         errors.append(f"ust_10y_nominal: {e}"); status["ust_10y_nominal"] = {"state": "error"}
 
-    # 2) Treasury 实际(TIPS) 10Y
+    # 2) Treasury 实际(TIPS) 10Y + 全期限实际曲线
     try:
-        real = {}
+        real = {}; real_curve = {}
         for yr in years:
             st, raw = g(TREAS_REAL.format(yr=yr))
             if st != 200:
@@ -145,12 +180,26 @@ def collect_public_macro(existing=None, years=(2026, 2025, 2024), fetcher=None, 
                     dd = dt.datetime.strptime(d, "%m/%d/%Y").date().isoformat()
                 except ValueError:
                     continue
+                curve = {t: _num(row.get(t)) for t in TENORS_REAL}
+                curve = {k: v for k, v in curve.items() if v is not None}
+                if curve:
+                    real_curve[dd] = curve
                 v = _num(row.get("10 YR"))
                 if v is not None:
                     real[dd] = v
         add("ust_10y_real", "美国10年期TIPS实际收益率", "%",
             TREAS_REAL.format(yr="2026"), TREAS_LICENSE, "daily",
             list(real.items()), "一手:美国财政部实际收益率曲线")
+        rdates = sorted(d for d in real_curve if d <= today)
+        if rdates:
+            metrics.append({
+                "id": "ust_curve_real", "name": "美国国债实际收益率曲线(TIPS,全期限)", "unit": "%",
+                "value": real_curve[rdates[-1]], "as_of": rdates[-1],
+                "history": [{"date": d, "value": real_curve[d]} for d in rdates],
+                "source_url": TREAS_REAL.format(yr="2026"), "license_url": TREAS_LICENSE,
+                "frequency": "daily", "attribution": "Source: U.S. Treasury real yield curve (TIPS)",
+                "collected_at": _now_iso(), "note": "一手美国财政部;tenor 5/7/10/20/30YR;至少1年历史"})
+            status["ust_curve_real"] = {"state": "ok", "as_of": rdates[-1], "n": len(rdates)}
     except Exception as e:  # noqa
         errors.append(f"ust_10y_real: {e}"); status["ust_10y_real"] = {"state": "error"}
 
@@ -179,8 +228,10 @@ def collect_public_macro(existing=None, years=(2026, 2025, 2024), fetcher=None, 
                 if v is not None:
                     sofr[r["effectiveDate"]] = v
         add("sofr", "担保隔夜融资利率 SOFR", "%",
-            SOFR_API.format(s=start, e=end), NYFED_LICENSE, "daily",
-            list(sofr.items()), "一手:纽约联储")
+            SOFR_API.format(s=start, e=end), NYFED_TERMS, "daily",
+            list(sofr.items()), "一手:纽约联储",
+            attribution="Source: Federal Reserve Bank of New York (SOFR)",
+            disclaimer=NYFED_DISCLAIMER, terms_notice_en=NYFED_NOTICE_EN)
     except Exception as e:  # noqa
         errors.append(f"sofr: {e}"); status["sofr"] = {"state": "error"}
 
@@ -217,8 +268,10 @@ def collect_public_macro(existing=None, years=(2026, 2025, 2024), fetcher=None, 
             except ImportError:
                 status["acm_tp_10y"] = {"state": "pending", "reason": "xlrd 不可用,待解析"}
         add("acm_tp_10y", "NYFed ACM 10年期国债期限溢价", "%",
-            ACM_URL, NYFED_LICENSE, "daily", list(acm.items()),
-            "一手:纽约联储;模型估计,非市场报价")
+            ACM_URL, NYFED_TERMS, "daily", list(acm.items()),
+            "一手:纽约联储;模型估计,非市场报价",
+            attribution="Source: Federal Reserve Bank of New York (Adrian-Crump-Moench term premia)",
+            disclaimer=NYFED_DISCLAIMER, copyright_notice=ACM_COPYRIGHT)
     except Exception as e:  # noqa
         errors.append(f"acm_tp_10y: {e}"); status["acm_tp_10y"] = {"state": "error"}
 
@@ -243,7 +296,8 @@ def collect_public_macro(existing=None, years=(2026, 2025, 2024), fetcher=None, 
         iorb, st = fetch_fred("IORB")
         add("iorb", "美联储准备金余额利率 IORB", "%",
             FRED_CSV.format(sid="IORB"), FRED_LICENSE, "daily",
-            list(iorb.items()), "FRED fredgraph免key镜像;原始来源Fed(H.15/IOR)")
+            list(iorb.items()), "FRED fredgraph免key镜像;原始来源Fed(H.15/IOR);metadata: public domain, citation requested",
+            attribution="Source: Federal Reserve Board (via FRED series IORB); public domain, citation requested")
         if not iorb:
             metrics.append({"id": "iorb", "name": "美联储准备金余额利率 IORB", "unit": "%",
                             "value": None, "as_of": None, "history": [],
@@ -291,7 +345,8 @@ def collect_public_macro(existing=None, years=(2026, 2025, 2024), fetcher=None, 
         nfci, st = fetch_fred("NFCI")
         add("nfci", "全国金融状况指数 NFCI", "index",
             FRED_CSV.format(sid="NFCI"), FRED_LICENSE, "weekly",
-            list(nfci.items()), "一手Chicago Fed;FRED免key镜像(本版Chicago直连500)")
+            list(nfci.items()), "一手Chicago Fed;FRED免key镜像(本版Chicago直连500);metadata: citation required",
+            attribution="Source: Federal Reserve Bank of Chicago (via FRED series NFCI); citation required")
         if not nfci:
             metrics.append({"id": "nfci", "name": "全国金融状况指数 NFCI", "unit": "index",
                             "value": None, "as_of": None, "history": [],
@@ -308,19 +363,27 @@ def collect_public_macro(existing=None, years=(2026, 2025, 2024), fetcher=None, 
                         "note": f"本版取数异常:{e}"})
         status["nfci"] = {"state": "error"}
 
-    # SAHM: series id/口径本版未核证(SAHM vs SAHMREALTIME vs SAHMCURRENT 定义不同),
-    # 不把"SAHM"冒充实时Sahm规则;FRED本VM 502无法读列名/元数据。一律pending待核,不假值。
+    # SAHM(实时规则): 正确series=SAHMREALTIME(observation_date,SAHMREALTIME,自1959-12),单位百分点pp
     try:
-        metrics.append({"id": "sahm", "name": "Sahm Rule 触发指标(series id/口径待核)", "unit": "index",
-                        "value": None, "as_of": None, "history": [],
-                        "source_url": "https://fred.stlouisfed.org/series/SAHM",
-                        "license_url": FRED_LICENSE, "frequency": "monthly", "collected_at": _now_iso(),
-                        "note": ("series id未核证: FRED上 SAHM / SAHMREALTIME / SAHMCURRENT 口径不同,"
-                                 "本版源HTTP502无法读取列名与定义,不冒充实时规则;待核元数据再接。"
-                                 "源非Atlanta Fed(独审更正)")})
-        status["sahm"] = {"state": "pending", "reason": "series id/definition not verified; FRED 502 this round"}
+        sahm, st = fetch_fred("SAHMREALTIME")
+        add("sahm", "Sahm Rule 实时触发指标", "pp",
+            FRED_CSV.format(sid="SAHMREALTIME"), FRED_LICENSE, "monthly",
+            list(sahm.items()), "FRED系列SAHMREALTIME(已独审核列名 observation_date,SAHMREALTIME);单位百分点;作者Claudia Sahm,源非Atlanta Fed;public domain, citation requested",
+            attribution="Source: Claudia Sahm — Sahm Rule real-time (via FRED series SAHMREALTIME); public domain, citation requested")
+        if not sahm:
+            metrics.append({"id": "sahm", "name": "Sahm Rule 实时触发指标", "unit": "pp",
+                            "value": None, "as_of": None, "history": [],
+                            "source_url": FRED_CSV.format(sid="SAHMREALTIME"), "license_url": FRED_LICENSE,
+                            "frequency": "monthly", "collected_at": _now_iso(),
+                            "note": f"SAHMREALTIME;本版HTTP {st}或返回非CSV,待重试;源非Atlanta Fed"})
+            status["sahm"] = {"state": "pending", "reason": f"FRED HTTP {st} / non-CSV"}
     except Exception as e:  # noqa
         errors.append(f"sahm: {e}")
+        metrics.append({"id": "sahm", "name": "Sahm Rule 实时触发指标", "unit": "pp",
+                        "value": None, "as_of": None, "history": [],
+                        "source_url": FRED_CSV.format(sid="SAHMREALTIME"), "license_url": FRED_LICENSE,
+                        "frequency": "monthly", "collected_at": _now_iso(),
+                        "note": f"本版取数异常:{e}"})
         status["sahm"] = {"state": "error"}
 
     return {"metrics": metrics, "fetch_status": status, "errors": errors}

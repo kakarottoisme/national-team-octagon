@@ -53,7 +53,7 @@ CBOE_SYMBOLS = {
     "VXTLT": f"{CBOE_CDN_BASE}/VXTLT_History.csv",
 }
 
-CBOE_LICENSE = "Cboe Global Markets (C) ; public CDN CSV download; display with source attribution."
+CBOE_LICENSE = None  # Cboe redistribution license not granted; link_only only.
 TREASURY_LICENSE = "US Government work -- public domain. https://home.treasury.gov/"
 
 HISTORY_DAYS = 30
@@ -200,8 +200,8 @@ _METRIC_DEFS: list[dict[str, Any]] = [
      "interpretation_cn": "美国财政部每日公布的名义国债收益率（1M-30Y）。2Y/10Y 差值即期限利差，为正通常表示正常向上倾斜；不直接判断经济周期方向。"},
     {"id": "A3b_yield_curve_real", "name": "US Treasury Real (TIPS) Yield Curve", "layer": "A_macro_rates",
      "unit": "percent", "status": "pending",
-     "interpretation_cn": "TIPS 实际收益率（扣除通胀预期）。国内 macro 模块负责接入，本面板不重复。",
-     "restricted_reason": "Domestic public_macro.py owns this."},
+     "interpretation_cn": "TIPS 实际收益率（扣除通胀预期）。国内 macro 模块负责接入，本面板不重复取数。",
+     "restricted_reason": "Pending public source verification."},
     {"id": "A4_fed_path", "name": "FOMC policy path", "layer": "A_macro_rates",
      "unit": "text", "status": "link_only",
      "link_url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
@@ -281,7 +281,7 @@ _METRIC_DEFS: list[dict[str, Any]] = [
      "unit": "percent", "status": "pending",
      "link_url": "https://www.finra.org/rules-guidance/key-topics/margin-accounts/margin-statistics",
      "interpretation_cn": "美股融资余额同比。同比高增表示杠杆参与度上升；转负通常表示去杠杆。月频，FINRA 公布。",
-     "restricted_reason": "FINRA public Excel; direct xlsx URL not parsed this run."},
+     "restricted_reason": "FINRA terms-of-use prohibits reproduction; value not copied. Link only."},
     {"id": "E5_single_day_shock", "name": "QQQ / SOXX single-day shock", "layer": "E_first_order_sentiment",
      "unit": "text", "status": "link_only",
      "interpretation_cn": "科技与半导体 ETF 单日跌幅。需要延迟行情，Yahoo 无商用再分发许可，本面板只给链接。",
@@ -312,26 +312,34 @@ _METRIC_DEFS: list[dict[str, Any]] = [
      "unit": "percentage points", "status": "pending",
      "link_url": "https://fred.stlouisfed.org/series/SAHMREALTIME",
      "interpretation_cn": "Sahm 规则（3 个月失业率均值相对 12 个月低点）。国内 macro 模块负责。",
-     "restricted_reason": "Domestic public_macro.py will own."},
+     "restricted_reason": "Pending public source verification."},
     {"id": "S2_nfci", "name": "Chicago Fed NFCI", "layer": "S_slow_variables",
      "unit": "z-score", "status": "pending",
      "link_url": "https://fred.stlouisfed.org/series/NFCI",
      "interpretation_cn": "芝加哥联储全国金融状况指数。国内 macro 模块负责。",
-     "restricted_reason": "Domestic public_macro.py will own."},
+     "restricted_reason": "Pending public source verification."},
     {"id": "S3_real_10y", "name": "10Y TIPS real yield", "layer": "S_slow_variables",
      "unit": "percent", "status": "pending",
      "interpretation_cn": "10 年期 TIPS 实际收益率。国内 macro 模块/Treasury 实际曲线负责。",
-     "restricted_reason": "Domestic public_macro.py will own."},
+     "restricted_reason": "Pending public source verification."},
     {"id": "S4_term_premium", "name": "ACM 10Y term premium", "layer": "S_slow_variables",
      "unit": "percent", "status": "pending",
      "link_url": "https://fred.stlouisfed.org/series/THREEFYTP10",
      "interpretation_cn": "纽约联储 ACM 期限溢价模型。国内 macro 模块负责。",
-     "restricted_reason": "Domestic public_macro.py will own."},
+     "restricted_reason": "Pending public source verification."},
     {"id": "S5_sofr_iorb", "name": "SOFR - IORB funding spread", "layer": "S_slow_variables",
      "unit": "basis points", "status": "pending",
      "link_url": "https://www.newyorkfed.org/markets/reference-rates/sofr",
-     "interpretation_cn": "担保隔夜融资利率与准备金利率之差。纽约联储公布，国内 macro 模块负责。",
-     "restricted_reason": "Domestic public_macro.py will own."},
+     "interpretation_cn": "SOFR 减 IORB 的利差（基点）。需要 SOFR 与 IORB 同日数值；缺 IORB 时为 null，不拿 SOFR 水平冒充利差。",
+     "restricted_reason": "Pending IORB same-day availability."},
+    {"id": "S9_sofr_level", "name": "SOFR (Secured Overnight Financing Rate)", "layer": "S_slow_variables",
+     "unit": "percent", "status": "pending",
+     "link_url": "https://www.newyorkfed.org/markets/reference-rates/sofr",
+     "interpretation_cn": "纽约联储公布的担保隔夜融资利率。独立水平读数，不是利差。"},
+    {"id": "S10_iorb_level", "name": "IORB (Interest on Reserve Balances)", "layer": "S_slow_variables",
+     "unit": "percent", "status": "pending",
+     "link_url": "https://www.federalreserve.gov/releases/h3/current/default.htm",
+     "interpretation_cn": "美联储准备金余额利率。与 SOFR 同日差值即 S5 利差。"},
     {"id": "S6_brent", "name": "Brent crude", "layer": "S_slow_variables",
      "unit": "USD/barrel", "status": "link_only",
      "interpretation_cn": "布伦特原油价格。BZ=F 为 Yahoo 代码，无许可。",
@@ -631,11 +639,17 @@ def _try_collect_public_macro() -> dict[str, Any]:
 
 # Mapping from public_macro metric id -> our metric id
 _PUBLIC_MACRO_MAP = {
-    "ust_10y_real":   "S3_real_10y",
-    "acm_tp_10y":     "S4_term_premium",
-    "sofr":           "S5_sofr_iorb",  # SOFR value; spread vs IORB still pending
-    "ust_10y_nominal": None,  # already covered by A3 full curve; skip
-    "bei_10y":        None,  # new independent metric, added below
+    "ust_curve_nominal": "A3_yield_curve_nominal",  # full tenor dict
+    "ust_curve_real":    "A3b_yield_curve_real",    # TIPS 5/7/10/20/30
+    "ust_10y_real":      "S3_real_10y",             # scalar 10Y TIPS
+    "acm_tp_10y":        "S4_term_premium",
+    "sofr":              "S9_sofr_level",
+    "iorb":              "S10_iorb_level",
+    "sofr_iorb_spread":  "S5_sofr_iorb",
+    "ust_10y_nominal":   None,  # covered by A3 curve
+    "bei_10y":           None,  # added as S8
+    "sahm":              None,  # still pending/stub
+    "nfci":              None,  # still pending
 }
 
 
@@ -657,16 +671,43 @@ def _merge_public_macro(payload: dict[str, Any], pm: dict[str, Any]) -> None:
         tgt = by_id[target_id]
         tgt["value"] = pm_m["value"]
         tgt["as_of"] = pm_m.get("as_of")
+        tgt["as_of_raw"] = pm_m.get("as_of_raw")
         tgt["collected_at"] = pm_m.get("collected_at")
-        tgt["history"] = pm_m.get("history", [])
+        hist = pm_m.get("history", [])
+        # Sort by date ascending, keep most recent ~5 years (1300 trading days)
+        try:
+            hist_sorted = sorted(hist, key=lambda x: x.get("date", ""))
+            if len(hist_sorted) > 1300:
+                hist_sorted = hist_sorted[-1300:]
+            hist = hist_sorted
+        except Exception:
+            pass
+        tgt["history"] = hist
         tgt["source_url"] = pm_m.get("source_url")
-        tgt["license"] = pm_m.get("license_url", pm_m.get("license"))
+        tgt["license"] = pm_m.get("license_url") or pm_m.get("license") or ""
+        tgt["license_url"] = pm_m.get("license_url")
+        # Preserve ALL metadata fields from macro module
+        for k in ("attribution", "disclaimer", "copyright_notice", "terms_notice_en",
+                  "note", "frequency", "unit"):
+            if k in pm_m:
+                tgt[k] = pm_m[k]
+        # Default attribution for Treasury-sourced metrics if macro didn't set one
+        if not tgt.get("attribution") and "treasury" in (pm_m.get("source_url") or "").lower():
+            tgt["attribution"] = "Source: U.S. Department of the Treasury (yield curve rates)"
+        # ACM is a model estimate, not a reference rate; do NOT carry SOFR disclaimer
+        if target_id == "S4_term_premium":
+            tgt["terms_notice_en"] = ""
         tgt["license_status"] = "official_source"
         tgt["status"] = "connected"
         tgt["update_frequency"] = pm_m.get("frequency", "daily")
         tgt["restricted_reason"] = None
     # Add BEI as new independent metric (not a risk score)
     if bei_metric and bei_metric.get("value") is not None:
+        bei_hist = bei_metric.get("history", [])
+        try:
+            bei_hist = sorted(bei_hist, key=lambda x: x.get("date", ""))[-1300:]
+        except Exception:
+            pass
         payload["metrics"].append({
             "id": "S8_bei_10y",
             "name": "10Y Breakeven Inflation (nominal - real, same-day)",
@@ -677,13 +718,20 @@ def _merge_public_macro(payload: dict[str, Any], pm: dict[str, Any]) -> None:
             "as_of": bei_metric.get("as_of"),
             "as_of_raw": None,
             "collected_at": bei_metric.get("collected_at"),
-            "history": bei_metric.get("history", []),
+            "history": bei_hist,
             "change": None, "change_pct": None,
             "stale": False, "last_attempt_at": None,
             "source_url": bei_metric.get("source_url"),
             "link_url": None,
-            "license": bei_metric.get("license_url"),
+            "license": bei_metric.get("license_url", ""),
+            "license_url": bei_metric.get("license_url"),
             "license_status": "official_source",
+            "attribution": "Calculated here from U.S. Treasury nominal and real yields on matching dates; not a Treasury forecast.",
+            "disclaimer": "",
+            "copyright_notice": "",
+            "terms_notice_en": "",
+            "note": "Same-day intersection of nominal and real Treasury curves; derived here.",
+            "frequency": "daily",
             "restricted_reason": None,
             "update_frequency": "daily",
             "interpretation_cn": "10 年期名义国债收益率减 10 年期 TIPS 实际收益率（同日交集）。反映市场隐含长期通胀预期；不是风险评分，也不预测通胀走势。",
@@ -705,21 +753,8 @@ def update_global(output_path: str) -> dict[str, Any]:
     # Merge public_macro
     _merge_public_macro(payload, pm)
 
-    # Overlay FINRA margin debt on E4
-    if finra.get("ok"):
-        by_id = {m["id"]: m for m in payload["metrics"]}
-        e4 = by_id.get("E4_margin_debt_yoy")
-        if e4:
-            e4["value"] = finra["value"]
-            e4["as_of"] = finra["as_of"]
-            e4["collected_at"] = finra["collected_at"]
-            e4["history"] = finra.get("history", [])
-            e4["source_url"] = finra["source_url"]
-            e4["license"] = "FINRA margin statistics (public, no fee): https://www.finra.org/rules-guidance/key-topics/margin-accounts/margin-statistics"
-            e4["license_status"] = "official_source"
-            e4["status"] = "connected"
-            e4["update_frequency"] = "monthly"
-            e4["restricted_reason"] = None
+    # FINRA E4: terms-of-use does not permit reproduction; keep link_only/pending, do not overlay values.
+    # finra fetch result is available in finra variable but intentionally not written to payload.
 
     # Multi-source cache: for any metric that ended up failed_no_cache but had a
     # connected value in the previous file, promote to connected_stale.
@@ -747,6 +782,28 @@ def update_global(output_path: str) -> dict[str, Any]:
     except (OSError, ValueError):
         pass
 
+    # Inject public_macro fetch_status + errors into payload JSON
+    payload["fetch_status"]["public_macro"] = {
+        "fetch_status": pm.get("fetch_status", {}),
+        "errors": pm.get("errors", []),
+    }
+    payload["errors"] = (
+        ([treasury.get("error")] if treasury.get("error") else [])
+        + pm.get("errors", [])
+    )
+    # Compute run_state compatible with old collector: ok / degraded_cached / partial / failed
+    n_conn = sum(1 for m in payload["metrics"] if m["status"] == "connected")
+    n_stale = sum(1 for m in payload["metrics"] if m["status"] == "connected_stale")
+    n_err = len(payload["errors"])
+    if n_conn >= 5 and n_err == 0:
+        payload["run_state"] = "ok"
+    elif n_stale >= 1:
+        payload["run_state"] = "degraded_cached"
+    elif n_conn >= 1:
+        payload["run_state"] = "partial"
+    else:
+        payload["run_state"] = "failed"
+
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
@@ -766,7 +823,7 @@ def update_global(output_path: str) -> dict[str, Any]:
         state = "failed_no_cache"
 
     return {
-        "ok": live_ok,
+        "ok": connected_now >= 1,
         "state": state,
         "path": os.path.abspath(output_path),
         "metrics_total": len(payload["metrics"]),
@@ -777,8 +834,9 @@ def update_global(output_path: str) -> dict[str, Any]:
         "link_only": counts.get("link_only", 0),
         "pending": counts.get("pending", 0),
         "missing": counts.get("missing", 0),
-        "cboe_connected": cboe_ok,
-        "errors": [d.get("error") for d in [treasury] + list(cboe.values()) if d.get("error")],
+        "errors": ([d.get("error") for d in [treasury] if d.get("error")]
+                   + pm.get("errors", [])
+                   + ([finra.get("error")] if finra.get("error") else [])),
     }
 
 

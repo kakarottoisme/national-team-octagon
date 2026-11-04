@@ -67,7 +67,7 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
   <path d="M9 46 25 16c2-4 7-4 9 0l16 30c2 4-1 7-5 7h-5L28 29 17 49c-2 4-10 3-8-3Z" fill="url(#signal-blue)"/>
   <path d="m32 47 13-24c2-4 8-1 6 3L40 49c-3 6-11 3-8-2Z" fill="url(#signal-cyan)"/>
   <circle cx="51" cy="14" r="5" fill="#77CFD9"/></svg></span>
-  <div><h1>全球风险预览<span class="pv-chip">预览</span></h1><div class="crumb">公开数据安全快照 · 仅 Treasury 名义曲线直取 · 其余跳源/受限/待接入 · 不评级不构成建议</div></div>
+  <div><h1>全球风险预览<span class="pv-chip">预览</span></h1><div class="crumb">利率条件与融资成本 · 读最新值与历史 · 不评级不构成建议</div></div>
  </div>
  <div class="ctl"><button id="rb" type="button" onclick="refresh()">重读本地快照</button></div>
 </div><div class="wrap nav-row"><nav class="view-tabs" aria-label="预览页导航">
@@ -78,10 +78,11 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
 </nav></div></header>
 
 <main class="wrap">
-<div class="sec"><h2>风险指标（37 项 · 按公开数据状态陈列）</h2><span class="side" id="st">加载中…</span></div>
+<div class="sec"><h2>风险指标</h2><span class="side" id="st">加载中…</span></div>
+<div style="margin:4px 0 8px;font-size:12px;color:var(--muted)">先读上方曲线与焦点趋势；下方为完整指标目录（按公开数据状态陈列）。</div>
 <div class="groups" id="groups"></div>
 <div id="banner"></div>
-<div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;margin-bottom:12px"><div id="curve" style="width:100%;height:280px"></div></div>
+<div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;margin-bottom:12px"><div id="curve" style="width:100%"></div></div>
 <div id="sparks" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"></div>
 <div class="grid" id="grid"></div>
 <div class="foot" id="riskFoot">schema 2.0-safe：仅 Treasury 名义曲线为 connected 直取；其余按 link_only（跳源）/restricted（版权受限不转录）/pending（待公开源接入）/missing（缺数据）陈列，不渲染受限数值、不补造、不评级、不继承 L0–L4。独立预览自动任务每日运行，数据为本地快照，源发布时间不保证。</div>
@@ -117,13 +118,14 @@ $('mask').addEventListener('click',closeDrawer);
 function safeUrl(u){if(!u||typeof u!=='string')return null;try{const url=new URL(u);if(!/^https?:$/.test(url.protocol))return null;return url.toString()}catch(e){return null}}
 function esc(s){return String(s==null?'—':s)}
 function isLicensed(m){return m.status==='connected'||m.status==='connected_stale'}
-function shortValue(m){
+ function shortValue(m){
  const staleMark=m.status==='connected_stale'?'<span style="color:#8a6d2f">陈旧·</span>':'';
  if(isLicensed(m)&&m.value!=null){
   if(typeof m.value==='object'){
    const keys=Object.keys(m.value);
-   const ten=(m.value['10 Yr']!=null)?m.value['10 Yr']:'—';
-   return staleMark+'名义曲线 '+keys.length+' 段 · 10Y '+ten+'%';
+   const tenKey=keys.find(k=>k.replace(/\s+/g,'').toUpperCase()==='10Y'||k.replace(/\s+/g,'').toUpperCase()==='10YR');
+   const ten=tenKey!=null?m.value[tenKey]:'—';
+   return staleMark+(m.id==='A3b_yield_curve_real'?'实际':'名义')+'曲线 '+keys.length+' 段 · 10Y '+ten+'%';
   }
   return staleMark+m.value+(m.unit?' '+m.unit:'');
  }
@@ -143,55 +145,94 @@ function rowHtml(m){
  return btn;
 }
 const TENOR_ORDER=['1 Mo','1.5 Month','2 Mo','3 Mo','4 Mo','6 Mo','1 Yr','2 Yr','3 Yr','5 Yr','7 Yr','10 Yr','20 Yr','30 Yr'];
+const TENOR_LABEL={'1 Mo':'1个月','1.5 Month':'1.5个月','2 Mo':'2个月','3 Mo':'3个月','4 Mo':'4个月','6 Mo':'6个月','1 Yr':'1年','2 Yr':'2年','3 Yr':'3年','5 Yr':'5年','7 Yr':'7年','10 Yr':'10年','20 Yr':'20年','30 Yr':'30年'};
+let realChart=null;
+function normTenor(k){
+ const up=k.toUpperCase().replace(/\s+/g,'');
+ const map={'1MO':'1 Mo','1.5MO':'1.5 Month','2MO':'2 Mo','3MO':'3 Mo','4MO':'4 Mo','6MO':'6 Mo','1Y':'1 Yr','2Y':'2 Yr','3Y':'3 Yr','5Y':'5 Yr','7Y':'7 Yr','10Y':'10 Yr','20Y':'20 Yr','30Y':'30 Yr'};
+ return map[up]||k;
+}
+function drawCurveChart(el,m,color,title,yMinZero){
+ const rawKeys=Object.keys(m.value);
+ const map={};rawKeys.forEach(k=>{map[normTenor(k)]=m.value[k]});
+ const xs=TENOR_ORDER.filter(k=>map[k]!=null);
+ const ys=xs.map(k=>map[k]);
+ if(!el||!xs.length)return null;
+ const c=echarts.init(el);
+ const yAxis={type:'value',axisLabel:{fontSize:10,color:'#868e9a',formatter:'{value}%'}};
+ if(yMinZero)yAxis.min=0;
+ c.setOption({backgroundColor:'transparent',animation:false,
+  grid:{left:36,right:14,top:28,bottom:26},
+  title:{text:title,left:4,top:0,textStyle:{fontSize:12,color:'#1f2733',fontWeight:600}},
+  tooltip:{trigger:'axis'},
+  xAxis:{type:'category',data:xs.map(k=>TENOR_LABEL[k]||k),axisLabel:{fontSize:10,color:'#868e9a'}},
+  yAxis,
+  series:[{type:'line',data:ys,smooth:false,symbol:'circle',symbolSize:4,
+   lineStyle:{color,width:2},itemStyle:{color},
+   label:{show:true,fontSize:8,color:'#4a5260',formatter:p=>p.value}}]
+ });
+ return c;
+}
+function renderCurve(){
+ const el=$('curve');if(!el||!window.echarts)return;
+ const m=DATA.metrics.find(x=>x.id==='A3_yield_curve_nominal');
+ if(!m||!isLicensed(m)||typeof m.value!=='object'){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">名义收益率曲线待官方快照加载</div>';return}
+ el.innerHTML='<div style="display:grid;grid-template-columns:1fr;gap:8px;min-width:0;overflow:hidden"><div id="curveN" style="width:100%;height:260px;min-width:0;overflow:hidden"></div><div id="curveR" style="width:100%;height:220px;min-width:0;overflow:hidden"></div></div>';
+ if(curveChart){try{curveChart.dispose()}catch(e){}}
+ curveChart=drawCurveChart($('curveN'),m,'#3d6a9e','美债名义收益率曲线（%）· 数据日期 '+(m.as_of||'—'),false);
+ const rm=DATA.metrics.find(x=>x.id==='A3b_yield_curve_real');
+ const rel=$('curveR');
+ if(rm&&isLicensed(rm)&&typeof rm.value==='object'){
+  if(realChart){try{realChart.dispose()}catch(e){}}
+  realChart=drawCurveChart(rel,rm,'#5a8fa8','美债实际收益率曲线 TIPS（%）· 数据日期 '+(rm.as_of||'—'),true);
+ }else{
+  rel.innerHTML='<div style="padding:16px;color:var(--muted);font-size:12.5px">TIPS 实际曲线待接入（已映射后自动显示）</div>';
+ }
+ setTimeout(()=>{if(curveChart)curveChart.resize();if(realChart)realChart.resize()},50);
+}
+function sortedHist(m){
+ if(!m.history)return [];
+ return m.history.filter(h=>h&&h.date&&h.value!=null).slice().sort((a,b)=>a.date.localeCompare(b.date));
+}
 function fmtChange(m){
- const h=m.history;if(!h||h.length<2)return '';
- const last=h[h.length-1].value,prev=h[h.length-2].value;
- if(last==null||prev==null)return '';
- const diff=last-prev;const sign=diff>=0?'+':'';
+ const h=sortedHist(m);if(h.length<2)return '';
+ const last=h[h.length-1];
+ if(m.as_of&&last.date!==m.as_of){
+  return '趋势止于 '+last.date.slice(0,10)+'（与 as_of '+m.as_of+' 不一致，待 source 修正）';
+ }
+ const prev=h[h.length-2];
+ const diff=last.value-prev.value;const sign=diff>=0?'+':'';
  const u=(m.unit||'').toLowerCase();
  let u2='';
  if(u.includes('percent')||u==='%')u2='pp';
  else if(u.includes('bp')||u.includes('basis'))u2='bp';
  else if(u.includes('index')||u.includes('vix')||u.includes('corr'))u2='点';
- return sign+diff.toFixed(2)+u2+' ('+(h[h.length-1].date||'').slice(5)+')';
+ return sign+diff.toFixed(2)+u2+' ('+(last.date||'').slice(5)+')';
 }
 let sparkWindow=90;
-function renderCurve(){
- const el=$('curve');if(!el||!window.echarts)return;
- const m=DATA.metrics.find(x=>x.id==='A3_yield_curve_nominal');
- if(!m||!isLicensed(m)||typeof m.value!=='object'){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">名义收益率曲线待官方快照加载</div>';return}
- if(!curveChart)curveChart=echarts.init(el);
- const xs=TENOR_ORDER.filter(k=>m.value[k]!=null);
- const ys=xs.map(k=>m.value[k]);
- curveChart.setOption({backgroundColor:'transparent',animation:false,
-  grid:{left:40,right:20,top:30,bottom:30},
-  title:{text:'美债名义收益率曲线（%）· as_of '+(m.as_of||'—'),left:4,top:0,textStyle:{fontSize:13,color:'#1f2733',fontWeight:600}},
-  tooltip:{trigger:'axis'},
-  xAxis:{type:'category',data:xs,axisLabel:{fontSize:10,color:'#868e9a',rotate:30}},
-  yAxis:{type:'value',axisLabel:{fontSize:10,color:'#868e9a',formatter:'{value}%'}},
-  series:[{type:'line',data:ys,smooth:false,symbol:'circle',symbolSize:5,
-   lineStyle:{color:'#3d6a9e',width:2},itemStyle:{color:'#3d6a9e'},
-   label:{show:true,fontSize:9,color:'#4a5260',formatter:p=>p.value}}]
- },true);
-}
 function renderSparks(){
  const holder=$('sparks');if(!holder)return;
  holder.innerHTML='';
  sparkCharts.forEach(c=>{try{c.dispose()}catch(e){}});sparkCharts=[];
- const connected=DATA.metrics.filter(m=>isLicensed(m)&&m.history&&m.history.length>=2&&typeof m.value!=='object');
- if(!connected.length){holder.innerHTML='<div style="padding:14px;color:var(--muted);font-size:12.5px">其他 connected 指标历史待接入（政府真实历史系列写入后自动显示）</div>';return}
- const ctl=document.createElement('div');ctl.style.cssText='width:100%;font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap';
+ const connected=DATA.metrics.filter(m=>isLicensed(m)&&sortedHist(m).length>=2&&typeof m.value!=='object');
+ if(!connected.length){holder.innerHTML='<div style="padding:14px;color:var(--muted);font-size:12.5px">政府真实历史系列待接入</div>';return}
+ const ctl=document.createElement('div');ctl.style.cssText='width:100%;font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap';
  ctl.appendChild(document.createTextNode('历史窗口：'));
  [30,90,252].forEach(w=>{const b=document.createElement('button');b.type='button';b.textContent=w+'日';b.style.cssText='height:26px;padding:0 10px;font-size:11px;border-radius:12px;border:1px solid #e0e5ed;background:'+(sparkWindow===w?'#edf3fc':'#fff');b.addEventListener('click',()=>{sparkWindow=w;renderSparks()});ctl.appendChild(b)});
  holder.appendChild(ctl);
+ const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;width:100%';
+ holder.appendChild(grid);
  connected.forEach(m=>{
-  const hist=m.history.slice(-sparkWindow);
-  const card=document.createElement('div');card.style.cssText='background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:200px;flex:1';
-  const hdr=document.createElement('div');hdr.style.cssText='font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px';
-  const n=document.createElement('span');n.textContent=cnName(m);const ch=document.createElement('span');ch.style.cssText='color:#3d6a9e;font-weight:600';ch.textContent=fmtChange(m);
-  hdr.appendChild(n);hdr.appendChild(ch);
-  const chEl=document.createElement('div');chEl.style.cssText='height:80px;margin-top:4px';
-  card.appendChild(hdr);card.appendChild(chEl);holder.appendChild(card);
+  const hist=sortedHist(m).slice(-sparkWindow);
+  const card=document.createElement('div');card.style.cssText='background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px;min-width:0;overflow:hidden';
+  const nm=document.createElement('div');nm.style.cssText='font-size:12px;color:var(--muted)';nm.textContent=cnName(m);
+  const val=document.createElement('div');val.style.cssText='font-size:22px;font-weight:600;color:#1f2733;margin-top:2px';
+  const unit=(m.unit||'').toLowerCase();const u=unit.includes('percent')||unit==='%'?'%':unit;
+  val.textContent=(typeof m.value==='number'?m.value.toFixed(2):m.value)+' '+u;
+  const ch=document.createElement('div');ch.style.cssText='font-size:11px;color:#3d6a9e;margin-top:1px';ch.textContent=fmtChange(m);
+  const q=document.createElement('div');q.style.cssText='font-size:11px;color:var(--faint);margin-top:4px;line-height:1.5';q.textContent=SPARK_Q[m.id]||'';
+  const chEl=document.createElement('div');chEl.style.cssText='width:100%;height:80px;margin-top:8px';
+  card.appendChild(nm);card.appendChild(val);card.appendChild(ch);card.appendChild(q);card.appendChild(chEl);grid.appendChild(card);
   const c=echarts.init(chEl);sparkCharts.push(c);
   c.setOption({backgroundColor:'transparent',animation:false,
    grid:{left:4,right:4,top:6,bottom:4},
@@ -201,6 +242,21 @@ function renderSparks(){
   });
  });
 }
+const CN_FOCUS={
+ S3_real_10y:'10Y 实际利率（TIPS）',
+ S4_term_premium:'持有长债所需模型补偿（ACM，NY Fed 估计）',
+ S9_sofr_level:'隔夜担保融资成本（SOFR）',
+ S8_bei_10y:'名义-实际利率差（隐含通胀预期）',
+ E4_margin_debt_yoy:'FINRA 保证金余额同比（自律组织数据）'
+};
+function cnName(m){return CN_FOCUS[m.id]||CN[m.id]||m.name}
+const SPARK_Q={
+ S3_real_10y:'真实资金成本，与名义曲线比较看通胀预期。',
+ S4_term_premium:'NY Fed ACM 模型估计值，非市场交易值。',
+ S9_sofr_level:'美元隔夜融资基准水平，不等同 IORB 利差。',
+ S8_bei_10y:'名义-TIPS 差值，含流动性与风险溢价，不纯是通胀预测。',
+ E4_margin_debt_yoy:'FINRA 自律组织数据，非政府来源。'
+};
 const PANEL_Q={
  A_macro_rates:'回答：美债利率期限结构当前形态（已直取名义曲线）。',
  B_credit:'回答：信用利差与 CDS 当前水平（多数源受限/跳源，不转录数值）。',
@@ -264,12 +320,19 @@ function openDetail(id){
  add('状态',ST_TXT[m.status]+' ('+m.status+')');
  add('数值',isLicensed(m)&&m.value!=null?JSON.stringify(m.value):(m.status==='restricted'?'受限不转录':'—'));
  add('单位',m.unit);
- add('as_of',m.as_of);
- add('最近尝试',m.last_attempt_at);
+ add('数据日期',m.as_of);
  add('采集时间',m.collected_at);
+ add('更新频率',m.update_frequency||m.frequency);
+ add('怎么解读',m.interpretation_cn);
+ add('说明',m.note);
+ add('归属',m.attribution);
  add('源链接',m.source_url,true);
  add('跳源链接',m.link_url,true);
  add('license',m.license);
+ add('license 条款',m.license_url,true);
+ add('版权声明',m.copyright_notice);
+ add('免责',m.disclaimer);
+ add('使用条款',m.terms_notice_en);
  add('受限原因',m.restricted_reason);
  openDrawer();
 }
@@ -280,7 +343,7 @@ async function refresh(){
   if(!d||!Array.isArray(d.metrics)){$('banner').style.display='block';$('banner').textContent='未读取到本地快照 preview-data/global.json';$('st').textContent='快照未加载';$('grid').innerHTML='';$('groups').innerHTML='';return}
   DATA=d;$('banner').style.display='none';
   let lastRun='—';try{const sr=await fetch('preview-data/status.json?t='+Date.now(),{cache:'no-store'});if(sr.ok){const sj=await sr.json();const t=sj.last_run||sj.generated_at;if(t)lastRun=t.slice(0,16).replace('T',' ')}}catch(e){}
-  $('st').textContent='schema '+d.schema_version+' · 生成 '+(d.generated_at||'').slice(0,10)+' · 预览任务已运行 '+lastRun+' · connected '+(d.metrics.filter(m=>m.status==='connected').length)+' 项 · 其余跳源/受限/待接入';
+  $('st').textContent='最近采集 '+lastRun+' · 已可观察 '+d.metrics.filter(m=>m.status==='connected').length+' 项 · 完整目录 '+d.metrics.length+' 项';
   renderGroups();renderCurve();renderSparks();render();
  }finally{busy=false;rb.disabled=false;rb.textContent='重读本地快照'}
 }
