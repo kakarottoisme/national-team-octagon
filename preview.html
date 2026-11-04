@@ -422,9 +422,10 @@ async function refresh(){if(busy)return;busy=true;const rb=document.getElementBy
  }catch(e){st.textContent="刷新失败："+e.message+(view=="live"?"，60秒后重试":"")}finally{busy=false;rb.disabled=false;rb.textContent="刷新"}}
 function onSel(){view=sel.value;refresh();if(typeof renderShares==='function'&&SNAP)renderShares()}sel.onchange=onSel;
 let SNAP=null,DOM=null,coreOnly=true,STATUS=null,sortKey=null;
-function setSort(k){sortKey=k;renderShares()}
+function setSort(k){sortKey=k==='growth_5d_pct'?'growth_5d_pct':null;renderShares()}
+function lastRunOf(s){if(!s)return '—';const t=s.last_run||s.generated_at;return t?t.slice(0,16).replace('T',' '):'—'}
 async function loadStatus(){
- try{const r=await fetch('preview-data/status.json?t='+Date.now(),{cache:'no-store'});if(r.ok)STATUS=await r.json()}catch(e){}
+ try{const r=await fetch('preview-data/status.json?t='+Date.now(),{cache:'no-store'});if(r.ok){STATUS=await r.json();window.STATUS=STATUS;if(typeof renderStatus==='function'&&SNAP)renderStatus()}}catch(e){}
 }
 const CORE7=['510050','510300','159352','510500','512100','159915','588000'];
 const ETF_NAME_FIX={};
@@ -457,7 +458,7 @@ function renderStatus(){
  });
  // status.json 最后运行时间
  let lastRun='—';
- if(window.STATUS&&STATUS.last_run)lastRun=STATUS.last_run.slice(0,16).replace('T',' ');
+ if(window.STATUS&&STATUS.last_run)lastRun=lastRunOf(STATUS);
  const el=document.getElementById('dailyStatus');
  if(el)el.innerHTML='<b>预览自动任务已运行 '+lastRun+'</b> · 官方份额 as_of '+SNAP.as_of+' · SSE：'+sseTxt+' · 其他源：'+others.join('，');
 }

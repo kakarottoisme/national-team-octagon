@@ -180,7 +180,7 @@ async function refresh(){
   let d=null;try{const r=await fetch('preview-data/global.json?t='+Date.now(),{cache:'no-store'});if(r.ok)d=await r.json()}catch(e){}
   if(!d||!Array.isArray(d.metrics)){$('banner').style.display='block';$('banner').textContent='未读取到本地快照 preview-data/global.json';$('st').textContent='快照未加载';$('grid').innerHTML='';$('groups').innerHTML='';return}
   DATA=d;$('banner').style.display='none';
-  let lastRun='—';try{const sr=await fetch('preview-data/status.json?t='+Date.now(),{cache:'no-store'});if(sr.ok){const sj=await sr.json();if(sj.last_run)lastRun=sj.last_run.slice(0,16).replace('T',' ')}}catch(e){}
+  let lastRun='—';try{const sr=await fetch('preview-data/status.json?t='+Date.now(),{cache:'no-store'});if(sr.ok){const sj=await sr.json();const t=sj.last_run||sj.generated_at;if(t)lastRun=t.slice(0,16).replace('T',' ')}}catch(e){}
   $('st').textContent='schema '+d.schema_version+' · 生成 '+(d.generated_at||'').slice(0,10)+' · 预览任务已运行 '+lastRun+' · connected '+(d.metrics.filter(m=>m.status==='connected').length)+' 项 · 其余跳源/受限/待接入';
   renderGroups();render();
  }finally{busy=false;rb.disabled=false;rb.textContent='重读本地快照'}

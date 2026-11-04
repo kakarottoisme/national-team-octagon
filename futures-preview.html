@@ -210,7 +210,7 @@ async function refresh(){
   }
   DATA=d;$('banner').style.display='none';
   const f=d.futures;
-  let lastRun='—';try{const sr=await fetch('preview-data/status.json?t='+Date.now(),{cache:'no-store'});if(sr.ok){const sj=await sr.json();if(sj.last_run)lastRun=sj.last_run.slice(0,16).replace('T',' ')}}catch(e){}
+  let lastRun='—';try{const sr=await fetch('preview-data/status.json?t='+Date.now(),{cache:'no-store'});if(sr.ok){const sj=await sr.json();const t=sj.last_run||sj.generated_at;if(t)lastRun=t.slice(0,16).replace('T',' ')}}catch(e){}
   $('st').innerHTML='官方快照 · 期货截至 '+f.as_of+' · ETF 截至 '+(d.as_of||'—')+(f.async_with_etf?' · <span style="color:#8a6d2f">期指与 ETF 异步（期货 '+f.as_of+' / ETF '+d.as_of+'）</span>':'')+' · '+f.member+' · 预览任务已运行 '+lastRun+staleChip(f.as_of);
   $('dMember').textContent=f.member+'：CFFEX 前20上榜合约汇总；'+(f.products&&Object.values(f.products)[0]?Object.values(f.products)[0].note:'')+'';
   $('dAsOf').textContent=f.as_of;
