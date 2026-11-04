@@ -176,7 +176,7 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
 <div id="banner"></div>
 
 <!-- ===== 八宫格 ===== -->
-<div class="sec"><h2>分时走势</h2><details class="note"><summary><span>口径说明</span></summary><p>上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；救市金额估算 = 当日蓝柱成交额合计；MACD(12,26,9)。仅「今日实时」页面约每 30 秒重读站点缓存；缓存由本机直连腾讯后约每 1 分钟中转推送（非券商级实时）。历史日为存档静态数据。注意：这是成交额阈值代理，非官方国家队认定，也不是监管披露的护盘资金。数据：腾讯行情（经站点缓存）。</p></details></div>
+<div class="sec"><h2>分时走势</h2><details class="note"><summary><span>口径说明</span></summary><p>上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；救市金额估算 = 当日蓝柱成交额合计；MACD(12,26,9)。仅「今日实时」页面约每 30 秒重读站点缓存；盘中数据由 GitHub Actions 约每 5 分钟写入（定时可能推迟，非券商级实时），笔记本休眠不影响查看。历史日为存档静态数据。注意：这是成交额阈值代理，非官方国家队认定，也不是监管披露的护盘资金。数据：腾讯行情（经站点缓存）。</p></details></div>
 <div class="g" id="g"></div>
 
 <!-- ===== 日度汇总 ===== -->
@@ -373,7 +373,7 @@ async function refresh(){if(busy)return;busy=true;const rb=document.getElementBy
    if(LIVE.estimates){Object.assign(o,LIVE.estimates);s=LIVE.estimates["合计"]??s}else o["合计"]=+s.toFixed(2);
    const ix=rows.findIndex(x=>x[0]==TODAY);if(ix>0&&o["上证收盘"]==null){o["上证收盘"]=+rows[ix][2];o["上证涨跌幅"]=+((rows[ix][2]/rows[ix-1][2]-1)*100).toFixed(2)}
    H[TODAY]=Object.assign({},H[TODAY]||{},o);let l={};try{l=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}l[TODAY]=H[TODAY];try{localStorage.setItem(KEY,JSON.stringify(l))}catch(e){}
-   fillSel();drawSum(rows,TODAY);table(TODAY);const lastBar=(ms[0]&&ms[0].t&&ms[0].t.length)?ms[0].t[ms[0].t.length-1]:"";const cut=lastBar?(lastBar.slice(0,2)+":"+lastBar.slice(2)):"";st.textContent="缓存 "+(LIVE.updated||bj().toLocaleString("zh-CN",{hour12:false}))+(cut?" · 行情截止 "+cut:"")+" · 来源"+(LIVE.src||"站点")+" · "+(trading()?"交易中":"非交易时段")+" · 约1分钟中转"}
+   fillSel();drawSum(rows,TODAY);table(TODAY);const lastBar=(ms[0]&&ms[0].t&&ms[0].t.length)?ms[0].t[ms[0].t.length-1]:"";const cut=lastBar?(lastBar.slice(0,2)+":"+lastBar.slice(2)):"";st.textContent="缓存 "+(LIVE.updated||bj().toLocaleString("zh-CN",{hour12:false}))+(cut?" · 行情截止 "+cut:"")+" · 来源"+(LIVE.src||"站点")+" · "+(trading()?"交易中":"非交易时段")+" · 云端约5分钟"}
   else{const rows=await sseRows();const d=view,h=H[d]||{};let m=null;try{m=await j("./data/minutes/"+d+".json")}catch(e){}
    E.forEach((e,i)=>{const x=m&&m.etfs[e[1]];x?drawEtf(i,x):noMin(i,h[e[0]])});
    if(!m){bn.style.display="block";bn.textContent=d+"：分时未存档，仅显示汇总数字（合计 "+(h["合计"]!=null?(+h["合计"]).toFixed(2)+" 亿":"无")+"）。"}else bn.style.display="none";

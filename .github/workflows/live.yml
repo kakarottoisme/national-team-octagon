@@ -1,0 +1,122 @@
+name: Refresh live.json
+
+# Cloud feeder for data/live.json so GitHub Pages keeps moving when no laptop is awake.
+# GitHub scheduled workflows cannot reliably run every minute: the practical floor is
+# every 5 minutes, and a run can start late. This file does not claim 1-minute updates.
+# Cron is UTC. */5 1-7 * * 1-5 = Mon–Fri 01:00–07:55 UTC = 09:00–15:55 Asia/Shanghai.
+# The gate then keeps only 09:15–11:35 and 12:55–15:05, matching live_daemon.sh.
+# Schedule and workflow_dispatch run only after this file is on the default branch.
+on:
+  schedule:
+    - cron: "*/5 1-7 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-live-json
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+          persist-credentials: true
+
+      - name: Gate to A-share session
+        id: gate
+        shell: bash
+        run: |
+          python3 - << 'PY'
+          import datetime, os
+          now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
+          minute = now.hour * 60 + now.minute
+          in_session = now.weekday() < 5 and (
+              (9 * 60 + 15 <= minute <= 11 * 60 + 35)
+              or (12 * 60 + 55 <= minute <= 15 * 60 + 5)
+          )
+          flag = "true" if in_session else "false"
+          print(f"shanghai={now.strftime('%Y-%m-%d %H:%M:%S')} in_session={flag}")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.write(f"in_session={flag}\n")
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary and not in_session:
+              with open(summary, "a", encoding="utf-8") as fh:
+                  fh.write("非交易时段（北京时间周末，或不在 09:15–11:35 / 12:55–15:05），不拉取、不提交。\n")
+          PY
+
+      - name: Fetch and push live.json when the market payload changes
+        if: steps.gate.outputs.in_session == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export GIT_TERMINAL_PROMPT=0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cat > /tmp/live_same.py << 'PY'
+          import json, sys
+          def payload(path):
+              with open(path, encoding="utf-8") as fh:
+                  data = json.load(fh)
+              data.pop("updated", None)
+              return data
+          sys.exit(0 if payload(sys.argv[1]) == payload(sys.argv[2]) else 1)
+          PY
+          git fetch --depth=50 origin main
+          git checkout -f -B main origin/main
+
+          DID_COMMIT=0
+          STAMP=""
+          commit_if_changed() {
+            DID_COMMIT=0
+            cp -f data/live.json /tmp/live.prev.json
+            python3 fetch_live.py
+            if python3 /tmp/live_same.py /tmp/live.prev.json data/live.json; then
+              git checkout -- data/live.json
+              echo "no meaningful change; skip commit"
+              return 0
+            fi
+            git add data/live.json
+            if git diff --cached --quiet; then
+              echo "nothing staged; skip commit"
+              return 0
+            fi
+            STAMP=$(python3 -c 'import json; print(json.load(open("data/live.json", encoding="utf-8"))["updated"][11:16])')
+            git commit -m "live ${STAMP}"
+            DID_COMMIT=1
+          }
+
+          commit_if_changed
+          if [[ "$DID_COMMIT" != "1" ]]; then
+            echo "left main unchanged"
+            exit 0
+          fi
+
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "pushed data/live.json (${STAMP})"
+              if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+                echo "已推送 data/live.json（${STAMP}，北京时间）。" >> "$GITHUB_STEP_SUMMARY"
+              fi
+              exit 0
+            fi
+            echo "push failed (attempt ${attempt}); rebasing onto origin/main"
+            git fetch --depth=50 origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              git reset --hard origin/main
+              commit_if_changed
+              if [[ "$DID_COMMIT" != "1" ]]; then
+                echo "upstream already has this payload"
+                exit 0
+              fi
+            fi
+          done
+          echo "failed to push data/live.json" >&2
+          exit 1

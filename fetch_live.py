@@ -1,9 +1,22 @@
 # 拉取 7 只 ETF 当日分时 + 上证日线，写 data/live.json（站点同源读取）
-import json, urllib.request, datetime, os
+import json, urllib.request, datetime, os, time
 
 def g(u):
-    q = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://finance.qq.com/"})
-    return json.loads(urllib.request.urlopen(q, timeout=15).read().decode("utf-8", "ignore"))
+    # Actions 跑在云端，到腾讯的连接偶发超时或 SSL 中断；重试避免整档被一次抖动丢掉。
+    delay = 1.5
+    last = None
+    for attempt in range(3):
+        try:
+            q = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://finance.qq.com/"})
+            with urllib.request.urlopen(q, timeout=20) as resp:
+                return json.loads(resp.read().decode("utf-8", "ignore"))
+        except Exception as e:
+            last = e
+            if attempt == 2:
+                break
+            time.sleep(delay)
+            delay *= 2
+    raise last
 
 E = [
     ("上证50", "sh510050"),
@@ -54,10 +67,13 @@ if ix and ix[0] > 0:
     est["上证涨跌幅"] = round((c / pc - 1) * 100, 2)
 now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
 os.makedirs("data", exist_ok=True)
-json.dump(
-    {"updated": now.strftime("%Y-%m-%d %H:%M:%S"), "date": date, "etfs": etfs, "estimates": est, "sse": sse},
-    open("data/live.json", "w"),
-    ensure_ascii=False,
-    separators=(",", ":"),
-)
+tmp = "data/live.json.tmp"
+with open(tmp, "w", encoding="utf-8") as fh:
+    json.dump(
+        {"updated": now.strftime("%Y-%m-%d %H:%M:%S"), "date": date, "etfs": etfs, "estimates": est, "sse": sse},
+        fh,
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+os.replace(tmp, "data/live.json")
 print(now.strftime("%Y-%m-%d %H:%M:%S"), date, est)
