@@ -6,7 +6,7 @@
  ],
  "calendar_days": 26,
  "calendar_source": "sse_observed_trading_days",
- "collected_at": "2026-11-04T17:24:30+08:00",
+ "collected_at": "2026-11-04T19:06:08+08:00",
  "errors": [],
  "etfs": [
   {
@@ -440,18 +440,22 @@
    }
   }
  },
- "generated_at": "2026-11-04T17:24:30+08:00",
+ "generated_at": "2026-11-04T19:06:08+08:00",
  "global": {
-  "connected": 1,
+  "connected": 6,
   "connected_stale": 0,
-  "errors": [],
+  "errors": [
+   "iorb: The read operation timed out",
+   "nfci: The read operation timed out",
+   "sahm: The read operation timed out"
+  ],
   "link_only": 25,
-  "metrics_total": 37,
+  "metrics_total": 40,
   "missing": 2,
   "module_state": "ok",
   "path": "/home/runner/work/national-team-octagon/national-team-octagon/preview-data/global.json",
-  "pending": 6,
-  "restricted": 3,
+  "pending": 5,
+  "restricted": 2,
   "state": "ok"
  },
  "legacy_note": "preview-data/domestic.json、global.json 等第三方快照仅作 legacy 存档,不用于本官方数值;NAV金额未核,本版仅份额增幅%。",

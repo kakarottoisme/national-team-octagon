@@ -3,19 +3,23 @@
  "calendar_days": 26,
  "domestic": "ok",
  "errors": [],
- "generated_at": "2026-11-04T17:24:30+08:00",
+ "generated_at": "2026-11-04T19:06:08+08:00",
  "global": "ok",
  "global_detail": {
-  "connected": 1,
+  "connected": 6,
   "connected_stale": 0,
-  "errors": [],
+  "errors": [
+   "iorb: The read operation timed out",
+   "nfci: The read operation timed out",
+   "sahm: The read operation timed out"
+  ],
   "link_only": 25,
-  "metrics_total": 37,
+  "metrics_total": 40,
   "missing": 2,
   "module_state": "ok",
   "path": "/home/runner/work/national-team-octagon/national-team-octagon/preview-data/global.json",
-  "pending": 6,
-  "restricted": 3
+  "pending": 5,
+  "restricted": 2
  },
  "run_status": "ok",
  "schema_version": "1.0.0",
