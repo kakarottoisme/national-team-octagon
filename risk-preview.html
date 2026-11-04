@@ -123,7 +123,7 @@ function isLicensed(m){return m.status==='connected'||m.status==='connected_stal
  if(isLicensed(m)&&m.value!=null){
   if(typeof m.value==='object'){
    const keys=Object.keys(m.value);
-   const tenKey=keys.find(k=>k.replace(/\s+/g,'').toUpperCase()==='10Y'||k.replace(/\s+/g,'').toUpperCase()==='10YR');
+   const tenKey=keys.find(k=>{const u=k.replace(/\s+/g,'').toUpperCase();return u==='10Y'||u==='10YR';});
    const ten=tenKey!=null?m.value[tenKey]:'—';
    return staleMark+(m.id==='A3b_yield_curve_real'?'实际':'名义')+'曲线 '+keys.length+' 段 · 10Y '+ten+'%';
   }
@@ -149,7 +149,8 @@ const TENOR_LABEL={'1 Mo':'1个月','1.5 Month':'1.5个月','2 Mo':'2个月','3 
 let realChart=null;
 function normTenor(k){
  const up=k.toUpperCase().replace(/\s+/g,'');
- const map={'1MO':'1 Mo','1.5MO':'1.5 Month','2MO':'2 Mo','3MO':'3 Mo','4MO':'4 Mo','6MO':'6 Mo','1Y':'1 Yr','2Y':'2 Yr','3Y':'3 Yr','5Y':'5 Yr','7Y':'7 Yr','10Y':'10 Yr','20Y':'20 Yr','30Y':'30 Yr'};
+ const map={'1MO':'1 Mo','1.5MO':'1.5 Month','2MO':'2 Mo','3MO':'3 Mo','4MO':'4 Mo','6MO':'6 Mo','1Y':'1 Yr','2Y':'2 Yr','3Y':'3 Yr','5Y':'5 Yr','7Y':'7 Yr','10Y':'10 Yr','20Y':'20 Yr','30Y':'30 Yr',
+  '1MOMO':'1 Mo','1MOYR':'1 Mo','5YR':'5 Yr','7YR':'7 Yr','10YR':'10 Yr','20YR':'20 Yr','30YR':'30 Yr'};
  return map[up]||k;
 }
 function drawCurveChart(el,m,color,title,yMinZero){
