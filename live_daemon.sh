@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# 盘中约每 60s 直连腾讯 → 写 data/live.json → 有变化则推 main（供 GitHub Pages 同源读）
+# 可选的本机补充：盘中约每 60s 直连腾讯 → 写 data/live.json → 有变化则推 main。
+# 云端以 .github/workflows/live.yml 为准（交易时段约每 5 分钟）。本脚本只在机器醒着时更密；
+# 笔记本休眠不影响 GitHub Pages 上的手机访问。
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
