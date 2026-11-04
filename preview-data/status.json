@@ -1,12 +1,12 @@
 {
- "as_of": "2026-11-03",
- "calendar_days": 26,
+ "as_of": "2026-11-04",
+ "calendar_days": 27,
  "domestic": "ok",
  "errors": [],
  "futures_history": {
   "as_of": "2026-11-04",
   "errors": [],
-  "last_attempt": "2026-11-04T20:48:21+08:00",
+  "last_attempt": "2026-11-05T05:26:31+08:00",
   "products": {
    "IC": {
     "date": "2026-11-04",
@@ -38,7 +38,7 @@
    }
   }
  },
- "generated_at": "2026-11-04T20:48:21+08:00",
+ "generated_at": "2026-11-05T05:26:31+08:00",
  "global": "ok",
  "global_detail": {
   "connected": 6,
@@ -60,18 +60,23 @@
  "schema_version": "1.0.0",
  "sources": [
   {
-   "date": "2026-11-04",
+   "date": "2026-11-05",
    "http": 200,
    "name": "SSE",
    "rows": 0,
    "status": "unpublished"
   },
   {
-   "date": "2026-11-03",
+   "date": "2026-11-04",
    "http": 200,
    "name": "SSE",
    "rows": 923,
    "status": "ok"
+  },
+  {
+   "date": "2026-11-05",
+   "name": "CFFEX",
+   "status": "no_published"
   },
   {
    "date": "2026-11-04",
