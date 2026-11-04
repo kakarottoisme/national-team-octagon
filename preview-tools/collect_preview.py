@@ -376,8 +376,8 @@ def run(target_date=None, fetcher=None, now=None):
                 rec["snapshot_scale_yi_no_date"] = szse_map[code]
         day["etfs"][code] = rec
 
-    if fut_as_of:
-        day["futures"] = fut_by_product
+    # 期货不再写入ETF history(原错位: 期货独立as_of≠ETF as_of)。
+    # 期货历史独立存 preview-data/official/futures/{product}.json(futures_history.py)。
 
     # 5) 官方交易日历 = 历史中所有有 SH 官方份额的日期(升序)
     calendar = sorted(d for d in hist
@@ -453,6 +453,25 @@ def run(target_date=None, fetcher=None, now=None):
                                  for k, v in cons.items()]),
             "note": "仅CFFEX前20上榜合约汇总;某合约当日未上榜=缺席,不等于0手"}
 
+    # 7b) 期指日更append: 独立 shard preview-data/official/futures/{product}.json
+    #     只增量当日,不重下04回补;单源失败保留历史并标旧,各源partial互不覆盖。
+    fut_daily = {}
+    try:
+        import futures_history as fh_mod
+        FUT_DIR = os.path.join(REPO, "preview-data", "official", "futures")
+        for p in PRODUCTS:
+            try:
+                d_ = fut_as_of or probe
+                res = fh_mod.collect_daily(
+                    p, d_, os.path.join(FUT_DIR, f"{p}.json"),
+                    raw_dir=None)
+                fut_daily[p] = res
+            except Exception as e:  # noqa
+                fut_daily[p] = {"product": p, "state": "failed_keep_history", "err": str(e)}
+                errors.append(f"futures_daily {p}: {e}")
+    except Exception as e:  # noqa
+        errors.append(f"futures_history module: {e}")
+
     # 8) global 容错调用
     g_state, g_info = maybe_collect_global()
     if sse_date and g_state in ("degraded_partial", "failed_nonblocking"):
@@ -486,6 +505,11 @@ def run(target_date=None, fetcher=None, now=None):
               "as_of": as_of, "domestic": "ok" if sse_date else "failed",
               "global": g_state, "global_detail": g_info,
               "calendar_days": len(calendar),
+              "futures_history": {
+                  "as_of": fut_as_of.isoformat() if fut_as_of else None,
+                  "products": fut_daily,
+                  "last_attempt": iso(now),
+                  "errors": [e for e in errors if "futures" in e.lower()]},
               "sources": source_log, "errors": errors}
     save_json(STATUS_PATH, status)
     return snap

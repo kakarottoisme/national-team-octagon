@@ -3,25 +3,63 @@
  "calendar_days": 26,
  "domestic": "ok",
  "errors": [],
- "generated_at": "2026-11-04T19:06:08+08:00",
- "global": "ok",
+ "futures_history": {
+  "as_of": "2026-11-04",
+  "errors": [],
+  "last_attempt": "2026-11-04T20:32:54+08:00",
+  "products": {
+   "IC": {
+    "date": "2026-11-04",
+    "product": "IC",
+    "published_before": 218,
+    "records_after": 218,
+    "source_status": "published"
+   },
+   "IF": {
+    "date": "2026-11-04",
+    "product": "IF",
+    "published_before": 218,
+    "records_after": 218,
+    "source_status": "published"
+   },
+   "IH": {
+    "date": "2026-11-04",
+    "product": "IH",
+    "published_before": 218,
+    "records_after": 218,
+    "source_status": "published"
+   },
+   "IM": {
+    "date": "2026-11-04",
+    "product": "IM",
+    "published_before": 218,
+    "records_after": 218,
+    "source_status": "published"
+   }
+  }
+ },
+ "generated_at": "2026-11-04T20:32:54+08:00",
+ "global": "failed_nonblocking",
  "global_detail": {
-  "connected": 6,
+  "connected": 1,
   "connected_stale": 0,
   "errors": [
+   "ust_10y_real: HTTP Error 502: Bad Gateway",
+   "sofr: HTTP Error 502: Bad Gateway",
+   "acm_tp_10y: The read operation timed out",
    "iorb: The read operation timed out",
    "nfci: The read operation timed out",
-   "sahm: The read operation timed out"
+   "sahm: HTTP Error 502: Bad Gateway"
   ],
   "link_only": 25,
-  "metrics_total": 40,
+  "metrics_total": 39,
   "missing": 2,
-  "module_state": "ok",
-  "path": "/home/runner/work/national-team-octagon/national-team-octagon/preview-data/global.json",
-  "pending": 5,
+  "module_state": "degraded_partial",
+  "path": "/home/user/Doubao/chats/38448346890959362/national-team-octagon/preview-data/global.json",
+  "pending": 9,
   "restricted": 2
  },
- "run_status": "ok",
+ "run_status": "partial",
  "schema_version": "1.0.0",
  "sources": [
   {

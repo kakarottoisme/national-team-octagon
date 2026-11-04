@@ -78,8 +78,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 259.3063
    }
-  },
-  "futures": {}
+  }
  },
  "2026-09-22": {
   "etfs": {
@@ -160,8 +159,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 257.8063
    }
-  },
-  "futures": {}
+  }
  },
  "2026-09-23": {
   "etfs": {
@@ -242,8 +240,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 257.1163
    }
-  },
-  "futures": {}
+  }
  },
  "2026-09-24": {
   "etfs": {
@@ -324,8 +321,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 258.5563
    }
-  },
-  "futures": {}
+  }
  },
  "2026-09-28": {
   "etfs": {
@@ -406,8 +402,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 263.7463
    }
-  },
-  "futures": {}
+  }
  },
  "2026-09-29": {
   "etfs": {
@@ -488,8 +483,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 265.6063
    }
-  },
-  "futures": {}
+  }
  },
  "2026-09-30": {
   "etfs": {
@@ -570,8 +564,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 271.0363
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-08": {
   "etfs": {
@@ -652,8 +645,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 276.6763
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-09": {
   "etfs": {
@@ -734,8 +726,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 282.0463
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-12": {
   "etfs": {
@@ -816,8 +807,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 284.2663
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-13": {
   "etfs": {
@@ -898,8 +888,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 286.0363
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-14": {
   "etfs": {
@@ -980,8 +969,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 287.3863
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-15": {
   "etfs": {
@@ -1062,8 +1050,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 288.8263
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-16": {
   "etfs": {
@@ -1144,8 +1131,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 291.9763
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-19": {
   "etfs": {
@@ -1226,8 +1212,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 295.8463
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-20": {
   "etfs": {
@@ -1308,8 +1293,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 295.2163
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-21": {
   "etfs": {
@@ -1390,8 +1374,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 295.3363
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-22": {
   "etfs": {
@@ -1472,8 +1455,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 299.4163
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-23": {
   "etfs": {
@@ -1554,8 +1536,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 304.5463
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-26": {
   "etfs": {
@@ -1636,8 +1617,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 307.8163
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-27": {
   "etfs": {
@@ -1718,8 +1698,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 310.8763
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-28": {
   "etfs": {
@@ -1800,8 +1779,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 308.5363
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-29": {
   "etfs": {
@@ -1882,8 +1860,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 312.9463
    }
-  },
-  "futures": {}
+  }
  },
  "2026-10-30": {
   "etfs": {
@@ -1964,8 +1941,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 316.3963
    }
-  },
-  "futures": {}
+  }
  },
  "2026-11-02": {
   "etfs": {
@@ -2046,8 +2022,7 @@
     "shares_status": "official_confirmed",
     "shares_yi": 318.9163
    }
-  },
-  "futures": {}
+  }
  },
  "2026-11-03": {
   "etfs": {
@@ -2169,106 +2144,6 @@
     "name": "科创板50ETF易方达",
     "shares_status": "official_confirmed",
     "shares_yi": 321.5563
-   }
-  },
-  "futures": {
-   "IC": {
-    "IC2611": {
-     "long": 11161,
-     "long_chg": 1221,
-     "short": 16953,
-     "short_chg": 2469
-    },
-    "IC2612": {
-     "long": 34033,
-     "long_chg": 5235,
-     "short": 39583,
-     "short_chg": 4198
-    },
-    "IC2703": {
-     "long": 8904,
-     "long_chg": 432,
-     "short": 14071,
-     "short_chg": 840
-    },
-    "IC2706": {
-     "long": 3205,
-     "long_chg": 421,
-     "short": 4551,
-     "short_chg": 257
-    }
-   },
-   "IF": {
-    "IF2611": {
-     "long": 8488,
-     "long_chg": -446,
-     "short": 9546,
-     "short_chg": 1222
-    },
-    "IF2612": {
-     "long": 25129,
-     "long_chg": 1304,
-     "short": 36921,
-     "short_chg": -832
-    },
-    "IF2703": {
-     "long": 5724,
-     "long_chg": 671,
-     "short": 14708,
-     "short_chg": 1216
-    },
-    "IF2706": {
-     "long": 2466,
-     "long_chg": 269,
-     "short": 4209,
-     "short_chg": 232
-    }
-   },
-   "IH": {
-    "IH2611": {
-     "long": 2209,
-     "long_chg": -885,
-     "short": 4365,
-     "short_chg": -1166
-    },
-    "IH2612": {
-     "long": 10866,
-     "long_chg": -1838,
-     "short": 11814,
-     "short_chg": -2099
-    },
-    "IH2703": {
-     "long": 2373,
-     "long_chg": -96,
-     "short": 4740,
-     "short_chg": -203
-    }
-   },
-   "IM": {
-    "IM2611": {
-     "long": 19159,
-     "long_chg": 2958,
-     "short": 31857,
-     "short_chg": 3788
-    },
-    "IM2612": {
-     "long": 55313,
-     "long_chg": 7139,
-     "short": 70293,
-     "short_chg": 6442
-    },
-    "IM2703": {
-     "long": 14700,
-     "long_chg": 2032,
-     "short": 24367,
-     "short_chg": 2327
-    },
-    "IM2706": {
-     "long": 6693,
-     "long_chg": 1165,
-     "short": 7000,
-     "short_chg": 1443
-    }
    }
   }
  }
