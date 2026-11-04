@@ -1,0 +1,74 @@
+name: Refresh preview official data
+
+# 隔离的国内官方预览采集: 只写 preview-data/official 与 preview-data/status.json,
+# 不触碰 data/、正式 *.py、正式 html、既有 live.yml(不改既有任务)。
+# Cron UTC: 30 15 * * 1-5 = 23:30 Asia/Shanghai Mon-Fri(晚间运行)。
+# 未发布/源失败时采集器保留上一有效值并在 run_status / status.json 如实报告(failed/partial),
+# 不把旧status当成功;具体发布时点以官方为准,此处不臆断。
+# 真实发布后由前端 agent 用 workflow_dispatch 触发;本调度仅兜底。
+on:
+  schedule:
+    - cron: "30 15 * * 1-5"
+  workflow_dispatch:
+
+# 最小权限: 仅 contents write(用于提交 preview-data/),不通知、不扩权、不需 secret。
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-preview-official
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout latest main (采集前,保证干净基线)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+          persist-credentials: true
+
+      - name: Configure git identity
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          export GIT_TERMINAL_PROMPT=0
+
+      - name: Run collector (官方SSE+CFFEX; global容错)
+        shell: bash
+        run: python3 preview-tools/collect_preview.py
+
+      - name: Commit only preview-data/ then push (不force、不reset丢数据)
+        shell: bash
+        run: |
+          set -euo pipefail
+          export GIT_TERMINAL_PROMPT=0
+          STAMP=$(date -u +%Y-%m-%dT%H:%MZ)
+
+          # 只暂存隔离目录,绝不 add 其它路径
+          git add preview-data/official preview-data/status.json preview-data/global.json
+          if git diff --cached --quiet; then
+            echo "preview-data 无变化,不提交"
+            exit 0
+          fi
+          git commit -m "preview official data ${STAMP}"
+
+          # push: 失败则 fetch + rebase(快进),冲突即保留工作树并 fail,绝不 reset --hard/force
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "已推送 preview-data/"
+              exit 0
+            fi
+            echo "push 第 ${attempt} 次失败,尝试 fetch + rebase origin/main"
+            git fetch --depth=20 origin main
+            if ! git rebase origin/main; then
+              echo "::error::rebase 冲突,保留工作树,不自动解决、不force;请人工处理后由前端 agent 发布"
+              git rebase --abort || true
+              exit 1
+            fi
+          done
+          echo "::error::多次 push 失败,已保留提交与工作树"
+          exit 1

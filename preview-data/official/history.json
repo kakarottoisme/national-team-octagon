@@ -1,0 +1,2275 @@
+{
+ "2026-09-21": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 76.8937
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2406
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 237.1369
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 113.7664
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 83.1895
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 56.0697
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 62.9922
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.4081
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.8462
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 552.7767
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 259.3063
+   }
+  },
+  "futures": {}
+ },
+ "2026-09-22": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 74.7607
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2406
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 237.3799
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 114.5674
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 84.2875
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 57.1857
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 65.3922
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.5681
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 19.3662
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 543.7467
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 257.8063
+   }
+  },
+  "futures": {}
+ },
+ "2026-09-23": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 73.7977
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2456
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 240.0529
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 118.0684
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 85.7815
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 57.6497
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 64.7122
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.7841
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 20.6662
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 542.9067
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 257.1163
+   }
+  },
+  "futures": {}
+ },
+ "2026-09-24": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 71.6737
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2406
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 239.0449
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 117.8884
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 85.1875
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 54.8737
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 64.5322
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.2161
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 20.7662
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 550.5267
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 258.5563
+   }
+  },
+  "futures": {}
+ },
+ "2026-09-28": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 73.6357
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2556
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 241.7809
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 118.1314
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 85.1245
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 55.1897
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 70.4122
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.1841
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 22.5662
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 563.7567
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 263.7463
+   }
+  },
+  "futures": {}
+ },
+ "2026-09-29": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 72.4837
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2706
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 241.6459
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 118.6714
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 85.0885
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 56.1377
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 69.7522
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.2321
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 22.5862
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 565.5567
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 265.6063
+   }
+  },
+  "futures": {}
+ },
+ "2026-09-30": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 69.3877
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2706
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 241.1959
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 119.8774
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 85.0705
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 56.1137
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 69.5122
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.1361
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 24.1262
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 582.3867
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 271.0363
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-08": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 69.3517
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2606
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 240.6379
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 119.9584
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 85.1605
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 55.9497
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 72.1522
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.2481
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 24.4462
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 605.4267
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 276.6763
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-09": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 71.2237
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2656
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 243.9229
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 120.9574
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 85.4935
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 57.2017
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 78.8322
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 19.1761
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 25.6862
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 629.7867
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 282.0463
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-12": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 71.1967
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2706
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 245.2999
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 121.1374
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 85.4305
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 56.7777
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 80.6522
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 19.1921
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 24.9062
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 632.3367
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 284.2663
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-13": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 72.9877
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2906
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 248.9719
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 121.6234
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 85.7455
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 57.0617
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 82.0922
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 19.2001
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 25.2062
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 639.6267
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 286.0363
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-14": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 73.1587
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.2956
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 246.9019
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 121.5694
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 85.7545
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 55.7177
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 77.7322
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.6721
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 24.9862
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 649.5867
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 287.3863
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-15": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 76.0297
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.3356
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 254.8489
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 167.2624
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 86.2405
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 56.5977
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 79.4322
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.3761
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 25.4462
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 695.7267
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 288.8263
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-16": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 89.1607
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.3306
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 285.5299
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 168.7924
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 86.8885
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 57.7417
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 80.8122
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.4081
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 26.2862
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 701.9667
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 291.9763
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-19": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 96.1987
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.3456
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 291.9559
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 169.4854
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 87.1945
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 63.8137
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 88.2122
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.9201
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 27.9062
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 715.9167
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 295.8463
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-20": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 111.6067
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.3706
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 294.0079
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 170.2864
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 96.2395
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 61.1057
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 83.3322
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.7441
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 24.9062
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 737.1867
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 295.2163
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-21": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 113.9017
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.4006
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 301.9909
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 170.6284
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 97.0225
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 60.9977
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 84.5722
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.7441
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 24.6462
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 747.6567
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 295.3363
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-22": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 129.8317
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.4406
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 327.2989
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 171.1504
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 105.3295
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 64.4817
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 96.8122
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.8881
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 24.9062
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 795.3267
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 299.4163
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-23": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 129.9307
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.4506
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 352.4269
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 183.5974
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 119.0815
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 73.0137
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 108.7722
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 19.3201
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 26.7662
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 822.9267
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 304.5463
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-26": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 126.5737
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.4256
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 354.4699
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 216.0154
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 132.5455
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 70.5177
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 110.1722
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 19.2001
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 26.6262
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 852.2967
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 307.8163
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-27": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 127.9147
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.4506
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 362.3809
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 219.2644
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 135.0745
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 70.2297
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 112.5722
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 19.2641
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 28.1262
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 857.7867
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 310.8763
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-28": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 125.5657
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.4306
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 363.7759
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 220.8124
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 136.1455
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 70.8897
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 116.7122
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 19.4481
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 29.6462
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 851.3667
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 308.5363
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-29": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 123.1987
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.4356
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 374.7559
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 223.1614
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 136.1005
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 67.7937
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 112.1522
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 18.9761
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 29.4062
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 877.9767
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 312.9463
+   }
+  },
+  "futures": {}
+ },
+ "2026-10-30": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 123.2167
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.4356
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 388.6699
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 226.5814
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 136.4065
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 68.8497
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 114.3522
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 19.0561
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 30.0862
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 900.6867
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 316.3963
+   }
+  },
+  "futures": {}
+ },
+ "2026-11-02": {
+  "etfs": {
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 128.6617
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.4706
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 414.0139
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 228.8584
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 138.5665
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 79.1017
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 142.4722
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 19.4881
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 33.2462
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 956.1267
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 318.9163
+   }
+  },
+  "futures": {}
+ },
+ "2026-11-03": {
+  "etfs": {
+   "159352": {
+    "core": true,
+    "exch": "SZ",
+    "name": "A500ETF南方",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "159629": {
+    "core": false,
+    "exch": "SZ",
+    "name": "中证1000ETF富国",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "159845": {
+    "core": false,
+    "exch": "SZ",
+    "name": "中证1000ETF华夏",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "159915": {
+    "core": true,
+    "exch": "SZ",
+    "name": "创业板ETF易方达",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "159919": {
+    "core": false,
+    "exch": "SZ",
+    "name": "沪深300ETF嘉实",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "159977": {
+    "core": false,
+    "exch": "SZ",
+    "name": "创业板ETF天弘",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 164.6077
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.4806
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 445.8739
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 247.5244
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 153.3265
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 88.0217
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 169.1522
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 19.3921
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 33.7462
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 1047.7167
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 321.5563
+   }
+  },
+  "futures": {
+   "IC": {
+    "IC2611": {
+     "long": 11161,
+     "long_chg": 1221,
+     "short": 16953,
+     "short_chg": 2469
+    },
+    "IC2612": {
+     "long": 34033,
+     "long_chg": 5235,
+     "short": 39583,
+     "short_chg": 4198
+    },
+    "IC2703": {
+     "long": 8904,
+     "long_chg": 432,
+     "short": 14071,
+     "short_chg": 840
+    },
+    "IC2706": {
+     "long": 3205,
+     "long_chg": 421,
+     "short": 4551,
+     "short_chg": 257
+    }
+   },
+   "IF": {
+    "IF2611": {
+     "long": 8488,
+     "long_chg": -446,
+     "short": 9546,
+     "short_chg": 1222
+    },
+    "IF2612": {
+     "long": 25129,
+     "long_chg": 1304,
+     "short": 36921,
+     "short_chg": -832
+    },
+    "IF2703": {
+     "long": 5724,
+     "long_chg": 671,
+     "short": 14708,
+     "short_chg": 1216
+    },
+    "IF2706": {
+     "long": 2466,
+     "long_chg": 269,
+     "short": 4209,
+     "short_chg": 232
+    }
+   },
+   "IH": {
+    "IH2611": {
+     "long": 2209,
+     "long_chg": -885,
+     "short": 4365,
+     "short_chg": -1166
+    },
+    "IH2612": {
+     "long": 10866,
+     "long_chg": -1838,
+     "short": 11814,
+     "short_chg": -2099
+    },
+    "IH2703": {
+     "long": 2373,
+     "long_chg": -96,
+     "short": 4740,
+     "short_chg": -203
+    }
+   },
+   "IM": {
+    "IM2611": {
+     "long": 19159,
+     "long_chg": 2958,
+     "short": 31857,
+     "short_chg": 3788
+    },
+    "IM2612": {
+     "long": 55313,
+     "long_chg": 7139,
+     "short": 70293,
+     "short_chg": 6442
+    },
+    "IM2703": {
+     "long": 14700,
+     "long_chg": 2032,
+     "short": 24367,
+     "short_chg": 2327
+    },
+    "IM2706": {
+     "long": 6693,
+     "long_chg": 1165,
+     "short": 7000,
+     "short_chg": 1443
+    }
+   }
+  }
+ }
+}

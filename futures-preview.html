@@ -202,21 +202,63 @@ async function refresh(){
  if(busy)return;busy=true;const rb=$('rb');rb.disabled=true;rb.textContent='读取中…';
  try{
   let d=null;
-  try{const r=await fetch('preview-data/domestic.json?t='+Date.now(),{cache:'no-store'});if(r.ok)d=await r.json()}catch(e){}
-  if(!d){
+  try{const r=await fetch('preview-data/official/snapshot-latest.json?t='+Date.now(),{cache:'no-store'});if(r.ok)d=await r.json()}catch(e){}
+  if(!d||!d.futures){
    $('banner').style.display='block';
-   $('banner').textContent='预览环境：未读取到 preview-data/domestic.json（本地 file:// 下 fetch 被拦截属正常；线上 GitHub Pages 可直读）。页面保持空态。';
-   $('st').textContent='数据包未加载';return;
+   $('banner').textContent='预览环境：未读取到 preview-data/official/snapshot-latest.json。页面保持空态。';
+   $('st').textContent='官方快照未加载';return;
   }
   DATA=d;$('banner').style.display='none';
   const f=d.futures;
-  $('st').innerHTML='第三方源快照 · 截至 '+f.as_of+' · '+f.member+'(代客) · 非权威/非实时 · 未接自动更新'+staleChip(f.as_of);
-  $('dMember').textContent=f.member+'：该会员全部客户合计，非自营；'+(f.note||'');
+  $('st').innerHTML='官方快照 · 期货截至 '+f.as_of+' · ETF 截至 '+(d.as_of||'—')+(f.async_with_etf?' · <span style="color:#8a6d2f">期指与 ETF 异步（期货 11-04 / ETF 11-03）</span>':'')+' · '+f.member+' · 未接自动更新'+staleChip(f.as_of);
+  $('dMember').textContent=f.member+'：CFFEX 前20上榜合约汇总；'+(f.products&&Object.values(f.products)[0]?Object.values(f.products)[0].note:'')+'';
   $('dAsOf').textContent=f.as_of;
-  $('dPublish').textContent='期货约16:30公布，与ETF份额(约23:00)不同时刻；站点按交易日对齐。';
-  $('drawerNote').innerHTML=(d.caveats&&d.caveats.length?'<b>口径注意：</b><ul style="margin:6px 0 0;padding-left:18px">'+d.caveats.map(c=>'<li style="margin-top:4px">'+c+'</li>').join('')+'</ul>':'');
-  renderKpis();renderLine();renderBar();renderTable();
+  $('dPublish').textContent='期货约16:30公布，与ETF份额(约23:00)不同时刻；本快照已标 async_with_etf 不并日。';
+  $('drawerNote').innerHTML='<b>口径注意：</b><ul style="margin:6px 0 0;padding-left:18px"><li>仅 CFFEX 前20上榜合约汇总；当日未上榜=缺席，不等于0手。</li><li>换月可能跳变；合约汇总非全市场持仓。</li></ul>';
+  renderOfficial();
  }finally{busy=false;rb.disabled=false;rb.textContent='重读快照'}
+}
+function renderOfficial(){
+ const f=DATA.futures;const ps=f.products||{};
+ const order=['IH','IF','IC','IM'];
+ const present=order.filter(k=>ps[k]);
+ // KPI: IH/IF/IC/IM + 合计
+ const totalNet=present.reduce((s,k)=>s+(ps[k].net_short||0),0);
+ const kpiHtml=present.map(k=>{
+   const p=ps[k];
+   return '<div class="kpi"><div class="lb">'+k+' 净空</div><div class="vl">'+(p.net_short||0).toLocaleString()+'<small>手</small></div><div class="ft">long '+(p.long||0).toLocaleString()+' / short '+(p.short||0).toLocaleString()+'</div></div>';
+ }).join('')+'<div class="kpi"><div class="lb">四品种合计净空</div><div class="vl">'+totalNet.toLocaleString()+'<small>手</small></div><div class="ft">'+present.join(' / ')+'</div></div>';
+ $('kpis').innerHTML=kpiHtml;
+ // line chart: only 1 snapshot, show single point
+ if(!charts.line)charts.line=echarts.init($('chLine'));
+ $('chLine .na') && ($('chLine .na').style.display='none');
+ charts.line.setOption({backgroundColor:'transparent',animation:false,color:CH,
+  legend:{top:0,left:4,icon:'roundRect',itemWidth:10,itemHeight:6,textStyle:{fontSize:11,color:'#6f7782'},data:present},
+  grid:{top:34,left:12,right:20,bottom:28,containLabel:true},
+  xAxis:{type:'category',data:[f.as_of],axisLabel:{fontSize:10,color:axisColor}},
+  yAxis:{type:'value',scale:true,name:'净空手',nameTextStyle:{color:axisColor,fontSize:10},axisLabel:{fontSize:10,color:axisColor},splitLine:{lineStyle:{color:gridColor}}},
+  tooltip:Object.assign({},tip,{}),
+  series:present.map((k,i)=>({name:k,type:'bar',barMaxWidth:30,itemStyle:{color:CH[i]},data:[ps[k].net_short||0]}))},true);
+ // bar chart: long vs short per product
+ if(!charts.bar)charts.bar=echarts.init($('chBar'));
+ $('chBar .na') && ($('chBar .na').style.display='none');
+ charts.bar.setOption({backgroundColor:'transparent',animation:false,color:['#3d6a9e','#b0b6bf'],
+  legend:{top:0,left:4,icon:'roundRect',itemWidth:10,itemHeight:6,textStyle:{fontSize:11,color:'#6f7782'},data:['多头','空头']},
+  grid:{top:34,left:12,right:20,bottom:28,containLabel:true},
+  xAxis:{type:'category',data:present,axisLabel:{fontSize:11,color:axisColor},axisLine:{lineStyle:{color:'#e1e4e9'}},axisTick:{show:false}},
+  yAxis:{type:'value',scale:true,name:'手',nameTextStyle:{color:axisColor,fontSize:10},axisLabel:{fontSize:10,color:axisColor},splitLine:{lineStyle:{color:gridColor}}},
+  tooltip:Object.assign({},tip,{}),
+  series:[
+   {name:'多头',type:'bar',barMaxWidth:28,data:present.map(k=>ps[k].long||0)},
+   {name:'空头',type:'bar',barMaxWidth:28,data:present.map(k=>ps[k].short||0)}
+  ]},true);
+ // table: c[1]=多、c[3]=空、c[2]=多变、c[4]=空变
+ const rows=[];present.forEach(k=>{(ps[k].contracts||[]).forEach(c=>rows.push('<tr style="cursor:default"><td>'+k+'</td><td>'+c[0]+'</td><td>'+(c[1]||0).toLocaleString()+'</td><td>'+(c[3]||0).toLocaleString()+'</td><td>'+(c[2]>=0?'+':'')+(c[2]||0)+'</td><td>'+(c[4]>=0?'+':'')+(c[4]||0)+'</td></tr>'))});
+ $('tb').innerHTML=rows.join('');
+ // update side text
+ document.querySelectorAll('.sec .side').forEach((el,i)=>{
+   if(i===1)el.textContent='仅 '+f.as_of+' 单日快照 · 时序待官方 history 累积';
+ });
 }
 addEventListener('resize',()=>{Object.values(charts).forEach(c=>c&&c.resize())});
 refresh();
