@@ -128,11 +128,15 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
 #shareBtn:disabled{color:#8b9caf;opacity:.8}
 .ctl label{gap:8px}
 .share-fallback{border-radius:14px}
+/* 预览标识：仅预览环境出现，不进正式 index.html */
+.pv-chip{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:11px;font-weight:500;color:#8a6d2f;background:#fdf3e0;border:1px solid #ecd9a6;vertical-align:middle;white-space:nowrap}
 @media(max-width:699px){
  .brand{gap:8px}h1{font-size:16px}
  .top .nav-row{padding-top:0;padding-bottom:10px}
- .view-tabs{display:flex;width:100%;max-width:360px}
- .view-tab{flex:1;min-height:40px;padding:0 12px}
+ .view-tabs{display:flex;width:100%;max-width:none;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+ .view-tabs::-webkit-scrollbar{display:none}
+ .view-tab{flex:none;min-height:40px;padding:0 14px}
+ .view-tab svg{display:none}
  .ctl{gap:8px}select{min-width:120px}
 }
 </style></head><body>
@@ -152,16 +156,19 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
   <path d="m32 47 13-24c2-4 8-1 6 3L40 49c-3 6-11 3-8-2Z" fill="url(#signal-cyan)"/>
   <circle cx="51" cy="14" r="5" fill="#77CFD9"/>
 </svg></span>
-  <div><h1>国家队进场分时概览</h1><div class="crumb">宽基 ETF · 分钟成交额观察</div></div>
+  <div><h1>国家队进场分时概览<span class="pv-chip">预览</span></h1><div class="crumb">宽基 ETF · 分钟成交额观察 · 预览环境</div></div>
  </div>
  <div class="ctl">
   <label for="ds">日期<select id="ds"><option value="live">今日实时</option></select></label>
   <button id="rb" onclick="refresh()">刷新</button>
   <button id="shareBtn" type="button" onclick="copyDashboardImage()" title="复制当前日期的概览、分时走势和完整日度汇总为一张图片">复制为图片</button>
  </div>
-</div><div class="wrap nav-row"><nav class="view-tabs" aria-label="数据视图切换">
- <a class="view-tab" href="index.html" aria-current="page"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 14V9m5 5V5m5 9V8m4 6V3"/></svg><span>进场分时</span></a>
- <a class="view-tab" href="margin.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 6h14M3 10h10M3 14h14"/><circle cx="7" cy="6" r="2" fill="#fff"/><circle cx="13" cy="14" r="2" fill="#fff"/></svg><span>两融余额</span></a>
+</div><div class="wrap nav-row"><nav class="view-tabs" aria-label="预览页导航（互链5个预览页）">
+ <a class="view-tab" href="preview.html" aria-current="page"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 14V9m5 5V5m5 9V8m4 6V3"/></svg><span>进场分时</span></a>
+ <a class="view-tab" href="margin-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 6h14M3 10h10M3 14h14"/><circle cx="7" cy="6" r="2" fill="#fff"/><circle cx="13" cy="14" r="2" fill="#fff"/></svg><span>两融余额</span></a>
+ <a class="view-tab" href="flows-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10m0 0-2.5-2.5M14 7l-2.5 2.5M16 13H6m0 0 2.5-2.5M6 13l2.5 2.5"/></svg><span>ETF资金</span></a>
+ <a class="view-tab" href="futures-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 3h7l4 4v10H6z"/><path d="M13 3v4h4M9 11h5M9 14.5h5"/></svg><span>期指持仓</span></a>
+ <a class="view-tab" href="risk-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M3.5 10h13M10 3.5c-2.8 2.8-2.8 10.2 0 13 2.8-2.8 2.8-10.2 0-13Z"/></svg><span>全球风险</span></a>
 </nav></div></header>
 
 <main class="wrap" id="dashboard">
