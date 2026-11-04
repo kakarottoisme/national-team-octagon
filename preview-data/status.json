@@ -3,7 +3,7 @@
  "calendar_days": 26,
  "domestic": "ok",
  "errors": [],
- "generated_at": "2026-11-04T17:12:49+08:00",
+ "generated_at": "2026-11-04T17:24:30+08:00",
  "global": "ok",
  "global_detail": {
   "connected": 1,
@@ -13,7 +13,7 @@
   "metrics_total": 37,
   "missing": 2,
   "module_state": "ok",
-  "path": "/home/user/Doubao/chats/38448346890959362/national-team-octagon/preview-data/global.json",
+  "path": "/home/runner/work/national-team-octagon/national-team-octagon/preview-data/global.json",
   "pending": 6,
   "restricted": 3
  },

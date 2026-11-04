@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0-safe",
-  "generated_at": "2026-11-04T09:15:21+00:00",
+  "generated_at": "2026-11-04T09:24:39+00:00",
   "data_status": "safe_public_only",
   "policy_notes": [
     "Only US-government public-domain data is auto-fetched.",
@@ -17,8 +17,8 @@
       "error": null,
       "as_of": "2026-11-03",
       "as_of_raw": "11/03/2026",
-      "collected_at": "2026-11-04T09:15:19+00:00",
-      "last_attempt_at": "2026-11-04T09:15:21+00:00"
+      "collected_at": "2026-11-04T09:24:39+00:00",
+      "last_attempt_at": "2026-11-04T09:24:39+00:00"
     }
   },
   "metrics": [
@@ -97,7 +97,7 @@
       },
       "as_of": "2026-11-03",
       "as_of_raw": "11/03/2026",
-      "collected_at": "2026-11-04T09:15:19+00:00",
+      "collected_at": "2026-11-04T09:24:39+00:00",
       "stale": false,
       "last_attempt_at": null,
       "source_url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/2026/all?type=daily_treasury_yield_curve&field_tdr_date_value=2026&page&_format=csv",

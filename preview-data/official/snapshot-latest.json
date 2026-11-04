@@ -6,7 +6,7 @@
  ],
  "calendar_days": 26,
  "calendar_source": "sse_observed_trading_days",
- "collected_at": "2026-11-04T17:12:49+08:00",
+ "collected_at": "2026-11-04T17:24:30+08:00",
  "errors": [],
  "etfs": [
   {
@@ -440,7 +440,7 @@
    }
   }
  },
- "generated_at": "2026-11-04T17:12:49+08:00",
+ "generated_at": "2026-11-04T17:24:30+08:00",
  "global": {
   "connected": 1,
   "connected_stale": 0,
@@ -449,7 +449,7 @@
   "metrics_total": 37,
   "missing": 2,
   "module_state": "ok",
-  "path": "/home/user/Doubao/chats/38448346890959362/national-team-octagon/preview-data/global.json",
+  "path": "/home/runner/work/national-team-octagon/national-team-octagon/preview-data/global.json",
   "pending": 6,
   "restricted": 3,
   "state": "ok"
