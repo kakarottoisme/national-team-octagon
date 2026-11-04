@@ -124,29 +124,32 @@ const FREQ={
  'S3_real_10y':['daily','日频'],'S4_term_premium':['daily','日频'],'S5_sofr_iorb':['daily','日频'],'S6_brent':['daily','日频'],
 };
 const MANUAL_IDS=new Set(['A4_fed_path','B3_tech_cds_5y','B4_ai_chain_credit','B5_ai_cds_volume']);
-let DATA=null,cur='全部',busy=false,COLLECTED='';
+let DATA=null,cur='全部',busy=false,COLLECTED='',TODAY=null;
+function todayDate(){if(TODAY)return TODAY;return new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Shanghai'})}
 function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('mask').classList.add('open')}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('mask').classList.remove('open')}
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closeDrawer()});
 
 function freqOf(m){
  if(MANUAL_IDS.has(m.id))return ['manual','手工'];
- if(FREQ[m.group==='S_slow_variables'?m.id:m.id])return FREQ[m.id];
+ if(FREQ[m.id])return FREQ[m.id];
  return ['daily','日频'];
 }
-function tradingDaysBetween(aStr,bStr){
+function workDaysBetween(aStr,bStr){
  const a=new Date(aStr.slice(0,10)),b=new Date(bStr.slice(0,10));let n=0;const d=new Date(a);
  while(d<b){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)n++}return n;
 }
 function calDaysBetween(aStr,bStr){return Math.round((new Date(bStr.slice(0,10))-new Date(aStr.slice(0,10)))/86400000)}
 function staleTag(m){
  if(m.availability==='missing'||m.value==null)return '';
+ if(!m.as_of)return '<span class="tag man">无as_of·待核</span>';
+ const today=todayDate();
  const [fq]=freqOf(m);
- if(fq==='manual'){const d=calDaysBetween(m.as_of,COLLECTED);return '<span class="tag man">手工·采集距今'+d+'日·待复核</span>'}
+ if(fq==='manual'){const d=calDaysBetween(m.as_of,today);return '<span class="tag man">手工·数据距查看日'+d+'天·待复核</span>'}
  let d,thr,unit;
- if(fq==='daily'){d=tradingDaysBetween(m.as_of,COLLECTED);thr=3;unit='交易日'}
- else if(fq==='weekly'){d=calDaysBetween(m.as_of,COLLECTED);thr=10;unit='自然日'}
- else{d=calDaysBetween(m.as_of,COLLECTED);thr=45;unit='自然日'}
+ if(fq==='daily'){d=workDaysBetween(m.as_of,today);thr=3;unit='工作日'}
+ else if(fq==='weekly'){d=calDaysBetween(m.as_of,today);thr=10;unit='自然日'}
+ else{d=calDaysBetween(m.as_of,today);thr=45;unit='自然日'}
  if(d>thr)return '<span class="tag stale">陈旧'+d+unit+'</span>';
  return '';
 }

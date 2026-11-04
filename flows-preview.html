@@ -156,6 +156,9 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
 function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('mask').classList.add('open')}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('mask').classList.remove('open')}
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closeDrawer()});
+function todayDate(){return new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Shanghai'})}
+function workDays(aStr,bStr){const a=new Date(aStr.slice(0,10)),b=new Date(bStr.slice(0,10));let n=0;const d=new Date(a);while(d<b){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)n++}return n}
+function staleChip(asOf){if(!asOf)return '';const w=workDays(asOf,todayDate());return w>3?' <span style="color:#8a6d2f">(数据陈旧'+w+'工作日)</span>':''}
 const $=id=>document.getElementById(id);
 let DATA=null,sortMode='flow',busy=false;
 const charts={bar:null,series:null,etf:null};
@@ -253,7 +256,7 @@ async function refresh(){
    return;
   }
   DATA=d;$('banner').style.display='none';
-  $('st').textContent='第三方源快照 · 截至 '+d.as_of_latest+' · 源站 '+d.site_updated_string+' · 采集 '+d.collected_at.slice(0,16).replace('T',' ')+' · 非权威/非实时 · 未接自动更新';
+  $('st').innerHTML='第三方源快照 · 截至 '+d.as_of_latest+' · 源站 '+d.site_updated_string+' · 采集 '+d.collected_at.slice(0,16).replace('T',' ')+' · 非权威/非实时 · 未接自动更新'+staleChip(d.as_of_latest);
   $('dAsOf').textContent=d.as_of_latest+'（'+d.as_of_latest_note+'）';
   $('dSiteUpd').textContent=d.site_updated_string;
   $('dCollected').textContent=d.collected_at;

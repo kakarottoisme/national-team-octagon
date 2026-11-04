@@ -147,6 +147,9 @@ function openDrawer(){document.getElementById('drawer').classList.add('open');do
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('mask').classList.remove('open')}
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closeDrawer()});
 const $=id=>document.getElementById(id);
+function todayDate(){return new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Shanghai'})}
+function workDays(aStr,bStr){const a=new Date(aStr.slice(0,10)),b=new Date(bStr.slice(0,10));let n=0;const d=new Date(a);while(d<b){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)n++}return n}
+function staleChip(asOf){if(!asOf)return '';const w=workDays(asOf,todayDate());return w>3?' <span style="color:#8a6d2f">(数据陈旧'+w+'工作日)</span>':''}
 let DATA=null,busy=false;
 const charts={line:null,bar:null};
 const axisColor='#9aa1ab',gridColor='#f0f1f4';
@@ -208,7 +211,7 @@ async function refresh(){
   }
   DATA=d;$('banner').style.display='none';
   const f=d.futures;
-  $('st').textContent='第三方源快照 · 截至 '+f.as_of+' · '+f.member+'(代客) · 非权威/非实时 · 未接自动更新';
+  $('st').innerHTML='第三方源快照 · 截至 '+f.as_of+' · '+f.member+'(代客) · 非权威/非实时 · 未接自动更新'+staleChip(f.as_of);
   $('dMember').textContent=f.member+'：该会员全部客户合计，非自营；'+(f.note||'');
   $('dAsOf').textContent=f.as_of;
   $('dPublish').textContent='期货约16:30公布，与ETF份额(约23:00)不同时刻；站点按交易日对齐。';
