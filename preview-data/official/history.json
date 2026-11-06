@@ -2394,5 +2394,129 @@
    }
   },
   "futures": {}
+ },
+ "2026-11-06": {
+  "etfs": {
+   "159352": {
+    "core": true,
+    "exch": "SZ",
+    "name": "A500ETF南方",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "159629": {
+    "core": false,
+    "exch": "SZ",
+    "name": "中证1000ETF富国",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "159845": {
+    "core": false,
+    "exch": "SZ",
+    "name": "中证1000ETF华夏",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "159915": {
+    "core": true,
+    "exch": "SZ",
+    "name": "创业板ETF易方达",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "159919": {
+    "core": false,
+    "exch": "SZ",
+    "name": "沪深300ETF嘉实",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "159977": {
+    "core": false,
+    "exch": "SZ",
+    "name": "创业板ETF天弘",
+    "shares_status": "pending_unverifiable",
+    "shares_yi": null
+   },
+   "510050": {
+    "core": true,
+    "exch": "SH",
+    "name": "上证50ETF",
+    "shares_status": "official_confirmed",
+    "shares_yi": 163.2667
+   },
+   "510180": {
+    "core": false,
+    "exch": "SH",
+    "name": "上证180ETF华安",
+    "shares_status": "official_confirmed",
+    "shares_yi": 44.4956
+   },
+   "510300": {
+    "core": true,
+    "exch": "SH",
+    "name": "沪深300ETF华泰柏瑞",
+    "shares_status": "official_confirmed",
+    "shares_yi": 466.4029
+   },
+   "510310": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 261.6094
+   },
+   "510330": {
+    "core": false,
+    "exch": "SH",
+    "name": "沪深300ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 156.6925
+   },
+   "510500": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证500ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 98.9217
+   },
+   "512100": {
+    "core": true,
+    "exch": "SH",
+    "name": "中证1000ETF南方",
+    "shares_status": "official_confirmed",
+    "shares_yi": 195.9522
+   },
+   "512500": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证500ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 20.7281
+   },
+   "560010": {
+    "core": false,
+    "exch": "SH",
+    "name": "中证1000ETF广发",
+    "shares_status": "official_confirmed",
+    "shares_yi": 40.0862
+   },
+   "588000": {
+    "core": true,
+    "exch": "SH",
+    "name": "科创50ETF华夏",
+    "shares_status": "official_confirmed",
+    "shares_yi": 1077.2367
+   },
+   "588080": {
+    "core": false,
+    "exch": "SH",
+    "name": "科创板50ETF易方达",
+    "shares_status": "official_confirmed",
+    "shares_yi": 336.0763
+   }
+  },
+  "futures": {}
  }
 }
