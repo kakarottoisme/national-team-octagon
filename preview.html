@@ -42,31 +42,38 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
 .kpi .vl{margin-top:2px;font-size:24px;line-height:1.25;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi .vl small{font-size:13px;font-weight:400;color:var(--muted);margin-left:3px}
 .kpi .ft{margin-top:2px;font-size:12px;line-height:1.55;color:var(--muted)}
-.guide{margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:0 16px 2px}
-.guide .gh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:11px 0 9px;border-bottom:1px solid var(--line-2)}
-.guide .gh b{font-size:13.5px;font-weight:600;color:var(--ink)}
-.guide .gh span{font-size:12.5px;color:var(--muted);line-height:1.65}
-.gf{display:grid;grid-template-columns:120px 1fr;gap:2px 14px;padding:9px 0;border-bottom:1px solid var(--line-2);font-size:12.5px;line-height:1.72}
-.gf .fn{color:var(--ink);font-weight:600}
-.gf .fd{color:var(--ink-2)}
-.gf .fd em{font-style:normal;color:var(--muted)}
-.guide-link{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px;margin-top:10px;padding:11px 16px;background:var(--card);border:1px solid var(--line);border-radius:10px;text-decoration:none;font-size:12.5px;line-height:1.6}
+.guide-link{width:100%;font-family:inherit;text-align:left;cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px;margin-top:10px;padding:11px 16px;background:var(--card);border:1px solid var(--line);border-radius:10px;text-decoration:none;font-size:12.5px;line-height:1.6}
 .guide-link:hover{border-color:#cfd8e4;background:#fcfdfe}
 .guide-link .gl-l{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;min-width:0}
 .guide-link .gl-l b{font-size:13px;color:var(--ink);font-weight:600}
 .guide-link .gl-l span{color:var(--ink-2)}
 .guide-link .gl-r{color:var(--accent);white-space:nowrap}
-.gsub{padding:10px 0 2px;font-size:12px;color:var(--muted);letter-spacing:.02em}
-.gmore{margin:6px 0 10px;border:0}
-.gmore summary{cursor:pointer;font-size:12px;color:var(--accent)}
-.gmore p{margin:8px 0 0;font-size:12px;line-height:1.78;color:var(--ink-2)}
-@media (max-width:560px){.gf{grid-template-columns:1fr;gap:1px}}
+.mask{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:22px}
+.mask[hidden]{display:none}
+.mask .bd{position:absolute;inset:0;background:rgba(10,16,24,.58)}
+.mbox{position:relative;background:var(--card);border-radius:12px;box-shadow:0 20px 50px rgba(10,16,24,.3);width:min(920px,100%);max-height:86vh;display:flex;flex-direction:column;overflow:hidden}
+.mhd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px 12px;border-bottom:1px solid var(--line-2);background:var(--card)}
+.mhd h3{margin:0;font-size:16px;font-weight:600;color:var(--ink)}
+.mhd .sub{margin-left:10px;font-size:12px;color:var(--muted);font-weight:400}
+.mx{border:1px solid var(--line);background:var(--card);color:var(--muted);width:30px;height:30px;border-radius:8px;font-size:15px;line-height:1;cursor:pointer;font-family:inherit}
+.mx:hover{background:#f5f7fa;color:var(--ink)}
+.mbd{overflow:auto;padding:2px 18px 18px}
+.msteps{display:grid;gap:8px;padding:12px 0 4px}
+@media(min-width:700px){.msteps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.mstep{background:#fafbfc;border:1px solid var(--line-2);border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.7;color:var(--ink-2)}
+.mstep i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-style:normal;margin-right:5px}
+.mstep b{color:var(--ink);font-weight:600}
+.mf{display:grid;grid-template-columns:104px 1fr;gap:1px 12px;padding:10px 0;border-bottom:1px solid var(--line-2);font-size:12px;line-height:1.7}
+.mf .fn{color:var(--ink);font-weight:600}
+.mf .fd{color:var(--ink-2);min-width:0}
+.mf .fd .lf{display:block;color:var(--ink);margin-bottom:1px}
+.mf .fd em{font-style:normal;color:var(--muted)}
+@media(max-width:560px){.mf{grid-template-columns:1fr}}
+.mmore{margin:12px 0 4px;border-top:1px solid var(--line-2);padding-top:10px}
+.mmore h4{margin:8px 0 2px;font-size:12px;color:var(--ink);font-weight:600}
+.mmore h4:first-child{margin-top:0}
+.mmore ul{margin:2px 0 0;padding-left:16px;font-size:12px;line-height:1.72;color:var(--ink-2)}
 #st{font-size:12px;color:var(--muted)}
-details.note{position:relative;flex:0 0 auto;margin-left:auto;font-size:12px;color:var(--muted)}
-details.note summary{cursor:pointer;list-style:none;display:block;white-space:nowrap;border-radius:4px}
-details.note summary::-webkit-details-marker{display:none}
-details.note summary span{color:var(--accent)}
-details.note p{position:absolute;right:0;top:100%;z-index:20;width:min(520px,calc(100vw - 48px));max-height:60vh;overflow:auto;margin:8px 0 0;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(31,39,51,.10);line-height:1.75;color:var(--ink-2)}
 .share-status{position:fixed;right:20px;bottom:20px;z-index:60;max-width:min(420px,calc(100vw - 40px));padding:12px 16px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);box-shadow:0 4px 18px rgba(31,39,51,.10);font-size:14px}
 .share-status:empty{display:none}
 .share-fallback{position:fixed;right:20px;bottom:110px;z-index:60;max-width:calc(100vw - 40px);padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:14px}
@@ -104,12 +111,6 @@ details.note p{position:absolute;right:0;top:100%;z-index:20;width:min(520px,cal
 
 /* ===== 日度汇总 ===== */
 .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:28px}
-.hxwin{display:inline-flex;gap:6px;margin-left:auto}
-.hxwin button{border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-size:12px;padding:4px 10px;border-radius:999px;cursor:pointer;font-family:inherit}
-.hxwin button.on{background:#eef2f7;border-color:#cfd8e4;color:var(--ink);font-weight:600}
-.hx{height:190px;margin:6px 8px 0}
-.hxt{padding:6px 16px 2px;font-size:13px;line-height:1.75;color:var(--ink-2)}
-.hxn{padding:2px 16px 14px;font-size:11.5px;line-height:1.7;color:var(--muted)}
 .tbx{overflow-x:auto}
 table{border-collapse:collapse;width:100%;min-width:560px;table-layout:fixed;font-size:14px}
 th,td{padding:10px 16px;text-align:right;white-space:nowrap}
@@ -165,6 +166,12 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
  .view-tab svg{display:none}
  .ctl{gap:8px}select{min-width:120px}
 }
+/* 读法弹窗：只滚动内容，标题和关闭按钮固定在弹窗顶部。 */
+.guide-link{height:auto;min-height:44px}
+.mhd{flex:none}
+.mbd{min-height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.mx{flex:none;width:44px;height:44px;padding:0;min-width:44px}
+@media(max-width:560px){.mask{padding:12px}.mbox{max-height:calc(100dvh - 24px)}.mhd{padding:12px}.mbd{padding:0 12px 14px}.mhd .sub{display:block;margin:4px 0 0}.guide-link .gl-r{white-space:normal}}
 </style></head><body>
 <!-- ===== 顶栏 ===== -->
 <header class="top"><div class="wrap">
@@ -182,12 +189,12 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
   <path d="m32 47 13-24c2-4 8-1 6 3L40 49c-3 6-11 3-8-2Z" fill="url(#signal-cyan)"/>
   <circle cx="51" cy="14" r="5" fill="#77CFD9"/>
 </svg></span>
-  <div><h1>资金观察预览<span class="pv-chip">预览</span></h1><div class="crumb">宽基 ETF · 盘中成交额 + 日度份额 + 披露证据 · 预览环境</div></div>
+  <div><h1>资金观察预览<span class="pv-chip">预览</span></h1><div class="crumb">宽基 ETF · 盘中活跃度与主动买卖方向 · 预览环境</div></div>
  </div>
  <div class="ctl">
   <label for="ds">日期<select id="ds"><option value="live">今日实时</option></select></label>
   <button id="rb" onclick="refresh()">重读</button>
-  <button id="shareBtn" type="button" onclick="copyDashboardImage()" title="复制当前显示的概览、分时、日度份额与披露证据为一张图片">复制为图片</button>
+  <button id="shareBtn" type="button" onclick="copyDashboardImage()" title="复制当前显示的概览、分时走势与日度汇总为一张图片">复制为图片</button>
  </div>
 </div><div class="wrap nav-row"><nav class="view-tabs" aria-label="预览页导航（4个预览页）">
  <a class="view-tab" href="preview.html" aria-current="page"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 14V9m5 5V5m5 9V8m4 6V3"/></svg><span>资金观察</span></a>
@@ -205,23 +212,15 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
  <div class="kpi"><div class="lb">主动净买入（推算）</div><div class="vl" id="kC">—</div><div class="ft" id="kCf">外盘 − 内盘推算，非资金净流入</div></div>
  <div class="kpi"><div class="lb">已归档天数</div><div class="vl" id="k4">—</div><div class="ft" id="k4f">data/history.json</div></div>
 </div>
-<a class="guide-link" href="preview-guide.html">
+<button type="button" class="guide-link" onclick="openGuide()">
  <span class="gl-l"><b>怎么读</b><span>先看「同时点倍数」判断今天热不热，再看「主动净买入」判断方向</span></span>
- <span class="gl-r">字段含义与口径 · 公式 / 样本 / 局限 →</span>
-</a>
+ <span class="gl-r">字段含义与口径 · 公式 / 样本 / 局限</span>
+</button>
 <div id="banner"></div>
 
 <!-- ===== 八宫格 ===== -->
 <div class="sec"><h2>分时走势（盘中活跃度）</h2></div>
 <div class="g" id="g"></div>
-
-<!-- ===== 成交额历史（新浪日聚合回补） ===== -->
-<div class="sec"><h2 id="hxTitle">成交额历史（七只合计）</h2><span class="hxwin" id="hxWin"><button type="button" data-n="20" onclick="setHxWin(20)">近 20</button><button type="button" data-n="60" onclick="setHxWin(60)">近 60</button><button type="button" data-n="120" onclick="setHxWin(120)">近 120</button><button type="button" data-n="0" onclick="setHxWin(0)">全部</button></span><span class="side" id="hxSide">加载中…</span></div>
-<section class="panel" id="histPanel">
- <div class="hx" id="histChart"></div>
- <div class="hxt" id="histTxt">—</div>
- <div class="hxn">口径：新浪 60 分钟 K 按日累加（每根都带成交额，四根相加即当日成交额），与站点分钟累计同源；已核最近一个完整交易日合计与站点读数一致。图中只画七只合计的二级市场成交额，不含大宗与协议转让，也不能当作申赎或任何机构身份。</div>
-</section>
 
 <!-- ===== 日度汇总 ===== -->
 <div class="sec"><h2>日度汇总</h2><span class="side">点击一行切换到该日</span></div>
@@ -231,48 +230,72 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
  <div class="foot">历史只含已归档日期（data/history.json），不补造。</div>
 </section>
 
-<!-- ===== 日度份额（一级申赎代理） ===== -->
-<section class="panel" id="secShares" style="margin-top:14px">
- <div class="sec" style="padding:0 16px"><h2>日度份额增幅（官方快照）</h2><span class="side"><button type="button" id="coreBtn" onclick="toggleCore()" style="height:28px;padding:0 12px;font-size:12px">切换为全部 17 只</button> <button type="button" onclick="setSort(sortKey?'null':'growth_5d_pct')" style="height:28px;padding:0 12px;font-size:12px">按5日增幅排序</button></span></div>
- <div style="padding:0 16px 6px;font-size:12.5px;color:var(--muted);line-height:1.7">回答：<b>这些 ETF 的份额规模近 1/5/20 个交易日变化了多少</b>。份额增幅 ≠ 价格涨幅；1/5/20 是重叠的累计窗口，不能相加；单点为正不代表连续净申购；裸份额不能跨基金比金额。— 表示该窗口数据不足或待核，不补 0。</div>
- <div id="dayWarn" style="display:none;padding:0 16px 6px;font-size:12px"></div>
- <div id="srcWarn" style="display:none;padding:0 16px 6px;font-size:12px;line-height:1.7"></div>
- <div class="tbx" style="padding:0 16px">
-  <table style="width:100%;border-collapse:collapse;table-layout:fixed">
-   <colgroup><col style="width:34%"><col style="width:16.5%"><col style="width:16.5%"><col style="width:16.5%"><col style="width:16.5%"></colgroup>
-   <thead><tr><th style="text-align:left">ETF</th><th>1日份额增幅</th><th>5交易日</th><th>20交易日</th><th>份额(亿份)</th></tr></thead>
-   <tbody id="shTb" style="cursor:default"><tr><td colspan="5" style="text-align:center;color:var(--faint);padding:14px">等待 official/snapshot-latest.json…</td></tr></tbody>
-</table>
-<div id="shareDrawer" style="display:none;position:fixed;inset:0;background:rgba(31,39,51,.28);z-index:60" onclick="if(event.target===this)closeShareDrawer()">
- <div style="position:absolute;top:0;right:0;bottom:0;width:min(560px,96vw);background:#fff;overflow-y:auto;padding:18px 20px" id="shareDrawerBody">
-  <button type="button" onclick="closeShareDrawer()" style="position:absolute;top:12px;right:12px;height:30px;padding:0 12px;font-size:12px">关闭</button>
-  <h3 id="sdName" style="margin:0 0 4px;font-size:15px"></h3>
-  <div id="sdMeta" style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6"></div>
-  <div id="sdChart" style="width:100%;height:260px"></div>
-  <div style="font-size:11.5px;color:var(--faint);margin-top:8px;line-height:1.7" id="sdNote"></div>
+</main>
+<div class="mask" id="guideMask" hidden>
+ <div class="bd" onclick="closeGuide()"></div>
+ <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="gmTitle">
+  <div class="mhd"><div><h3 id="gmTitle">怎么读 · 字段含义与口径</h3><span class="sub">每项都写清「是什么 / ≠ 什么」；公式与局限在底部</span></div>
+   <button class="mx" type="button" id="guideClose" aria-label="关闭" onclick="closeGuide()">&#215;</button></div>
+  <div class="mbd">
+   <div class="msteps">
+    <div class="mstep"><i>1</i><b>同时点倍数</b> —— 今天热不热、比平时热多少。1 倍左右算平常，明显放大才叫活跃。</div>
+    <div class="mstep"><i>2</i><b>主动净买入</b> —— 方向：主动买更猛还是主动卖更猛，只是方向线索。</div>
+    <div class="mstep"><i>3</i><b>大额分钟 / 尾盘</b> —— 成交是不是集中在少数几分钟、最后半小时有没有放量。</div>
+   </div>
+   <div class="mf"><div class="fn">同时点倍数</div><div class="fd"><span class="lf">先看这个：今天热不热、比平时热多少。</span>当日累计成交额 ÷（过去 20 个完整交易日全天均额 × 该只此刻平均已走完的比例）。1 倍左右算平常，明显放大才叫活跃；11:30 的半天不会直接拿去跟全天均额比。卡里第二行同时给出「合计额 ÷ 20 日同时点基准」和收盘后的尾盘占比，倍数怎么来的一眼能对上。<em>≠ 买卖力量对比，也不能说明是谁在成交</em></div></div><div class="mf"><div class="fn">大额分钟成交额</div><div class="fd"><span class="lf">成交是不是集中在「单分钟超过 1 亿」的那几分钟。</span>单分钟成交额 &gt; 1 亿的那些分钟，把它们的成交额加起来。阈值一改数字就变，所以这是阈值口径，不是总量口径。<em>≠ 大单，≠ 机构痕迹</em></div></div><div class="mf"><div class="fn">主动净买入（推算）</div><div class="fd"><span class="lf">方向：主动买更猛，还是主动卖更猛。</span>逐笔成交落在卖方报价（外盘）还是买方报价（内盘），据此推算主动买减主动卖。它只是方向线索，一二级套利与做市双边报价会稀释它。<em>≠ 资金净流入，≠ ETF 申赎，不含大宗与协议转让，不代表任何机构身份</em></div></div><div class="mf"><div class="fn">尾盘占比</div><div class="fd"><span class="lf">收盘后才有：最后半小时成交是不是异常放大。</span>14:30–15:00 的成交额占全天多少，并与 20 日同一区间均值对照；盘中显示「—」，因为收盘前分母（全天）还没定。<em>≠ 尾盘抢筹或砸盘</em></div></div><div class="mf"><div class="fn">已归档天数</div><div class="fd"><span class="lf">本地存档攒了几天，决定「历史对比」能看多长。</span>本地存了多少天日度记录（data/history.json）。<em>只表示「存档几天」，不是数据源覆盖长度</em></div></div><div class="mf"><div class="fn">七只合计成交额</div><div class="fd"><span class="lf">不再是单独一张卡，现在是倍数卡的分子。</span>这 7 只 ETF 在二级市场一共成交了多少钱（截至所标时刻）。<em>≠ 申购赎回金额，≠ 资金净流入，≠ 机构买入量</em></div></div><div class="mf"><div class="fn">上证收盘</div><div class="fd"><span class="lf">大盘背景，已从首屏移走，只留在下面的日度汇总表里。</span>上证综指当日收盘点位与涨跌幅，与 ETF 名单没有对应关系。<em>不作为 ETF 资金判断的依据</em></div></div><div class="mf"><div class="fn">图内元素</div><div class="fd"><span class="lf">分时图里的线、柱分别是什么。</span>涨跌幅线 = 相对昨收的涨跌幅%，<em>不是价格本身</em>；蓝柱 = 单分钟成交额 &gt; 1 亿的分钟，<em>只标「这一分钟大」，不标买卖方向</em>；MACD(12,26,9) = 价格动量辅助线，<em>不做买卖信号</em>。</div></div>
+   <div class="mmore">
+    <h4>公式</h4>
+    <ul>
+     <li>同时点倍数 = 当日累计成交额 ÷（20 日均额 × 该时点历史平均已走完比例）；比例逐只算，近期样本 47%–68%，所以不套统一系数。</li>
+     <li>主动净买入 =（外盘 − 内盘）/（外盘 + 内盘）× 累计成交额。</li>
+     <li>尾盘占比 = 14:30–15:00 成交额 ÷ 全天成交额，只在收盘后计算。</li>
+     <li>大额分钟成交额 = 单分钟成交额 &gt; 1 亿的成交额之和。</li>
+    </ul>
+    <h4>样本与核对</h4>
+    <ul>
+     <li>分时曲线与同时点基准：20 个完整交易日（新浪 5 分钟 K，单次上限约 22 日）。</li>
+    </ul>
+    <h4>已知局限</h4>
+    <ul>
+     <li>三个数字口径不同，<b>不能相加</b>，也不能互相换算。</li>
+     <li>大宗交易与协议转让不在逐笔内外盘里，主动净买入天然缺这部分。</li>
+     <li>一二级套利、做市双边报价会稀释主动方向，数值不代表单边力量。</li>
+     <li>盘中数据由 GitHub Actions 约每 5 分钟写入（定时可能推迟），不是券商级实时；历史日是存档静态数据。</li>
+     <li>页面不含任何身份判断或「国家队」口径。</li>
+    </ul>
+   </div>
+  </div>
  </div>
 </div>
-  </table>
- </div>
- <div class="foot" id="shFoot">等待 official/snapshot-latest.json…</div>
- <div id="dailyStatus" style="padding:0 16px 8px;font-size:11px;color:var(--muted);line-height:1.6"></div>
-</section>
-
-<!-- ===== 披露证据 ===== -->
-<section class="panel" id="secDisc" style="margin-top:14px">
- <div class="sec" style="padding:0 16px"><h2>定期披露参照（待核原文）</h2><span class="side" id="discSide">不并入当日资金统计</span></div>
-<div style="padding:0 16px 6px;font-size:12.5px;color:var(--muted);line-height:1.7">回答：<b>截至 2025 年末，哪些机构曾被披露持有这些 ETF</b>。这是 2025 年报期末的前十大持有人参照（当前为二手转引，原文待核），<b>不是今日持仓</b>；披露日与报告期末相差数月。2026-05-01 起施行的信披准则第 2 号第三十一条只要求披露持有人户数、户均份额、机构与个人占比，不再强制列示前十名持有人，所以这份名单只能当<b>“历史上被披露持有过”的静态标签</b>，不能推当前持仓。约 1.54 万亿为发布方约数，非精确加总。</div>
- <div class="tbx" style="padding:0 16px" id="discBody"><div style="color:var(--faint);padding:10px">等待披露数据…</div></div>
- <div class="foot" id="discFoot">披露日 / 期末 / 原文核查状态见右侧；无原文一律标"待核"。</div>
-</section>
-</main>
 <div id="shareStatus" class="share-status" role="status" aria-live="polite" aria-atomic="true"></div>
 <a id="shareDownload" class="share-fallback" hidden>保存图片（复制受限时备用）</a>
 <script>
-/* 口径说明不参与标题行宽度计算；点击外部或 Escape 关闭。 */
-const notePanel=document.querySelector('details.note');
-document.addEventListener('click',ev=>{if(notePanel.open&&!notePanel.contains(ev.target))notePanel.open=false});
-document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&notePanel.open){notePanel.open=false;notePanel.querySelector('summary').focus()}});
+let guideReturnFocus=null,guideBodyOverflow='',guideInertState=[];
+function openGuide(){
+ const mask=document.getElementById('guideMask');if(!mask||!mask.hidden)return;
+ guideReturnFocus=document.activeElement;guideBodyOverflow=document.body.style.overflow;
+ guideInertState=[document.querySelector('header.top'),document.getElementById('dashboard')].filter(Boolean).map(el=>({el,was:el.inert}));
+ guideInertState.forEach(item=>{item.el.inert=true});
+ mask.hidden=false;document.body.style.overflow='hidden';
+ const content=mask.querySelector('.mbd');if(content)content.scrollTop=0;
+ const close=document.getElementById('guideClose');if(close)close.focus();
+}
+function closeGuide(){
+ const mask=document.getElementById('guideMask');if(!mask||mask.hidden)return;
+ mask.hidden=true;document.body.style.overflow=guideBodyOverflow;
+ guideInertState.forEach(item=>{item.el.inert=item.was});guideInertState=[];
+ if(guideReturnFocus&&guideReturnFocus.isConnected)guideReturnFocus.focus();
+}
+document.addEventListener('keydown',event=>{
+ const mask=document.getElementById('guideMask');if(!mask||mask.hidden)return;
+ if(event.key==='Escape'){event.preventDefault();closeGuide();return}
+ if(event.key!=='Tab')return;
+ const focusable=[...mask.querySelectorAll('button,a[href],input,select,textarea,[tabindex]')].filter(el=>!el.disabled&&el.tabIndex>=0&&el.getClientRects().length);
+ if(!focusable.length){event.preventDefault();return}
+ const first=focusable[0],last=focusable[focusable.length-1];
+ if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+ else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+});
 
 /* PNG 分享：只在用户点击时写剪贴板；不会读取剪贴板，也不上传图片。 */
 let shareInProgress=false,shareDownloadURL=null,shareStatusTimer=null,captureLibraryPromise=null;
@@ -403,58 +426,6 @@ async function liveEtfTx(code){const raw=(await j("https://web.ifzq.gtimg.cn/app
 let BASE=null;
 async function loadBaseline(){try{const r=await fetch('preview-data/turnover-baseline.json?t='+Date.now(),{cache:'no-store'});if(r.ok){BASE=await r.json();window.BASE=BASE;if(typeof kpi==='function'&&TODAY)kpi(TODAY)}}catch(e){}}
 
-/* ===== 成交额历史：新区 60 分钟 K 按日累加回补（只画七只合计） ===== */
-let TH=null,histChart2=null;
-async function loadTurnoverHist(){
- try{
-  const r=await fetch('preview-data/turnover-history.json?t='+Date.now(),{cache:'no-store'});
-  if(!r.ok)throw new Error('http '+r.status);
-  TH=await r.json();
- }catch(e){
-  $('hxSide').textContent='历史未取到';
-  $('histTxt').textContent='历史序列暂时不可用（下一次数据更新任务会重新生成），不影响上面的实时读数。';
-  return;
- }
- drawTurnoverHist();
-}
-let HXWIN=0; // 0 = 全部交易日
-function setHxWin(n){HXWIN=+n||0;drawTurnoverHist()}
-function drawTurnoverHist(){
- const node=$('histChart'),side=$('hxSide'),txt=$('histTxt');
- const all=(TH&&TH.total_days)||[];
- if(!all.length){node.style.display='none';side.textContent='暂无';txt.textContent='没有可用的历史序列。';return}
- const total=all.length,N=HXWIN?Math.min(total,HXWIN):total,rows=all.slice(-N);
- const dates=rows.map(r=>r[0]),vals=rows.map(r=>r[1]),last=vals[vals.length-1],ld=dates[dates.length-1];
- const below=all.filter(r=>r[1]<last).length,pr=Math.round(below/all.length*100);
- const title=$('hxTitle');const tot=TH.n_days||total;
- if(title)title.textContent='成交额历史（七只合计 · '+(N<total?'近 '+N+' 天':'全部 '+tot+' 天')+'）';
- side.textContent=TH.window[0]+' → '+TH.window[1]+' · 共 '+tot+' 个完整交易日'+(N<total?'（当前显示最近 '+N+' 天）':'（已全部画出）');
- const box=$('hxWin');if(box)[...box.querySelectorAll('button')].forEach(b=>b.className=(+b.dataset.n===HXWIN?'on':''));
- const vs20=TH.avg20?((last/TH.avg20-1)*100):null;
- let lead='今天（'+ld+'）七只合计 <b>'+last.toFixed(1)+' 亿</b>';
- if(vs20!==null)lead+='，'+(vs20<0?'比近 20 日日均低 ':'比近 20 日日均高 ')+Math.abs(vs20).toFixed(0)+'%';
- lead+='。';
- let rank='在全部 '+all.length+' 个交易日里，'+(below===0?'<b>这是最低的一天</b>':(below===all.length-1?'<b>这是最高的一天</b>':'有 <b>'+below+'</b> 天比今天更低（约第 '+pr+' 百分位）'))+'。';
- const r60=(TH.avg20&&TH.avg60)?(TH.avg20/TH.avg60-1):0;
- const volTxt=Math.abs(r60)>0.1?('近 20 日日均比近 60 日'+(r60>0?'高':'低')+Math.abs(r60*100).toFixed(0)+'%，最近一个月整体'+(r60>0?'在放量':'在缩量')+'。'):'近 20 日与近 60 日日均接近，量能没有明显变化。';
- txt.innerHTML=lead+rank+'<br>近 20 日日均 '+(TH.avg20||0).toFixed(1)+' 亿、近 60 日日均 '+(TH.avg60||0).toFixed(1)+' 亿。'+volTxt+'这条只回答"今天的量算大还是小"，不回答谁在买。'+(total>N?'':"图上已画出全部 "+total+" 个交易日，可用滚轮/双指放大、拖动回看更早的日期。");
- if(!histChart2)histChart2=echarts.init(node);
- histChart2.setOption({
-  animation:false,grid:{left:46,right:12,top:14,bottom:34},
-  dataZoom:[{type:'inside',zoomOnMouseWheel:true,minValueSpan:8},{type:'slider',height:14,bottom:4,borderColor:'#eef0f3',
-   fillerColor:'#e8eef6',handleSize:12,showDetail:false,brushSelect:false}],
-  tooltip:{trigger:'axis',axisPointer:{type:'line'},backgroundColor:'#fff',borderColor:'#e6e8ec',textStyle:{color:'#1f2733',fontSize:12},
-   formatter:ps=>{const o=ps[0];return o.axisValue+'<br>合计 '+o.data.toFixed(1)+' 亿';}},
-  xAxis:{type:'category',data:dates,axisLine:{lineStyle:{color:'#e1e4e9'}},axisTick:{show:false},
-   axisLabel:{color:'#9aa1ab',fontSize:11,interval:Math.max(0,Math.ceil(dates.length/6)-1),formatter:v=>String(v).slice(5)}},
-  yAxis:{type:'value',name:'亿',nameTextStyle:{color:'#9aa1ab',fontSize:11},splitLine:{lineStyle:{color:'#f0f1f4'}},
-   axisLabel:{color:'#9aa1ab',fontSize:11}},
-  series:[{type:'bar',data:vals,barMaxWidth:14,
-   itemStyle:{color:ps=>ps.dataIndex===vals.length-1?'#3d6a9e':'#ccd5e0',borderRadius:[2,2,0,0]},
-   markLine:{silent:true,symbol:'none',label:{show:false},
-    lineStyle:{color:'#9aa1ab',type:'dashed',width:1},data:[{yAxis:TH.avg20}]}}]
- });
-}
 function barIdx(t){const s=String(t).replace(/\D/g,''),hh=+s.slice(0,2),mm=+s.slice(2),m=hh*60+mm;
  // 只算"已走完"的 5 分钟 bar：当前那根未走完，不能用它的累计占比当分母
  if(m<=690){const fin=Math.min(24,Math.max(1,Math.floor((m-570)/5)));return fin-1}
@@ -575,145 +546,6 @@ async function refresh(){if(busy)return;busy=true;const rb=document.getElementBy
    if(!m){bn.style.display="block";bn.textContent=d+"：分时未存档，仅显示汇总数字（合计 "+(h["合计"]!=null?(+h["合计"]).toFixed(2)+" 亿":"无")+"）。"}else bn.style.display="none";
    drawSum(rows,d);table(d);st.textContent="查看存档 "+d+" · 静态数据，不自动刷新"}
  }catch(e){st.textContent="刷新失败："+e.message+(view=="live"?"，60秒后重试":"")}finally{busy=false;rb.disabled=false;rb.textContent="刷新"}}
-function onSel(){view=sel.value;refresh();if(typeof renderShares==='function'&&SNAP)renderShares()}sel.onchange=onSel;
-let SNAP=null,DOM=null,coreOnly=true,STATUS=null,sortKey=null;
-function setSort(k){sortKey=k==='growth_5d_pct'?'growth_5d_pct':null;renderShares()}
-function lastRunOf(s){if(!s)return '—';const t=s.last_run||s.generated_at;return t?t.slice(0,16).replace('T',' '):'—'}
-async function loadStatus(){
- try{const r=await fetch('preview-data/status.json?t='+Date.now(),{cache:'no-store'});if(r.ok){STATUS=await r.json();window.STATUS=STATUS;if(typeof renderStatus==='function'&&SNAP)renderStatus()}}catch(e){}
-}
-const CORE7=['510050','510300','159352','510500','512100','159915','588000'];
-const ETF_NAME_FIX={};
-function pctCell(v,reason){
- if(v==null||v===undefined)return '<span style="color:var(--faint)" title="'+(reason||'—')+'">—</span>';
- return v.toFixed(2)+'%';
-}
-async function loadOfficial(){
- try{
-  const r=await fetch('preview-data/official/snapshot-latest.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;
-  SNAP=await r.json();
-  renderShares();renderDisc();renderStatus();
- }catch(e){}
-}
-async function loadDisc(){
- try{
-  const r=await fetch('preview-data/domestic.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;
-  DOM=await r.json();renderDisc();
- }catch(e){}
-}
-function renderStatus(){
- if(!SNAP)return;
- const src=SNAP.sources||[];
- // SSE 合并：保留最新日期 + 前一日 ok
- const sse=src.filter(s=>s.name==='SSE');
- const sseTxt=sse.length?sse.map(s=>s.date+' '+(s.status==='ok'?'已发布':'未发布')).join('，'):'—';
- const others=src.filter(s=>s.name!=='SSE').map(s=>{
-  const map={ok:'已抓取',unpublished:'未发布',recorded_no_date:'无日期·待核',pending:'待接入'};
-  return s.name+' '+(s.date||'')+' '+(map[s.status]||s.status);
- });
- // status.json 最后运行时间
- let lastRun='—';
- if(window.STATUS&&STATUS.last_run)lastRun=lastRunOf(STATUS);
- const el=document.getElementById('dailyStatus');
- if(el)el.innerHTML='<b>预览自动任务已运行 '+lastRun+'</b> · 官方份额 as_of '+SNAP.as_of+' · SSE：'+sseTxt+' · 其他源：'+others.join('，');
-}
-function closeShareDrawer(){$('shareDrawer').style.display='none'}
-let SHARE_HIST=null,shareChart=null,STALE={};
-/* 份额源日更自检：拿最近一期已归档份额跟当前快照比，
-   同市场 ≥70% 标的两日份额完全相同 → 判为份额字段未按日更新，不当成"没有申赎"。 */
-function computeStale(){
- STALE={};
- if(!SNAP||!SHARE_HIST)return;
- const dates=Object.keys(SHARE_HIST).filter(d=>d<SNAP.as_of);
- if(!dates.length)return;
- const prev=SHARE_HIST[dates.sort().pop()];
- const pe=prev&&prev.etfs;
- if(!pe)return;
- (SNAP.etfs||[]).forEach(e=>{
-  const p=pe[e.code];
-  if(!p||p.shares_yi==null||e.shares_yi==null)return;
-  const m=e.exch||'SH';
-  STALE[m]=STALE[m]||{same:0,n:0};
-  STALE[m].n++;
-  if(Math.abs(p.shares_yi-e.shares_yi)<1e-9)STALE[m].same++;
- });
- Object.keys(STALE).forEach(m=>{const s=STALE[m];s.stale=s.n>=3&&(s.same/s.n)>=0.7;s.pct=Math.round(s.same/s.n*100);s.prevDate=dates[dates.length-1]});
-}
-async function loadShareHistory(){
- try{const r=await fetch('preview-data/official/history.json?t='+Date.now(),{cache:'no-store'});if(r.ok)SHARE_HIST=await r.json()}catch(e){}
- computeStale();if(SNAP)renderShares();
-}
-function openShareHistory(code){
- if(!SHARE_HIST){alert('历史数据未加载');return}
- const dates=Object.keys(SHARE_HIST).sort();
- const xs=[],ys=[];
- dates.forEach(d=>{const e=SHARE_HIST[d].etfs?.[code];if(e&&e.shares_yi!=null){xs.push(d.slice(5));ys.push(e.shares_yi)}});
- if(!xs.length){$('sdName').textContent=code;$('sdMeta').textContent='该代码在历史快照中无份额记录';$('sdNote').textContent='日期未确认或历史未覆盖。';$('shareDrawer').style.display='block';return}
- const etf=(SNAP.etfs.find(e=>e.code===code)||{});
- $('sdName').textContent=(ETF_NAME_FIX[code]||etf.name||code)+' '+code;
- $('sdMeta').textContent='份额(亿份) · 窗口 '+dates[0]+' 至 '+dates[dates.length-1]+' · '+xs.length+' 个来源记录日（窗口连续性已检查；原始行仅抽样复核；公司行动未全面核查）';
- $('sdNote').textContent='来源：SSE/SZSE 官方披露（总份额，单位万份换算亿份）' + (etf.exch==='SH'?'，如上交所 510300 页 TOT_VOL':'') + '；' + (etf.shares_status==='official_confirmed'?'交易所记录':'未核/待核') + '；— 日不连线不补 0。仅记录份额变化，不含投资者身份/金额；公司行动未全面核查；不解读为连续加仓。';
- if(!shareChart)shareChart=echarts.init($('sdChart'));
- shareChart.setOption({backgroundColor:'transparent',animation:false,grid:{left:46,right:16,top:20,bottom:30},
-  tooltip:{trigger:'axis'},
-  xAxis:{type:'category',data:xs,axisLabel:{fontSize:10,color:'#868e9a',rotate:30}},
-  yAxis:{type:'value',axisLabel:{fontSize:10,color:'#868e9a'}},
-  series:[{type:'line',data:ys,smooth:false,symbol:'circle',symbolSize:4,
-   lineStyle:{color:'#3d6a9e',width:2},itemStyle:{color:'#3d6a9e'}}]
- },true);
- $('shareDrawer').style.display='block';
-}
-function showShareNote(){alert('份额增幅 = (当日份额 − N 交易日前份额) / N 交易日前份额。\n窗口：官方交易日 2026-09-21 至 '+(SNAP.as_of||'—')+'（calendar_days='+(SNAP.calendar_days||'—')+'）。\nnull 不补 0；159352/159915 深市快照无日期本版禁算。\namount_calc='+(etfs[0]?.amount_calc||'—')+'（盘中大额分钟成交额另算，与份额增幅无关）。\n采集 '+(SNAP.collected_at||'—'))}
-function renderShares(){
- if(!SNAP)return;
- const etfs=SNAP.etfs||[];
- const list=coreOnly?etfs.filter(e=>CORE7.includes(e.code)):etfs;
- const sorted=sortKey?[...list].sort((a,b)=>(b[sortKey]??-Infinity)-(a[sortKey]??-Infinity)):list;
- // 日切异步警告
- const warn=document.getElementById('dayWarn');
- if(warn){
-  if(view!=='live'&&view!==SNAP.as_of){
-   warn.style.display='block';
-   warn.innerHTML='<span style="color:#8a6d2f">当前官方份额快照 '+SNAP.as_of+' 与分时所选 '+view+' 不同日，不作同日比；该日份额在 history 中若已核则显示，growth 未计算则为 —。</span>';
-  }else{warn.style.display='none';warn.innerHTML='';}
- }
- // 份额源日更自检：同一市场 ≥70% 标的两日份额完全相同 → 该市场份额源未按日更新，1 日增幅不显示（不是 0）
- const srcWarn=document.getElementById('srcWarn');
- if(srcWarn){
-  const stale=Object.keys(STALE).filter(m=>STALE[m].stale);
-  if(stale.length){
-   srcWarn.style.display='block';
-   srcWarn.innerHTML='<span style="color:#8a6d2f">份额源未日更：'+stale.map(m=>(m==='SH'?'沪市':'深市')+' '+STALE[m].same+'/'+STALE[m].n+' 只与上一披露日完全相同（'+STALE[m].pct+'%）').join('，')+'。这更像行情商份额字段没有按日更新，<b>因此 1 日增幅显示 “—” 而不是 0</b>；以基金公司公告为准。</span>';
-  }else{srcWarn.style.display='none';srcWarn.innerHTML='';}
- }
- $('shTb').innerHTML=sorted.map(e=>{
-  const nullMark=e.shares_status!=='official_confirmed'?'<span style="color:#8a6d2f">待核</span>':'';
-  const st=STALE[e.exch];
-  const g1=(st&&st.stale)?'<span style="color:var(--faint)" title="该市场份额源未按日更新，不显示 1 日变化">—</span>':pctCell(e.growth_1d_pct,e.coverage_reason_1d);
-  let shares=e.shares_yi;
-  if(view!=='live'&&view!==SNAP.as_of&&window.HIST&&HIST[view]){
-   const h=HIST[view][e.code];if(h)shares=h.shares_yi!=null?h.shares_yi:null;
-  }
-  return '<tr style="cursor:pointer" onclick="openShareHistory(\''+e.code+'\')" title="点击查看该 ETF 份额历史">'+
-   '<td style="text-align:left">'+(ETF_NAME_FIX[e.code]||e.name)+' '+e.code+nullMark+'</td>'+
-   '<td>'+g1+'</td>'+
-   '<td>'+pctCell(e.growth_5d_pct,e.coverage_reason_5d)+'</td>'+
-   '<td>'+pctCell(e.growth_20d_pct,e.coverage_reason_20d)+'</td>'+
-   '<td>'+(shares!=null?shares.toFixed(1):'—')+'</td></tr>';
- }).join('');
- $('shFoot').innerHTML='份额源 SSE/SZSE 披露 · 窗口 '+SNAP.as_of+' 之前 N 个交易日 · 详见 <a href="javascript:void(0)" onclick="showShareNote()">口径说明</a>';
-}
-function toggleCore(){coreOnly=!coreOnly;$('coreBtn').textContent=coreOnly?'切换为全部 17 只':'仅看 7 只代表券';renderShares()}
-function $(id){return document.getElementById(id)}
-function renderDisc(){
- if(!DOM||!DOM.baselines)return;
- const b=DOM.baselines;
- const holders=(b.holders||[]).map(h=>{
-  const v=/汇金/.test(h.name);
-  return '<div style="padding:8px 0;border-bottom:1px solid var(--line-2)"><b style="color:var(--ink)">'+h.name+'</b>'+(v?'':'<span style="font-size:10px;color:#8a6d2f;margin-left:6px">待核</span>')+'<div style="font-size:12px;color:var(--muted)">持有 '+h.etf_count+' 只 · 约 '+h.value_yi+' 亿元 · 平均占各基金份额 '+(h.avg_pct||'—')+'%（各基金算术平均，不可加总）</div></div>';
- }).join('');
- $('discBody').innerHTML='<div style="padding:4px 0"><b style="color:var(--ink)">'+(b.total_value_label||'待核')+'</b><div style="font-size:12px;color:var(--muted);margin-top:2px">报告期末：2025-12-31（2025 年报）· 披露日：未核实（二手报道 2026-04-08 转引，非直取原文）</div></div>'+holders;
- $('discFoot').textContent=(b.reconciliation||'')+' 仅规模参照，不并入当日资金统计。';
-}
-(async()=>{await loadHist();await loadTurnoverHist();await loadBaseline();fillSel();await refresh();await loadStatus();await loadOfficial();await loadShareHistory();await loadDisc();setInterval(()=>{if(view=="live")refresh()},30000)})();
+function onSel(){view=sel.value;refresh()}sel.onchange=onSel;
+(async()=>{await loadHist();await loadBaseline();fillSel();await refresh();setInterval(()=>{if(view=="live")refresh()},30000)})();
 </script></body></html>
