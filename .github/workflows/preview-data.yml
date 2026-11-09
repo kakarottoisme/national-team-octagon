@@ -49,6 +49,10 @@ jobs:
         shell: bash
         run: python3 preview-tools/collect_preview.py
 
+      - name: Refresh intraday turnover baseline (post-close, 同时点对齐分母)
+        shell: bash
+        run: python3 preview-tools/turnover_baseline.py
+
       - name: Commit only preview-data/ then push (不force、不reset丢数据)
         shell: bash
         run: |
@@ -57,7 +61,7 @@ jobs:
           STAMP=$(date -u +%Y-%m-%dT%H:%MZ)
 
           # 只暂存隔离目录,绝不 add 其它路径
-          git add preview-data/official preview-data/status.json preview-data/global.json
+          git add preview-data/official preview-data/status.json preview-data/global.json preview-data/turnover-baseline.json
           if git diff --cached --quiet; then
             echo "preview-data 无变化,不提交"
             exit 0

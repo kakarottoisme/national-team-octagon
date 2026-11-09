@@ -42,6 +42,7 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
 .kpi .vl{margin-top:2px;font-size:24px;line-height:1.25;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi .vl small{font-size:13px;font-weight:400;color:var(--muted);margin-left:3px}
 .kpi .ft{margin-top:2px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.howto{margin-top:10px;padding:10px 14px;border:1px solid var(--line-2);border-radius:10px;background:#fafbfc;font-size:12.5px;line-height:1.75;color:var(--ink-2)}
 #st{font-size:12px;color:var(--muted)}
 details.note{position:relative;flex:0 0 auto;margin-left:auto;font-size:12px;color:var(--muted)}
 details.note summary{cursor:pointer;list-style:none;display:block;white-space:nowrap;border-radius:4px}
@@ -54,7 +55,7 @@ details.note p{position:absolute;right:0;top:100%;z-index:20;width:min(520px,cal
 .share-fallback[hidden]{display:none}
 /* 分享仅渲染当前已显示内容的副本；不截取浏览器或其他窗口，不重新取数。 */
 .share-snapshot{position:fixed;left:-100000px;top:0;max-width:none!important;margin:0!important;padding:4px 24px 12px!important;background:var(--page);pointer-events:none}
-.share-snapshot .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.share-snapshot .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
 .share-snapshot .g{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .share-snapshot .c.sum .t .cd{white-space:normal}
 .share-snapshot .ch{height:210px}
@@ -76,6 +77,7 @@ details.note p{position:absolute;right:0;top:100%;z-index:20;width:min(520px,cal
 .t .es .k{font-size:11px;color:var(--muted)}
 .t .es .v{font-size:17px;line-height:1.2;font-weight:600;color:var(--ink)}
 .t .es .u{font-size:11px;color:var(--muted)}
+.t .m1{grid-column:1/3;margin-top:2px;font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ch{height:200px;margin:0 4px 2px}
 .c.sum .ch{height:246px}
 .na{position:absolute;left:12px;right:12px;bottom:12px;top:84px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font-size:13px;text-align:center;padding:0 12px}
@@ -102,7 +104,7 @@ tr.sel{background:var(--accent-bg)}
 
 @media(min-width:700px){
  .wrap{padding:0 24px}
- .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
  .g{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 }
 /* 按页面可用宽度判断：桌面打开浏览器侧栏后也保持四列，不依赖屏幕物理像素。 */
@@ -174,15 +176,21 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
 <!-- ===== 概览 ===== -->
 <div class="sec"><h2 id="kt">当日概览</h2><span class="side" id="st">加载中…</span></div>
 <div class="kpis">
- <div class="kpi"><div class="lb">大额分钟成交额</div><div class="vl" id="k1">—</div><div class="ft">七只 ETF 分钟成交额 &gt; 1 亿合计</div></div>
+ <div class="kpi"><div class="lb">七只合计成交额</div><div class="vl" id="kA">—</div><div class="ft" id="kAf">截至盘中</div></div>
+ <div class="kpi"><div class="lb">同时点倍数</div><div class="vl" id="kB">—</div><div class="ft" id="kBf">对比 20 日同一时刻</div></div>
+ <div class="kpi"><div class="lb">大额分钟成交额</div><div class="vl" id="k1">—</div><div class="ft">分钟成交额 &gt; 1 亿的合计</div></div>
+ <div class="kpi"><div class="lb">主动净买入（推算）</div><div class="vl" id="kC">—</div><div class="ft" id="kCf">外盘 − 内盘推算，非资金净流入</div></div>
  <div class="kpi"><div class="lb">上证收盘</div><div class="vl" id="k2">—</div><div class="ft" id="k2f">上证指数</div></div>
- <div class="kpi"><div class="lb">估算最高</div><div class="vl" id="k3">—</div><div class="ft" id="k3f">七只 ETF 中</div></div>
  <div class="kpi"><div class="lb">已归档天数</div><div class="vl" id="k4">—</div><div class="ft" id="k4f">data/history.json</div></div>
+</div>
+<div class="howto">
+ <b>怎么读：</b>先看「合计成交额」和「同时点倍数」——今天到此刻的成交额，是过去 20 个交易日同一时刻的几倍。1 倍左右属于平常，明显放大才叫活跃；但活跃只是市场行为，<b>不代表国家队买入</b>。<br>
+ 再看「主动净买入」——按逐笔成交方向算主动买更猛还是主动卖更猛，只是方向线索，<b>不是资金净流入、不是 ETF 申赎、也不是任何机构身份</b>。三个数字口径不同，<b>不能相加</b>；「大额分钟成交额」是另一个阈值口径。
 </div>
 <div id="banner"></div>
 
 <!-- ===== 八宫格 ===== -->
-<div class="sec"><h2>分时走势（盘中活跃度）</h2><details class="note"><summary><span>口径说明</span></summary><p>上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；大额分钟成交额估算 = 当日蓝柱成交额合计（二级市场成交额阈值代理，非身份、非净流向）；MACD(12,26,9)。仅「今日实时」页面约每 30 秒重读站点缓存；盘中数据由 GitHub Actions 约每 5 分钟写入（定时可能推迟，非券商级实时），笔记本休眠不影响查看。历史日为存档静态数据。注意：这是成交额阈值代理，非官方资金认定，也不代表任何机构席位。数据：腾讯行情（经站点缓存）。</p></details></div>
+<div class="sec"><h2>分时走势（盘中活跃度）</h2><details class="note"><summary><span>口径说明</span></summary><p>上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；大额分钟成交额估算 = 当日蓝柱成交额合计（二级市场成交额阈值代理，非身份、非净流向）；MACD(12,26,9)。<b>同时点倍数</b> = 当日到此刻的累计成交额 ÷（该只 ETF 过去 20 个完整交易日全天均额 × 该时点历史平均已走完比例），按 5 分钟粒度对齐；所以 11:30 的半天成交额不会直接跟全天均额比。比例逐只不同（近期样本约 47%–68%），所以不套用同一个倍数。<b>主动净买入</b> =（外盘−内盘）/（外盘+内盘）× 累计成交额，是逐笔主动方向的推算：不是资金净流入，不是 ETF 申赎净流入，不含大宗与协议转让，也不代表任何机构身份；一二级套利、做市双边报价都会稀释它。仅「今日实时」页面约每 30 秒重读站点缓存；盘中数据由 GitHub Actions 约每 5 分钟写入（定时可能推迟，非券商级实时）。历史日为存档静态数据。数据：腾讯行情（经站点缓存）+ 新浪 5 分钟 K 线（同时点基线）。</p></details></div>
 <div class="g" id="g"></div>
 
 <!-- ===== 日度汇总 ===== -->
@@ -198,6 +206,7 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
  <div class="sec" style="padding:0 16px"><h2>日度份额增幅（官方快照）</h2><span class="side"><button type="button" id="coreBtn" onclick="toggleCore()" style="height:28px;padding:0 12px;font-size:12px">切换为全部 17 只</button> <button type="button" onclick="setSort(sortKey?'null':'growth_5d_pct')" style="height:28px;padding:0 12px;font-size:12px">按5日增幅排序</button></span></div>
  <div style="padding:0 16px 6px;font-size:12.5px;color:var(--muted);line-height:1.7">回答：<b>这些 ETF 的份额规模近 1/5/20 个交易日变化了多少</b>。份额增幅 ≠ 价格涨幅；1/5/20 是重叠的累计窗口，不能相加；单点为正不代表连续净申购；裸份额不能跨基金比金额。— 表示该窗口数据不足或待核，不补 0。</div>
  <div id="dayWarn" style="display:none;padding:0 16px 6px;font-size:12px"></div>
+ <div id="srcWarn" style="display:none;padding:0 16px 6px;font-size:12px;line-height:1.7"></div>
  <div class="tbx" style="padding:0 16px">
   <table style="width:100%;border-collapse:collapse;table-layout:fixed">
    <colgroup><col style="width:34%"><col style="width:16.5%"><col style="width:16.5%"><col style="width:16.5%"><col style="width:16.5%"></colgroup>
@@ -222,7 +231,7 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
 <!-- ===== 披露证据 ===== -->
 <section class="panel" id="secDisc" style="margin-top:14px">
  <div class="sec" style="padding:0 16px"><h2>定期披露参照（待核原文）</h2><span class="side" id="discSide">不并入当日资金统计</span></div>
-<div style="padding:0 16px 6px;font-size:12.5px;color:var(--muted);line-height:1.7">回答：<b>截至报告期末（2025-12-31），哪些机构被披露持有多少 ETF</b>。这是 2025 年报期末披露参照（当前为二手转引，原文待核），不是实时总持仓；披露日（2026-04-08 二手转引）与报告期末相差数月，原文未核。约 1.54 万亿为发布方约数，非精确加总，不能当实时 KPI。</div>
+<div style="padding:0 16px 6px;font-size:12.5px;color:var(--muted);line-height:1.7">回答：<b>截至 2025 年末，哪些机构曾被披露持有这些 ETF</b>。这是 2025 年报期末的前十大持有人参照（当前为二手转引，原文待核），<b>不是今日持仓</b>；披露日与报告期末相差数月。2026-05-01 起施行的信披准则第 2 号第三十一条只要求披露持有人户数、户均份额、机构与个人占比，不再强制列示前十名持有人，所以这份名单只能当<b>“历史上被披露持有过”的静态标签</b>，不能推当前持仓。约 1.54 万亿为发布方约数，非精确加总。</div>
  <div class="tbx" style="padding:0 16px" id="discBody"><div style="color:var(--faint);padding:10px">等待披露数据…</div></div>
  <div class="foot" id="discFoot">披露日 / 期末 / 原文核查状态见右侧；无原文一律标"待核"。</div>
 </section>
@@ -358,7 +367,21 @@ function trading(){const d=bj(),w=d.getDay(),m=d.getHours()*60+d.getMinutes();re
 async function j(u){const r=await fetch(u,{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.json()}
 async function loadLive(){try{LIVE=await j("./data/live.json?t="+Date.now());LIVE.src="站点"}catch(e){LIVE=null;try{const ms=await Promise.all(E.map(x=>liveEtfTx(x[1])));LIVE={src:"腾讯直连",updated:bj().toLocaleString("zh-CN",{hour12:false}),etfs:Object.fromEntries(E.map((x,i)=>[x[1],ms[i]])),date:ms[0].date}}catch(e2){throw new Error("站点实时数据 live.json 读取失败（"+e.message+"），请稍后刷新")}}return LIVE}
 async function liveEtfTx(code){const raw=(await j("https://web.ifzq.gtimg.cn/appstock/app/minute/query?code="+code)).data[code];const d=raw.data;let pa=0;const t=[],p=[],a=[];
- d.data.forEach(s=>{const r=s.split(" ");t.push(r[0]);p.push(+r[1]);const am=+r[3];a.push((am-pa)/1e8);pa=am});let pre=p[0];try{pre=+raw.qt[code][4]}catch(e){}return {date:d.date,t,p,a,pre}}
+ d.data.forEach(s=>{const r=s.split(" ");t.push(r[0]);p.push(+r[1]);const am=+r[3];a.push((am-pa)/1e8);pa=am});let pre=p[0];try{pre=+raw.qt[code][4]}catch(e){}
+ let ob=null,os_=null;try{ob=+raw.qt[code][7];os_=+raw.qt[code][8]}catch(e){}return {date:d.date,t,p,a,pre,amt:+(pa/1e8).toFixed(4),ob,os:os_,net_buy:(ob!=null&&os_!=null&&ob+os_>0)?+(((ob-os_)/(ob+os_))*(pa/1e8)).toFixed(3):null}}
+/* ===== 同时点对齐：当日到此刻的累计成交额 ÷ (20日均额 × 该时点历史平均进度) ===== */
+let BASE=null;
+async function loadBaseline(){try{const r=await fetch('preview-data/turnover-baseline.json?t='+Date.now(),{cache:'no-store'});if(r.ok){BASE=await r.json();window.BASE=BASE;if(typeof kpi==='function'&&TODAY)kpi(TODAY)}}catch(e){}}
+function barIdx(t){const s=String(t).replace(/\D/g,''),hh=+s.slice(0,2),mm=+s.slice(2),m=hh*60+mm;
+ // 只算"已走完"的 5 分钟 bar：当前那根未走完，不能用它的累计占比当分母
+ if(m<=690){const fin=Math.min(24,Math.max(1,Math.floor((m-570)/5)));return fin-1}
+ const fin=Math.min(24,Math.max(0,Math.floor((m-780)/5)));return Math.min(47,24+fin-1)}
+function sameTime(code,amt,lastT){
+ const b=BASE&&BASE.codes&&BASE.codes[code];if(!b||amt==null||!lastT)return null;
+ const k=barIdx(lastT),prog=b.curve[k],den=b.avg_amt_yi*prog;
+ if(!(den>0))return null;
+ return {x:+(amt/den).toFixed(2),prog:+(prog*100).toFixed(1),done:+(amt/b.avg_amt_yi).toFixed(2),avg:b.avg_amt_yi,n:b.sample_days}
+}
 /* 卡片标题：名称 / 代码 / 涨跌幅标签 / 估算大数字（涨跌只用符号，不用颜色） */
 function coverageRatio(a){
  const src=(a||[]);
@@ -370,7 +393,7 @@ function coverageRatio(a){
  const ratio=total>0?+(est/total*100).toFixed(1):null;
  return{est:+est.toFixed(3),total:+total.toFixed(3),ratio,n:valid.length,bad,incomplete:bad>0};
 }
-function head(n,code,est,pct,ratio,coverage){return '<span class="nm">'+n+'</span><span class="cd">'+code+'</span>'+(pct!=null?'<span class="pc">'+(pct>=0?"+":"")+pct.toFixed(2)+'%</span>':'')+'<div class="es"><span class="k">大额分钟成交额</span><span class="v">'+(est!=null?(+est).toFixed(2):"—")+'</span><span class="u">亿</span></div>'+(coverage?'<div style="font-size:10px;color:'+(coverage.incomplete?'#8a6d2f':'var(--muted)')+';margin-top:2px">大额分钟占比 '+(coverage.ratio!=null?coverage.ratio+'%':'—')+(coverage.incomplete?'·数据不完整':'')+'<span style="color:var(--faint)"> · 截至 '+(coverage.lastT||'—')+'/有效'+coverage.n+'分钟</span></div>':'<div style="font-size:10px;color:var(--faint);margin-top:2px">大额分钟占比 —</div>')}
+function head(n,code,est,pct,ratio,coverage,tm){const cov='大额分钟占比 '+(coverage&&coverage.ratio!=null?coverage.ratio+'%':'—');const tip='大额分钟成交额 = 单分钟成交额>1亿的合计'+(coverage?' · 截至 '+coverage.lastT+' · 有效'+coverage.n+'分钟':'')+(tm?' · 同时点基准 '+tm.avg.toFixed(1)+'亿 × 已走完 '+tm.prog+'%':'');return '<span class="nm">'+n+'</span><span class="cd">'+code+'</span>'+(pct!=null?'<span class="pc">'+(pct>=0?'+':'')+pct.toFixed(2)+'%</span>':'')+'<div class="es"><span class="k">大额</span><span class="v">'+(est!=null?(+est).toFixed(2):'—')+'</span><span class="u">亿</span></div>'+'<div class="m1" title="'+tip+'">'+cov+(tm?' · 同时点 <b style="color:var(--ink-2)">'+tm.x.toFixed(2)+'×</b>':'')+'</div>'}
 function drawEtf(i,m){const [n,code]=E[i];document.getElementById("n"+i).style.display="none";const t=m.t.map(s=>s.slice(0,2)+":"+s.slice(2)),p=m.p,a=m.a;
  const pre=(m.pre!=null&&m.pre>0)?+m.pre:(p[0]||1);const pct=p.map(v=>+((v/pre-1)*100).toFixed(3));
  const cr=coverageRatio(a);
@@ -378,7 +401,8 @@ function drawEtf(i,m){const [n,code]=E[i];document.getElementById("n"+i).style.d
  cr.incomplete=cr.incomplete||(t.length!==a.length);
  const est=cr.est,e12=ema(p,12),e26=ema(p,26),dif=p.map((v,k)=>e12[k]-e26[k]),dea=ema(dif,9),mac=dif.map((v,k)=>2*(v-dea[k]));
  const last=pct.length?pct[pct.length-1]:0;
- document.getElementById("t"+i).innerHTML=head(n,code.slice(2),est,last,cr.ratio,cr);
+ const tm=sameTime(code,(m.amt!=null?m.amt:cr.total),t.length?t[t.length-1]:null);
+ document.getElementById("t"+i).innerHTML=head(n,code.slice(2),est,last,cr.ratio,cr,tm);
  const ax=k=>({type:"category",data:t,gridIndex:k,axisLabel:{show:k==2,fontSize:10,color:V.axis,margin:6,hideOverlap:true},axisTick:{show:false},axisLine:{show:k==2,lineStyle:{color:V.base}}});
  const ya=(k,extra)=>Object.assign({gridIndex:k,splitNumber:2,splitLine:{show:false},axisLabel:{fontSize:10,color:V.axis},axisLine:{show:false},axisTick:{show:false}},extra);
  charts[i].setOption({backgroundColor:"transparent",animation:false,tooltip:Object.assign({valueFormatter:v=>v},TIP),axisPointer:{link:[{xAxisIndex:"all"}]},
@@ -406,11 +430,44 @@ function drawSum(rows,cur){const r=rows.filter(x=>x[0]>="2026-10-15"),ds=r.map(x
 /* 概览指标：只读取已在 H 中的数字，不另取数据 */
 function kpi(cur){const h=H[cur]||{},f=v=>v==null?"—":(+v).toFixed(2);
  document.getElementById("kt").textContent=(view=="live"?"今日概览":"当日概览")+(cur?" · "+cur:"");
- document.getElementById("k1").innerHTML=h["合计"]!=null?f(h["合计"])+"<small>亿</small>":"—";
- const c=h["上证涨跌幅"];document.getElementById("k2").textContent=f(h["上证收盘"]);
+ const kA=document.getElementById("kA"),kAf=document.getElementById("kAf"),kB=document.getElementById("kB"),kBf=document.getElementById("kBf"),kC=document.getElementById("kC"),kCf=document.getElementById("kCf");
+ let tot=null,nets=[],dens=[],progs=[],lastT="";
+ if(view=="live"&&LIVE&&LIVE.etfs){
+  E.forEach(([n,code])=>{const m=LIVE.etfs[code];if(!m)return;
+   if(m.t&&m.t.length)lastT=m.t[m.t.length-1];
+   const amt=(m.amt!=null?+m.amt:null);
+   if(amt!=null){tot=(tot||0)+amt;
+    const st=sameTime(code,amt,lastT);if(st){dens.push(amt/st.x);progs.push(st.prog)}
+   }
+   if(m.net_buy!=null)nets.push(+m.net_buy);
+  });
+ }
+ if(tot!=null){
+  kA.innerHTML=tot.toFixed(1)+"<small>亿</small>";
+  const hhmm=lastT?(lastT.slice(0,2)+":"+lastT.slice(2)):"";
+  let tailTxt="";
+  if(hhmm>="15:00"&&LIVE&&LIVE.etfs){
+   let todayTail=0,todayTot=0,baseTail=0,baseW=0;
+   E.forEach(([n,code])=>{const m=LIVE.etfs[code],b=BASE&&BASE.codes&&BASE.codes[code];if(!m||!m.a||!b)return;
+    const s=m.a.reduce((x,v)=>x+v,0);if(!(s>0))return;
+    todayTail+=m.a.slice(-6).reduce((x,v)=>x+v,0);todayTot+=s;baseTail+=b.avg_amt_yi*b.tail_share;baseW+=b.avg_amt_yi});
+   if(todayTot>0&&baseW>0)tailTxt=" · 尾盘占比 "+(todayTail/todayTot*100).toFixed(1)+"%（20日均 "+(baseTail/baseW*100).toFixed(1)+"%）";
+  }
+  kAf.textContent=(hhmm?"截至 "+hhmm:"")+tailTxt;
+ }else{kA.textContent="—";kAf.textContent="仅今日实时提供，历史日不补算"}
+ const ratio=(tot!=null&&dens.length)?tot/dens.reduce((a,b)=>a+b,0):null;
+ if(ratio!=null){
+  kB.innerHTML=ratio.toFixed(2)+"<small>×</small>";
+  kBf.textContent="20日同时点 · 已完成 "+Math.round(progs.reduce((a,b)=>a+b,0)/progs.length)+"% · "+dens.length+"/7 只";
+ }else{kB.textContent="—";kBf.textContent="对比 20 日同一时刻"}
+ if(nets.length){
+  const nb=nets.reduce((a,b)=>a+b,0);
+  kC.innerHTML=(nb>=0?"+":"")+nb.toFixed(1)+"<small>亿</small>";
+  kCf.textContent="外盘−内盘推算 · "+nets.length+"/7 只 · 非净流入";
+ }else{kC.textContent="—";kCf.textContent="逐笔方向需行情外盘/内盘字段"}
+ const c=h["上证涨跌幅"];document.getElementById("k1").innerHTML=h["合计"]!=null?f(h["合计"])+"<small>亿</small>":"—";
+ document.getElementById("k2").textContent=f(h["上证收盘"]);
  document.getElementById("k2f").textContent=c!=null?"较前收 "+(c>0?"+":"")+(+c).toFixed(2)+"%":"上证指数";
- let best=null;E.forEach(e=>{const v=h[e[0]];if(v!=null&&(best==null||+v>best[1]))best=[e[0],+v]});
- document.getElementById("k3").innerHTML=best?best[1].toFixed(2)+"<small>亿</small>":"—";document.getElementById("k3f").textContent=best?best[0]:"七只 ETF 中";
  const ks=Object.keys(H).sort();document.getElementById("k4").innerHTML=ks.length+"<small>天</small>";document.getElementById("k4f").textContent=ks.length?ks[0]+" 起":"data/history.json"}
 function table(cur){const tb=document.getElementById("tb");tb.innerHTML="";Object.keys(H).sort().reverse().forEach(d=>{const h=H[d],c=h["上证涨跌幅"],tr=document.createElement("tr");if(d==cur)tr.className="sel";
  tr.tabIndex=0;tr.innerHTML="<td>"+d+"</td><td>"+(h["合计"]!=null?(+h["合计"]).toFixed(2):"-")+"</td><td>"+(h["上证收盘"]!=null?(+h["上证收盘"]).toFixed(2):"-")+"</td><td>"+(c!=null?(c>0?"+":"")+(+c).toFixed(2)+"%":"-")+"</td><td><span class='tag "+(c>0?"up":"")+"'>"+(c==null?"-":c>0?"涨":c<0?"跌":"平")+"</span></td>";
@@ -475,9 +532,30 @@ function renderStatus(){
  if(el)el.innerHTML='<b>预览自动任务已运行 '+lastRun+'</b> · 官方份额 as_of '+SNAP.as_of+' · SSE：'+sseTxt+' · 其他源：'+others.join('，');
 }
 function closeShareDrawer(){$('shareDrawer').style.display='none'}
-let SHARE_HIST=null,shareChart=null;
+let SHARE_HIST=null,shareChart=null,STALE={};
+/* 份额源日更自检：拿最近一期已归档份额跟当前快照比，
+   同市场 ≥70% 标的两日份额完全相同 → 判为份额字段未按日更新，不当成"没有申赎"。 */
+function computeStale(){
+ STALE={};
+ if(!SNAP||!SHARE_HIST)return;
+ const dates=Object.keys(SHARE_HIST).filter(d=>d<SNAP.as_of);
+ if(!dates.length)return;
+ const prev=SHARE_HIST[dates.sort().pop()];
+ const pe=prev&&prev.etfs;
+ if(!pe)return;
+ (SNAP.etfs||[]).forEach(e=>{
+  const p=pe[e.code];
+  if(!p||p.shares_yi==null||e.shares_yi==null)return;
+  const m=e.exch||'SH';
+  STALE[m]=STALE[m]||{same:0,n:0};
+  STALE[m].n++;
+  if(Math.abs(p.shares_yi-e.shares_yi)<1e-9)STALE[m].same++;
+ });
+ Object.keys(STALE).forEach(m=>{const s=STALE[m];s.stale=s.n>=3&&(s.same/s.n)>=0.7;s.pct=Math.round(s.same/s.n*100);s.prevDate=dates[dates.length-1]});
+}
 async function loadShareHistory(){
  try{const r=await fetch('preview-data/official/history.json?t='+Date.now(),{cache:'no-store'});if(r.ok)SHARE_HIST=await r.json()}catch(e){}
+ computeStale();if(SNAP)renderShares();
 }
 function openShareHistory(code){
  if(!SHARE_HIST){alert('历史数据未加载');return}
@@ -513,15 +591,26 @@ function renderShares(){
    warn.innerHTML='<span style="color:#8a6d2f">当前官方份额快照 '+SNAP.as_of+' 与分时所选 '+view+' 不同日，不作同日比；该日份额在 history 中若已核则显示，growth 未计算则为 —。</span>';
   }else{warn.style.display='none';warn.innerHTML='';}
  }
+ // 份额源日更自检：同一市场 ≥70% 标的两日份额完全相同 → 该市场份额源未按日更新，1 日增幅不显示（不是 0）
+ const srcWarn=document.getElementById('srcWarn');
+ if(srcWarn){
+  const stale=Object.keys(STALE).filter(m=>STALE[m].stale);
+  if(stale.length){
+   srcWarn.style.display='block';
+   srcWarn.innerHTML='<span style="color:#8a6d2f">份额源未日更：'+stale.map(m=>(m==='SH'?'沪市':'深市')+' '+STALE[m].same+'/'+STALE[m].n+' 只与上一披露日完全相同（'+STALE[m].pct+'%）').join('，')+'。这更像行情商份额字段没有按日更新，<b>因此 1 日增幅显示 “—” 而不是 0</b>；以基金公司公告为准。</span>';
+  }else{srcWarn.style.display='none';srcWarn.innerHTML='';}
+ }
  $('shTb').innerHTML=sorted.map(e=>{
   const nullMark=e.shares_status!=='official_confirmed'?'<span style="color:#8a6d2f">待核</span>':'';
+  const st=STALE[e.exch];
+  const g1=(st&&st.stale)?'<span style="color:var(--faint)" title="该市场份额源未按日更新，不显示 1 日变化">—</span>':pctCell(e.growth_1d_pct,e.coverage_reason_1d);
   let shares=e.shares_yi;
   if(view!=='live'&&view!==SNAP.as_of&&window.HIST&&HIST[view]){
    const h=HIST[view][e.code];if(h)shares=h.shares_yi!=null?h.shares_yi:null;
   }
   return '<tr style="cursor:pointer" onclick="openShareHistory(\''+e.code+'\')" title="点击查看该 ETF 份额历史">'+
    '<td style="text-align:left">'+(ETF_NAME_FIX[e.code]||e.name)+' '+e.code+nullMark+'</td>'+
-   '<td>'+pctCell(e.growth_1d_pct,e.coverage_reason_1d)+'</td>'+
+   '<td>'+g1+'</td>'+
    '<td>'+pctCell(e.growth_5d_pct,e.coverage_reason_5d)+'</td>'+
    '<td>'+pctCell(e.growth_20d_pct,e.coverage_reason_20d)+'</td>'+
    '<td>'+(shares!=null?shares.toFixed(1):'—')+'</td></tr>';
@@ -535,10 +624,10 @@ function renderDisc(){
  const b=DOM.baselines;
  const holders=(b.holders||[]).map(h=>{
   const v=/汇金/.test(h.name);
-  return '<div style="padding:8px 0;border-bottom:1px solid var(--line-2)"><b style="color:var(--ink)">'+h.name+'</b>'+(v?'':'<span style="font-size:10px;color:#8a6d2f;margin-left:6px">待核</span>')+'<div style="font-size:12px;color:var(--muted)">持有 '+h.etf_count+' 只 · 约 '+h.value_yi+' 亿元 · 占比 '+(h.avg_pct||'—')+'%</div></div>';
+  return '<div style="padding:8px 0;border-bottom:1px solid var(--line-2)"><b style="color:var(--ink)">'+h.name+'</b>'+(v?'':'<span style="font-size:10px;color:#8a6d2f;margin-left:6px">待核</span>')+'<div style="font-size:12px;color:var(--muted)">持有 '+h.etf_count+' 只 · 约 '+h.value_yi+' 亿元 · 平均占各基金份额 '+(h.avg_pct||'—')+'%（各基金算术平均，不可加总）</div></div>';
  }).join('');
  $('discBody').innerHTML='<div style="padding:4px 0"><b style="color:var(--ink)">'+(b.total_value_label||'待核')+'</b><div style="font-size:12px;color:var(--muted);margin-top:2px">报告期末：2025-12-31（2025 年报）· 披露日：未核实（二手报道 2026-04-08 转引，非直取原文）</div></div>'+holders;
  $('discFoot').textContent=(b.reconciliation||'')+' 仅规模参照，不并入当日资金统计。';
 }
-(async()=>{await loadHist();fillSel();await refresh();await loadStatus();await loadOfficial();await loadShareHistory();await loadDisc();setInterval(()=>{if(view=="live")refresh()},30000)})();
+(async()=>{await loadHist();await loadBaseline();fillSel();await refresh();await loadStatus();await loadOfficial();await loadShareHistory();await loadDisc();setInterval(()=>{if(view=="live")refresh()},30000)})();
 </script></body></html>
