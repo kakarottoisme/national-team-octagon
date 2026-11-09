@@ -461,7 +461,8 @@ function kpi(cur){const h=H[cur]||{},f=v=>v==null?"—":(+v).toFixed(2);
  const ratio=(tot!=null&&dens.length)?tot/dens.reduce((a,b)=>a+b,0):null;
  if(ratio!=null){
   kB.innerHTML=ratio.toFixed(2)+"<small>×</small>";
-  kBf.textContent="20日同时点 · 已完成 "+Math.round(progs.reduce((a,b)=>a+b,0)/progs.length)+"% · "+dens.length+"/7 只";
+  const ap=Math.round(progs.reduce((a,b)=>a+b,0)/progs.length);
+  kBf.textContent=(ap>=99?"全天 vs 20 日均额 · "+dens.length+"/7 只":"20日同时点 · 已完成 "+ap+"% · "+dens.length+"/7 只");
  }else{kB.textContent="—";kBf.textContent="对比 20 日同一时刻"}
  if(nets.length){
   const nb=nets.reduce((a,b)=>a+b,0);
