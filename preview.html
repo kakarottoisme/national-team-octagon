@@ -42,7 +42,19 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
 .kpi .vl{margin-top:2px;font-size:24px;line-height:1.25;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi .vl small{font-size:13px;font-weight:400;color:var(--muted);margin-left:3px}
 .kpi .ft{margin-top:2px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.howto{margin-top:10px;padding:10px 14px;border:1px solid var(--line-2);border-radius:10px;background:#fafbfc;font-size:12.5px;line-height:1.75;color:var(--ink-2)}
+.guide{margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:0 16px 2px}
+.guide .gh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:11px 0 9px;border-bottom:1px solid var(--line-2)}
+.guide .gh b{font-size:13.5px;font-weight:600;color:var(--ink)}
+.guide .gh span{font-size:12.5px;color:var(--muted);line-height:1.65}
+.gf{display:grid;grid-template-columns:120px 1fr;gap:2px 14px;padding:9px 0;border-bottom:1px solid var(--line-2);font-size:12.5px;line-height:1.72}
+.gf .fn{color:var(--ink);font-weight:600}
+.gf .fd{color:var(--ink-2)}
+.gf .fd em{font-style:normal;color:var(--muted)}
+.gsub{padding:10px 0 2px;font-size:12px;color:var(--muted);letter-spacing:.02em}
+.gmore{margin:6px 0 10px;border:0}
+.gmore summary{cursor:pointer;font-size:12px;color:var(--accent)}
+.gmore p{margin:8px 0 0;font-size:12px;line-height:1.78;color:var(--ink-2)}
+@media (max-width:560px){.gf{grid-template-columns:1fr;gap:1px}}
 #st{font-size:12px;color:var(--muted)}
 details.note{position:relative;flex:0 0 auto;margin-left:auto;font-size:12px;color:var(--muted)}
 details.note summary{cursor:pointer;list-style:none;display:block;white-space:nowrap;border-radius:4px}
@@ -186,14 +198,26 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
  <div class="kpi"><div class="lb">上证收盘</div><div class="vl" id="k2">—</div><div class="ft" id="k2f">上证指数</div></div>
  <div class="kpi"><div class="lb">已归档天数</div><div class="vl" id="k4">—</div><div class="ft" id="k4f">data/history.json</div></div>
 </div>
-<div class="howto">
- <b>怎么读：</b>先看「合计成交额」和「同时点倍数」——今天到此刻的成交额，是过去 20 个交易日同一时刻的几倍。1 倍左右属于平常，明显放大才叫活跃；但活跃只是市场行为，<b>不代表国家队买入</b>。<br>
- 再看「主动净买入」——按逐笔成交方向算主动买更猛还是主动卖更猛，只是方向线索，<b>不是资金净流入、不是 ETF 申赎、也不是任何机构身份</b>。三个数字口径不同，<b>不能相加</b>；「大额分钟成交额」是另一个阈值口径。
-</div>
+<section class="guide">
+ <div class="gh"><b>怎么读</b><span>顺序：① 合计成交额看今天热不热 → ② 同时点倍数看比平时热多少 → ③ 主动净买入看方向。其余是背景与口径。</span></div>
+ <div class="gf"><div class="fn">七只合计成交额</div><div class="fd">这 7 只 ETF 今天在二级市场一共成交了多少钱（截至所标时刻）。<em>≠ 申购赎回金额，≠ 资金净流入，≠ 机构买入量</em>——它只回答“交易有多活跃”。</div></div>
+ <div class="gf"><div class="fn">同时点倍数</div><div class="fd">当日累计成交额 ÷（过去 20 个完整交易日全天均额 × 该只此刻平均已走完的比例）。<em>1 倍左右算平常，明显放大才叫活跃</em>；11:30 的半天不会直接拿去跟全天均额比。<em>≠ 买卖力量对比，也不能说明是谁在成交</em>。</div></div>
+ <div class="gf"><div class="fn">主动净买入（推算）</div><div class="fd">逐笔成交落在卖方报价（外盘）还是买方报价（内盘），据此推算主动买减主动卖，是方向线索。<em>≠ 资金净流入，≠ ETF 申赎，不含大宗与协议转让，不代表任何机构身份</em>；一二级套利和做市双边报价会稀释它。</div></div>
+ <div class="gf"><div class="fn">大额分钟成交额</div><div class="fd">单分钟成交额 &gt; 1 亿的那些分钟，把它们的成交额加起来（阈值口径）。<em>≠ 大单，≠ 机构痕迹</em>；阈值一改数字就变。</div></div>
+ <div class="gf"><div class="fn">尾盘占比</div><div class="fd">14:30–15:00 的成交额占全天多少，并与 20 日同一区间均值对照；<em>只在收盘后计算</em>，盘中显示“—”。<em>≠ 尾盘抢筹或砸盘</em>。</div></div>
+ <div class="gf"><div class="fn">上证收盘</div><div class="fd">上证综指当日收盘点位与涨跌幅，<em>只作大盘背景</em>，与 ETF 名单无对应关系。</div></div>
+ <div class="gf"><div class="fn">已归档天数</div><div class="fd">本地攒了多少天日度记录（data/history.json）。<em>只表示“存档几天”，不是数据源覆盖长度</em>。</div></div>
+ <div class="gf"><div class="fn">图内元素</div><div class="fd">涨跌幅线 = 相对昨收的涨跌幅%，<em>不是价格本身</em>；蓝柱 = 单分钟成交额 &gt; 1 亿的分钟，<em>只标“这一分钟大”，不标买卖方向</em>；MACD(12,26,9) = 价格动量辅助线，<em>不做买卖信号</em>；成交额历史柱 = 七只合计的日成交额（新浪 60 分钟 K 按日累加），<em>深色柱=今天，虚线=近 20 日均额</em>。</div></div>
+ <details class="gmore"><summary>口径与来源（公式 / 样本 / 局限）</summary><p>
+  公式：同时点倍数 = 当日累计成交额 ÷（20 日均额 × 已走完比例），比例逐只算，近期样本 47%–68%，所以不套统一系数；主动净买入 =（外盘 − 内盘）/（外盘 + 内盘）× 累计成交额；尾盘占比 = 14:30–15:00 成交额 ÷ 全天；大额分钟 = 单分钟 &gt; 1 亿的成交额之和。<br>
+  样本：分时 20 个完整交易日（新浪 5 分钟 K，单次上限约 22 日）；日成交额 255 个交易日（新浪 60 分钟 K，2025-10-22 起）；最近一个完整交易日的累加合计已与站点分钟读数核对一致（差 0.00%）。<br>
+  局限：三个数字口径不同，<b>不能相加</b>；大宗与协议转让不在逐笔内外盘里；盘中数据由 GitHub Actions 约每 5 分钟写入（定时可能推迟，非券商级实时）；历史日是存档静态数据；不含任何身份判断或国家队口径。
+ </p></details>
+</section>
 <div id="banner"></div>
 
 <!-- ===== 八宫格 ===== -->
-<div class="sec"><h2>分时走势（盘中活跃度）</h2><details class="note"><summary><span>口径说明</span></summary><p>上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；大额分钟成交额估算 = 当日蓝柱成交额合计（二级市场成交额阈值代理，非身份、非净流向）；MACD(12,26,9)。<b>同时点倍数</b> = 当日到此刻的累计成交额 ÷（该只 ETF 过去 20 个完整交易日全天均额 × 该时点历史平均已走完比例），按 5 分钟粒度对齐；所以 11:30 的半天成交额不会直接跟全天均额比。比例逐只不同（近期样本约 47%–68%），所以不套用同一个倍数。<b>主动净买入</b> =（外盘−内盘）/（外盘+内盘）× 累计成交额，是逐笔主动方向的推算：不是资金净流入，不是 ETF 申赎净流入，不含大宗与协议转让，也不代表任何机构身份；一二级套利、做市双边报价都会稀释它。仅「今日实时」页面约每 30 秒重读站点缓存；盘中数据由 GitHub Actions 约每 5 分钟写入（定时可能推迟，非券商级实时）。历史日为存档静态数据。数据：腾讯行情（经站点缓存）+ 新浪 5 分钟 K 线（同时点曲线、尾盘占比）+ 新浪 60 分钟 K 线（下方日成交额历史）。</p></details></div>
+<div class="sec"><h2>分时走势（盘中活跃度）</h2></div>
 <div class="g" id="g"></div>
 
 <!-- ===== 成交额历史（新浪日聚合回补） ===== -->
@@ -544,7 +568,7 @@ async function refresh(){if(busy)return;busy=true;const rb=document.getElementBy
    if(LIVE.estimates){Object.assign(o,LIVE.estimates);s=LIVE.estimates["合计"]??s}else o["合计"]=+s.toFixed(2);
    const ix=rows.findIndex(x=>x[0]==TODAY);if(ix>0&&o["上证收盘"]==null){o["上证收盘"]=+rows[ix][2];o["上证涨跌幅"]=+((rows[ix][2]/rows[ix-1][2]-1)*100).toFixed(2)}
    H[TODAY]=Object.assign({},H[TODAY]||{},o);let l={};try{l=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}l[TODAY]=H[TODAY];try{localStorage.setItem(KEY,JSON.stringify(l))}catch(e){}
-   fillSel();drawSum(rows,TODAY);table(TODAY);const lastBar=(ms[0]&&ms[0].t&&ms[0].t.length)?ms[0].t[ms[0].t.length-1]:"";let cut=lastBar?(lastBar.slice(0,2)+":"+lastBar.slice(2)):"";if(cut>"15:00")cut="15:00";st.textContent="缓存 "+(LIVE.updated||bj().toLocaleString("zh-CN",{hour12:false}))+(cut?" · 行情截止 "+cut:"")+" · 来源"+(LIVE.src||"站点")+" · "+(trading()?"交易中":"非交易时段")+" · 云端约5分钟"}
+   fillSel();drawSum(rows,TODAY);table(TODAY);const lastBar=(ms[0]&&ms[0].t&&ms[0].t.length)?ms[0].t[ms[0].t.length-1]:"";let cut=lastBar?(lastBar.slice(0,2)+":"+lastBar.slice(2)):"";if(cut>"15:00")cut="15:00";st.textContent="缓存 "+(LIVE.updated||bj().toLocaleString("zh-CN",{hour12:false}))+(cut?" · 行情截止 "+cut:"")+" · "+(trading()?"交易中":"非交易时段")+" · 云端约5分钟"}
   else{const rows=await sseRows();const d=view,h=H[d]||{};let m=null;try{m=await j("./data/minutes/"+d+".json")}catch(e){}
    E.forEach((e,i)=>{const x=m&&m.etfs[e[1]];x?drawEtf(i,x):noMin(i,h[e[0]])});
    if(!m){bn.style.display="block";bn.textContent=d+"：分时未存档，仅显示汇总数字（合计 "+(h["合计"]!=null?(+h["合计"]).toFixed(2)+" 亿":"无")+"）。"}else bn.style.display="none";
