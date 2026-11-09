@@ -86,6 +86,9 @@ details.note p{position:absolute;right:0;top:100%;z-index:20;width:min(520px,cal
 
 /* ===== 日度汇总 ===== */
 .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:28px}
+.hx{height:190px;margin:6px 8px 0}
+.hxt{padding:6px 16px 2px;font-size:13px;line-height:1.75;color:var(--ink-2)}
+.hxn{padding:2px 16px 14px;font-size:11.5px;line-height:1.7;color:var(--muted)}
 .tbx{overflow-x:auto}
 table{border-collapse:collapse;width:100%;min-width:560px;table-layout:fixed;font-size:14px}
 th,td{padding:10px 16px;text-align:right;white-space:nowrap}
@@ -190,8 +193,16 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
 <div id="banner"></div>
 
 <!-- ===== 八宫格 ===== -->
-<div class="sec"><h2>分时走势（盘中活跃度）</h2><details class="note"><summary><span>口径说明</span></summary><p>上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；大额分钟成交额估算 = 当日蓝柱成交额合计（二级市场成交额阈值代理，非身份、非净流向）；MACD(12,26,9)。<b>同时点倍数</b> = 当日到此刻的累计成交额 ÷（该只 ETF 过去 20 个完整交易日全天均额 × 该时点历史平均已走完比例），按 5 分钟粒度对齐；所以 11:30 的半天成交额不会直接跟全天均额比。比例逐只不同（近期样本约 47%–68%），所以不套用同一个倍数。<b>主动净买入</b> =（外盘−内盘）/（外盘+内盘）× 累计成交额，是逐笔主动方向的推算：不是资金净流入，不是 ETF 申赎净流入，不含大宗与协议转让，也不代表任何机构身份；一二级套利、做市双边报价都会稀释它。仅「今日实时」页面约每 30 秒重读站点缓存；盘中数据由 GitHub Actions 约每 5 分钟写入（定时可能推迟，非券商级实时）。历史日为存档静态数据。数据：腾讯行情（经站点缓存）+ 新浪 5 分钟 K 线（同时点基线）。</p></details></div>
+<div class="sec"><h2>分时走势（盘中活跃度）</h2><details class="note"><summary><span>口径说明</span></summary><p>上图为相对昨收的涨跌幅%；中图蓝柱 = 单分钟成交额 &gt; 1 亿；大额分钟成交额估算 = 当日蓝柱成交额合计（二级市场成交额阈值代理，非身份、非净流向）；MACD(12,26,9)。<b>同时点倍数</b> = 当日到此刻的累计成交额 ÷（该只 ETF 过去 20 个完整交易日全天均额 × 该时点历史平均已走完比例），按 5 分钟粒度对齐；所以 11:30 的半天成交额不会直接跟全天均额比。比例逐只不同（近期样本约 47%–68%），所以不套用同一个倍数。<b>主动净买入</b> =（外盘−内盘）/（外盘+内盘）× 累计成交额，是逐笔主动方向的推算：不是资金净流入，不是 ETF 申赎净流入，不含大宗与协议转让，也不代表任何机构身份；一二级套利、做市双边报价都会稀释它。仅「今日实时」页面约每 30 秒重读站点缓存；盘中数据由 GitHub Actions 约每 5 分钟写入（定时可能推迟，非券商级实时）。历史日为存档静态数据。数据：腾讯行情（经站点缓存）+ 新浪 5 分钟 K 线（同时点曲线、尾盘占比）+ 新浪 60 分钟 K 线（下方日成交额历史）。</p></details></div>
 <div class="g" id="g"></div>
+
+<!-- ===== 成交额历史（新浪日聚合回补） ===== -->
+<div class="sec"><h2>成交额历史（近 120 个交易日 · 七只合计）</h2><span class="side" id="hxSide">加载中…</span></div>
+<section class="panel" id="histPanel">
+ <div class="hx" id="histChart"></div>
+ <div class="hxt" id="histTxt">—</div>
+ <div class="hxn">口径：新浪 60 分钟 K 按日累加（每根都带成交额，四根相加即当日成交额），与站点分钟累计同源；已核最近一个完整交易日合计与站点读数一致。图中只画七只合计的二级市场成交额，不含大宗与协议转让，也不能当作申赎或任何机构身份。</div>
+</section>
 
 <!-- ===== 日度汇总 ===== -->
 <div class="sec"><h2>日度汇总</h2><span class="side">点击一行切换到该日</span></div>
@@ -372,6 +383,52 @@ async function liveEtfTx(code){const raw=(await j("https://web.ifzq.gtimg.cn/app
 /* ===== 同时点对齐：当日到此刻的累计成交额 ÷ (20日均额 × 该时点历史平均进度) ===== */
 let BASE=null;
 async function loadBaseline(){try{const r=await fetch('preview-data/turnover-baseline.json?t='+Date.now(),{cache:'no-store'});if(r.ok){BASE=await r.json();window.BASE=BASE;if(typeof kpi==='function'&&TODAY)kpi(TODAY)}}catch(e){}}
+
+/* ===== 成交额历史：新区 60 分钟 K 按日累加回补（只画七只合计） ===== */
+let TH=null,histChart2=null;
+async function loadTurnoverHist(){
+ try{
+  const r=await fetch('preview-data/turnover-history.json?t='+Date.now(),{cache:'no-store'});
+  if(!r.ok)throw new Error('http '+r.status);
+  TH=await r.json();
+ }catch(e){
+  $('hxSide').textContent='历史未取到';
+  $('histTxt').textContent='历史序列暂时不可用（下一次数据更新任务会重新生成），不影响上面的实时读数。';
+  return;
+ }
+ drawTurnoverHist();
+}
+function drawTurnoverHist(){
+ const node=$('histChart'),side=$('hxSide'),txt=$('histTxt');
+ const all=(TH&&TH.total_days)||[];
+ if(!all.length){node.style.display='none';side.textContent='暂无';txt.textContent='没有可用的历史序列。';return}
+ const N=Math.min(all.length,120),rows=all.slice(-N);
+ const dates=rows.map(r=>r[0]),vals=rows.map(r=>r[1]),last=vals[vals.length-1],ld=dates[dates.length-1];
+ const below=all.filter(r=>r[1]<last).length,pr=Math.round(below/all.length*100);
+ side.textContent=TH.window[0]+' → '+TH.window[1]+' · 共 '+TH.n_days+' 个完整交易日';
+ const vs20=TH.avg20?((last/TH.avg20-1)*100):null;
+ let lead='今天（'+ld+'）七只合计 <b>'+last.toFixed(1)+' 亿</b>';
+ if(vs20!==null)lead+='，'+(vs20<0?'比近 20 日日均低 ':'比近 20 日日均高 ')+Math.abs(vs20).toFixed(0)+'%';
+ lead+='。';
+ let rank='在全部 '+all.length+' 个交易日里，'+(below===0?'<b>这是最低的一天</b>':(below===all.length-1?'<b>这是最高的一天</b>':'有 <b>'+below+'</b> 天比今天更低（约第 '+pr+' 百分位）'))+'。';
+ const r60=(TH.avg20&&TH.avg60)?(TH.avg20/TH.avg60-1):0;
+ const volTxt=Math.abs(r60)>0.1?('近 20 日日均比近 60 日'+(r60>0?'高':'低')+Math.abs(r60*100).toFixed(0)+'%，最近一个月整体'+(r60>0?'在放量':'在缩量')+'。'):'近 20 日与近 60 日日均接近，量能没有明显变化。';
+ txt.innerHTML=lead+rank+'<br>近 20 日日均 '+(TH.avg20||0).toFixed(1)+' 亿、近 60 日日均 '+(TH.avg60||0).toFixed(1)+' 亿。'+volTxt+'这条只回答"今天的量算大还是小"，不回答谁在买。';
+ if(!histChart2)histChart2=echarts.init(node);
+ histChart2.setOption({
+  animation:false,grid:{left:46,right:12,top:14,bottom:24},
+  tooltip:{trigger:'axis',axisPointer:{type:'line'},backgroundColor:'#fff',borderColor:'#e6e8ec',textStyle:{color:'#1f2733',fontSize:12},
+   formatter:ps=>{const o=ps[0];return o.axisValue+'<br>合计 '+o.data.toFixed(1)+' 亿';}},
+  xAxis:{type:'category',data:dates,axisLine:{lineStyle:{color:'#e1e4e9'}},axisTick:{show:false},
+   axisLabel:{color:'#9aa1ab',fontSize:11,interval:Math.max(0,Math.ceil(dates.length/6)-1),formatter:v=>String(v).slice(5)}},
+  yAxis:{type:'value',name:'亿',nameTextStyle:{color:'#9aa1ab',fontSize:11},splitLine:{lineStyle:{color:'#f0f1f4'}},
+   axisLabel:{color:'#9aa1ab',fontSize:11}},
+  series:[{type:'bar',data:vals,barWidth:'62%',
+   itemStyle:{color:ps=>ps.dataIndex===vals.length-1?'#3d6a9e':'#ccd5e0',borderRadius:[2,2,0,0]},
+   markLine:{silent:true,symbol:'none',label:{show:false},
+    lineStyle:{color:'#9aa1ab',type:'dashed',width:1},data:[{yAxis:TH.avg20}]}}]
+ });
+}
 function barIdx(t){const s=String(t).replace(/\D/g,''),hh=+s.slice(0,2),mm=+s.slice(2),m=hh*60+mm;
  // 只算"已走完"的 5 分钟 bar：当前那根未走完，不能用它的累计占比当分母
  if(m<=690){const fin=Math.min(24,Math.max(1,Math.floor((m-570)/5)));return fin-1}
@@ -633,5 +690,5 @@ function renderDisc(){
  $('discBody').innerHTML='<div style="padding:4px 0"><b style="color:var(--ink)">'+(b.total_value_label||'待核')+'</b><div style="font-size:12px;color:var(--muted);margin-top:2px">报告期末：2025-12-31（2025 年报）· 披露日：未核实（二手报道 2026-04-08 转引，非直取原文）</div></div>'+holders;
  $('discFoot').textContent=(b.reconciliation||'')+' 仅规模参照，不并入当日资金统计。';
 }
-(async()=>{await loadHist();await loadBaseline();fillSel();await refresh();await loadStatus();await loadOfficial();await loadShareHistory();await loadDisc();setInterval(()=>{if(view=="live")refresh()},30000)})();
+(async()=>{await loadHist();await loadTurnoverHist();await loadBaseline();fillSel();await refresh();await loadStatus();await loadOfficial();await loadShareHistory();await loadDisc();setInterval(()=>{if(view=="live")refresh()},30000)})();
 </script></body></html>

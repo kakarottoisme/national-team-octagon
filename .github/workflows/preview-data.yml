@@ -53,6 +53,10 @@ jobs:
         shell: bash
         run: python3 preview-tools/turnover_baseline.py
 
+      - name: Refresh daily turnover history (新浪 60 分钟 K 按日累加回补)
+        shell: bash
+        run: python3 preview-tools/turnover_history.py
+
       - name: Commit only preview-data/ then push (不force、不reset丢数据)
         shell: bash
         run: |
@@ -61,7 +65,7 @@ jobs:
           STAMP=$(date -u +%Y-%m-%dT%H:%MZ)
 
           # 只暂存隔离目录,绝不 add 其它路径
-          git add preview-data/official preview-data/status.json preview-data/global.json preview-data/turnover-baseline.json
+          git add preview-data/official preview-data/status.json preview-data/global.json preview-data/turnover-baseline.json preview-data/turnover-history.json
           if git diff --cached --quiet; then
             echo "preview-data 无变化,不提交"
             exit 0
