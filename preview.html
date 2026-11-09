@@ -449,11 +449,14 @@ function kpi(cur){const h=H[cur]||{},f=v=>v==null?"—":(+v).toFixed(2);
   if(hhmm>="15:00"&&LIVE&&LIVE.etfs){
    let todayTail=0,todayTot=0,baseTail=0,baseW=0;
    E.forEach(([n,code])=>{const m=LIVE.etfs[code],b=BASE&&BASE.codes&&BASE.codes[code];if(!m||!m.a||!b)return;
-    const s=m.a.reduce((x,v)=>x+v,0);if(!(s>0))return;
-    todayTail+=m.a.slice(-6).reduce((x,v)=>x+v,0);todayTot+=s;baseTail+=b.avg_amt_yi*b.tail_share;baseW+=b.avg_amt_yi});
+    const s=m.a.reduce((x,v)=>x+Math.max(0,v),0);if(!(s>0))return;
+    // 尾盘固定取 14:35–15:00 六根 bar 按时间定位，不按"最后 6 根"（收盘后行情商常追加一根时间大于 15:00 的空 bar）
+    const tb=(m.t||[]).map((x,i)=>[String(x).replace(/\D/g,''),m.a[i]]).filter(x=>x[0]>"1430"&&x[0]<="1500");
+    if(tb.length<4)return;
+    todayTail+=tb.reduce((x,v)=>x+Math.max(0,v[1]||0),0);todayTot+=s;baseTail+=b.avg_amt_yi*b.tail_share;baseW+=b.avg_amt_yi});
    if(todayTot>0&&baseW>0)tailTxt=" · 尾盘占比 "+(todayTail/todayTot*100).toFixed(1)+"%（20日均 "+(baseTail/baseW*100).toFixed(1)+"%）";
   }
-  kAf.textContent=(hhmm?"截至 "+hhmm:"")+tailTxt;
+  const shown=(hhmm>"15:00"?"15:00":hhmm);kAf.textContent=(shown?"截至 "+shown:"")+tailTxt;
  }else{kA.textContent="—";kAf.textContent="仅今日实时提供，历史日不补算"}
  const ratio=(tot!=null&&dens.length)?tot/dens.reduce((a,b)=>a+b,0):null;
  if(ratio!=null){
