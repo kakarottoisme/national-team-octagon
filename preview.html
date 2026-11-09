@@ -41,7 +41,7 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
 .kpi .lb{font-size:12px;color:var(--muted)}
 .kpi .vl{margin-top:2px;font-size:24px;line-height:1.25;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi .vl small{font-size:13px;font-weight:400;color:var(--muted);margin-left:3px}
-.kpi .ft{margin-top:2px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .ft{margin-top:2px;font-size:12px;line-height:1.55;color:var(--muted)}
 .guide{margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:0 16px 2px}
 .guide .gh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:11px 0 9px;border-bottom:1px solid var(--line-2)}
 .guide .gh b{font-size:13.5px;font-weight:600;color:var(--ink)}
@@ -50,6 +50,12 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
 .gf .fn{color:var(--ink);font-weight:600}
 .gf .fd{color:var(--ink-2)}
 .gf .fd em{font-style:normal;color:var(--muted)}
+.guide-link{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px;margin-top:10px;padding:11px 16px;background:var(--card);border:1px solid var(--line);border-radius:10px;text-decoration:none;font-size:12.5px;line-height:1.6}
+.guide-link:hover{border-color:#cfd8e4;background:#fcfdfe}
+.guide-link .gl-l{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;min-width:0}
+.guide-link .gl-l b{font-size:13px;color:var(--ink);font-weight:600}
+.guide-link .gl-l span{color:var(--ink-2)}
+.guide-link .gl-r{color:var(--accent);white-space:nowrap}
 .gsub{padding:10px 0 2px;font-size:12px;color:var(--muted);letter-spacing:.02em}
 .gmore{margin:6px 0 10px;border:0}
 .gmore summary{cursor:pointer;font-size:12px;color:var(--accent)}
@@ -67,7 +73,7 @@ details.note p{position:absolute;right:0;top:100%;z-index:20;width:min(520px,cal
 .share-fallback[hidden]{display:none}
 /* 分享仅渲染当前已显示内容的副本；不截取浏览器或其他窗口，不重新取数。 */
 .share-snapshot{position:fixed;left:-100000px;top:0;max-width:none!important;margin:0!important;padding:4px 24px 12px!important;background:var(--page);pointer-events:none}
-.share-snapshot .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+.share-snapshot .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
 .share-snapshot .g{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .share-snapshot .c.sum .t .cd{white-space:normal}
 .share-snapshot .ch{height:210px}
@@ -98,6 +104,9 @@ details.note p{position:absolute;right:0;top:100%;z-index:20;width:min(520px,cal
 
 /* ===== 日度汇总 ===== */
 .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:28px}
+.hxwin{display:inline-flex;gap:6px;margin-left:auto}
+.hxwin button{border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-size:12px;padding:4px 10px;border-radius:999px;cursor:pointer;font-family:inherit}
+.hxwin button.on{background:#eef2f7;border-color:#cfd8e4;color:var(--ink);font-weight:600}
 .hx{height:190px;margin:6px 8px 0}
 .hxt{padding:6px 16px 2px;font-size:13px;line-height:1.75;color:var(--ink-2)}
 .hxn{padding:2px 16px 14px;font-size:11.5px;line-height:1.7;color:var(--muted)}
@@ -119,7 +128,7 @@ tr.sel{background:var(--accent-bg)}
 
 @media(min-width:700px){
  .wrap{padding:0 24px}
- .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
  .g{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 }
 /* 按页面可用宽度判断：桌面打开浏览器侧栏后也保持四列，不依赖屏幕物理像素。 */
@@ -191,29 +200,15 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
 <!-- ===== 概览 ===== -->
 <div class="sec"><h2 id="kt">当日概览</h2><span class="side" id="st">加载中…</span></div>
 <div class="kpis">
- <div class="kpi"><div class="lb">七只合计成交额</div><div class="vl" id="kA">—</div><div class="ft" id="kAf">截至盘中</div></div>
  <div class="kpi"><div class="lb">同时点倍数</div><div class="vl" id="kB">—</div><div class="ft" id="kBf">对比 20 日同一时刻</div></div>
  <div class="kpi"><div class="lb">大额分钟成交额</div><div class="vl" id="k1">—</div><div class="ft">分钟成交额 &gt; 1 亿的合计</div></div>
  <div class="kpi"><div class="lb">主动净买入（推算）</div><div class="vl" id="kC">—</div><div class="ft" id="kCf">外盘 − 内盘推算，非资金净流入</div></div>
- <div class="kpi"><div class="lb">上证收盘</div><div class="vl" id="k2">—</div><div class="ft" id="k2f">上证指数</div></div>
  <div class="kpi"><div class="lb">已归档天数</div><div class="vl" id="k4">—</div><div class="ft" id="k4f">data/history.json</div></div>
 </div>
-<section class="guide">
- <div class="gh"><b>怎么读</b><span>顺序：① 合计成交额看今天热不热 → ② 同时点倍数看比平时热多少 → ③ 主动净买入看方向。其余是背景与口径。</span></div>
- <div class="gf"><div class="fn">七只合计成交额</div><div class="fd">这 7 只 ETF 今天在二级市场一共成交了多少钱（截至所标时刻）。<em>≠ 申购赎回金额，≠ 资金净流入，≠ 机构买入量</em>——它只回答“交易有多活跃”。</div></div>
- <div class="gf"><div class="fn">同时点倍数</div><div class="fd">当日累计成交额 ÷（过去 20 个完整交易日全天均额 × 该只此刻平均已走完的比例）。<em>1 倍左右算平常，明显放大才叫活跃</em>；11:30 的半天不会直接拿去跟全天均额比。<em>≠ 买卖力量对比，也不能说明是谁在成交</em>。</div></div>
- <div class="gf"><div class="fn">主动净买入（推算）</div><div class="fd">逐笔成交落在卖方报价（外盘）还是买方报价（内盘），据此推算主动买减主动卖，是方向线索。<em>≠ 资金净流入，≠ ETF 申赎，不含大宗与协议转让，不代表任何机构身份</em>；一二级套利和做市双边报价会稀释它。</div></div>
- <div class="gf"><div class="fn">大额分钟成交额</div><div class="fd">单分钟成交额 &gt; 1 亿的那些分钟，把它们的成交额加起来（阈值口径）。<em>≠ 大单，≠ 机构痕迹</em>；阈值一改数字就变。</div></div>
- <div class="gf"><div class="fn">尾盘占比</div><div class="fd">14:30–15:00 的成交额占全天多少，并与 20 日同一区间均值对照；<em>只在收盘后计算</em>，盘中显示“—”。<em>≠ 尾盘抢筹或砸盘</em>。</div></div>
- <div class="gf"><div class="fn">上证收盘</div><div class="fd">上证综指当日收盘点位与涨跌幅，<em>只作大盘背景</em>，与 ETF 名单无对应关系。</div></div>
- <div class="gf"><div class="fn">已归档天数</div><div class="fd">本地攒了多少天日度记录（data/history.json）。<em>只表示“存档几天”，不是数据源覆盖长度</em>。</div></div>
- <div class="gf"><div class="fn">图内元素</div><div class="fd">涨跌幅线 = 相对昨收的涨跌幅%，<em>不是价格本身</em>；蓝柱 = 单分钟成交额 &gt; 1 亿的分钟，<em>只标“这一分钟大”，不标买卖方向</em>；MACD(12,26,9) = 价格动量辅助线，<em>不做买卖信号</em>；成交额历史柱 = 七只合计的日成交额（新浪 60 分钟 K 按日累加），<em>深色柱=今天，虚线=近 20 日均额</em>。</div></div>
- <details class="gmore"><summary>口径与来源（公式 / 样本 / 局限）</summary><p>
-  公式：同时点倍数 = 当日累计成交额 ÷（20 日均额 × 已走完比例），比例逐只算，近期样本 47%–68%，所以不套统一系数；主动净买入 =（外盘 − 内盘）/（外盘 + 内盘）× 累计成交额；尾盘占比 = 14:30–15:00 成交额 ÷ 全天；大额分钟 = 单分钟 &gt; 1 亿的成交额之和。<br>
-  样本：分时 20 个完整交易日（新浪 5 分钟 K，单次上限约 22 日）；日成交额 255 个交易日（新浪 60 分钟 K，2025-10-22 起）；最近一个完整交易日的累加合计已与站点分钟读数核对一致（差 0.00%）。<br>
-  局限：三个数字口径不同，<b>不能相加</b>；大宗与协议转让不在逐笔内外盘里；盘中数据由 GitHub Actions 约每 5 分钟写入（定时可能推迟，非券商级实时）；历史日是存档静态数据；不含任何身份判断或国家队口径。
- </p></details>
-</section>
+<a class="guide-link" href="preview-guide.html">
+ <span class="gl-l"><b>怎么读</b><span>先看「同时点倍数」判断今天热不热，再看「主动净买入」判断方向</span></span>
+ <span class="gl-r">字段含义与口径 · 公式 / 样本 / 局限 →</span>
+</a>
 <div id="banner"></div>
 
 <!-- ===== 八宫格 ===== -->
@@ -221,7 +216,7 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
 <div class="g" id="g"></div>
 
 <!-- ===== 成交额历史（新浪日聚合回补） ===== -->
-<div class="sec"><h2>成交额历史（近 120 个交易日 · 七只合计）</h2><span class="side" id="hxSide">加载中…</span></div>
+<div class="sec"><h2 id="hxTitle">成交额历史（七只合计）</h2><span class="hxwin" id="hxWin"><button type="button" data-n="20" onclick="setHxWin(20)">近 20</button><button type="button" data-n="60" onclick="setHxWin(60)">近 60</button><button type="button" data-n="120" onclick="setHxWin(120)">近 120</button><button type="button" data-n="0" onclick="setHxWin(0)">全部</button></span><span class="side" id="hxSide">加载中…</span></div>
 <section class="panel" id="histPanel">
  <div class="hx" id="histChart"></div>
  <div class="hxt" id="histTxt">—</div>
@@ -422,14 +417,19 @@ async function loadTurnoverHist(){
  }
  drawTurnoverHist();
 }
+let HXWIN=0; // 0 = 全部交易日
+function setHxWin(n){HXWIN=+n||0;drawTurnoverHist()}
 function drawTurnoverHist(){
  const node=$('histChart'),side=$('hxSide'),txt=$('histTxt');
  const all=(TH&&TH.total_days)||[];
  if(!all.length){node.style.display='none';side.textContent='暂无';txt.textContent='没有可用的历史序列。';return}
- const N=Math.min(all.length,120),rows=all.slice(-N);
+ const total=all.length,N=HXWIN?Math.min(total,HXWIN):total,rows=all.slice(-N);
  const dates=rows.map(r=>r[0]),vals=rows.map(r=>r[1]),last=vals[vals.length-1],ld=dates[dates.length-1];
  const below=all.filter(r=>r[1]<last).length,pr=Math.round(below/all.length*100);
- side.textContent=TH.window[0]+' → '+TH.window[1]+' · 共 '+TH.n_days+' 个完整交易日';
+ const title=$('hxTitle');const tot=TH.n_days||total;
+ if(title)title.textContent='成交额历史（七只合计 · '+(N<total?'近 '+N+' 天':'全部 '+tot+' 天')+'）';
+ side.textContent=TH.window[0]+' → '+TH.window[1]+' · 共 '+tot+' 个完整交易日'+(N<total?'（当前显示最近 '+N+' 天）':'（已全部画出）');
+ const box=$('hxWin');if(box)[...box.querySelectorAll('button')].forEach(b=>b.className=(+b.dataset.n===HXWIN?'on':''));
  const vs20=TH.avg20?((last/TH.avg20-1)*100):null;
  let lead='今天（'+ld+'）七只合计 <b>'+last.toFixed(1)+' 亿</b>';
  if(vs20!==null)lead+='，'+(vs20<0?'比近 20 日日均低 ':'比近 20 日日均高 ')+Math.abs(vs20).toFixed(0)+'%';
@@ -437,17 +437,19 @@ function drawTurnoverHist(){
  let rank='在全部 '+all.length+' 个交易日里，'+(below===0?'<b>这是最低的一天</b>':(below===all.length-1?'<b>这是最高的一天</b>':'有 <b>'+below+'</b> 天比今天更低（约第 '+pr+' 百分位）'))+'。';
  const r60=(TH.avg20&&TH.avg60)?(TH.avg20/TH.avg60-1):0;
  const volTxt=Math.abs(r60)>0.1?('近 20 日日均比近 60 日'+(r60>0?'高':'低')+Math.abs(r60*100).toFixed(0)+'%，最近一个月整体'+(r60>0?'在放量':'在缩量')+'。'):'近 20 日与近 60 日日均接近，量能没有明显变化。';
- txt.innerHTML=lead+rank+'<br>近 20 日日均 '+(TH.avg20||0).toFixed(1)+' 亿、近 60 日日均 '+(TH.avg60||0).toFixed(1)+' 亿。'+volTxt+'这条只回答"今天的量算大还是小"，不回答谁在买。';
+ txt.innerHTML=lead+rank+'<br>近 20 日日均 '+(TH.avg20||0).toFixed(1)+' 亿、近 60 日日均 '+(TH.avg60||0).toFixed(1)+' 亿。'+volTxt+'这条只回答"今天的量算大还是小"，不回答谁在买。'+(total>N?'':"图上已画出全部 "+total+" 个交易日，可用滚轮/双指放大、拖动回看更早的日期。");
  if(!histChart2)histChart2=echarts.init(node);
  histChart2.setOption({
-  animation:false,grid:{left:46,right:12,top:14,bottom:24},
+  animation:false,grid:{left:46,right:12,top:14,bottom:34},
+  dataZoom:[{type:'inside',zoomOnMouseWheel:true,minValueSpan:8},{type:'slider',height:14,bottom:4,borderColor:'#eef0f3',
+   fillerColor:'#e8eef6',handleSize:12,showDetail:false,brushSelect:false}],
   tooltip:{trigger:'axis',axisPointer:{type:'line'},backgroundColor:'#fff',borderColor:'#e6e8ec',textStyle:{color:'#1f2733',fontSize:12},
    formatter:ps=>{const o=ps[0];return o.axisValue+'<br>合计 '+o.data.toFixed(1)+' 亿';}},
   xAxis:{type:'category',data:dates,axisLine:{lineStyle:{color:'#e1e4e9'}},axisTick:{show:false},
    axisLabel:{color:'#9aa1ab',fontSize:11,interval:Math.max(0,Math.ceil(dates.length/6)-1),formatter:v=>String(v).slice(5)}},
   yAxis:{type:'value',name:'亿',nameTextStyle:{color:'#9aa1ab',fontSize:11},splitLine:{lineStyle:{color:'#f0f1f4'}},
    axisLabel:{color:'#9aa1ab',fontSize:11}},
-  series:[{type:'bar',data:vals,barWidth:'62%',
+  series:[{type:'bar',data:vals,barMaxWidth:14,
    itemStyle:{color:ps=>ps.dataIndex===vals.length-1?'#3d6a9e':'#ccd5e0',borderRadius:[2,2,0,0]},
    markLine:{silent:true,symbol:'none',label:{show:false},
     lineStyle:{color:'#9aa1ab',type:'dashed',width:1},data:[{yAxis:TH.avg20}]}}]
@@ -511,7 +513,7 @@ function drawSum(rows,cur){const r=rows.filter(x=>x[0]>="2026-10-15"),ds=r.map(x
 /* 概览指标：只读取已在 H 中的数字，不另取数据 */
 function kpi(cur){const h=H[cur]||{},f=v=>v==null?"—":(+v).toFixed(2);
  document.getElementById("kt").textContent=(view=="live"?"今日概览":"当日概览")+(cur?" · "+cur:"");
- const kA=document.getElementById("kA"),kAf=document.getElementById("kAf"),kB=document.getElementById("kB"),kBf=document.getElementById("kBf"),kC=document.getElementById("kC"),kCf=document.getElementById("kCf");
+ const kB=document.getElementById("kB"),kBf=document.getElementById("kBf"),kC=document.getElementById("kC"),kCf=document.getElementById("kCf");
  let tot=null,nets=[],dens=[],progs=[],lastT="";
  if(view=="live"&&LIVE&&LIVE.etfs){
   E.forEach(([n,code])=>{const m=LIVE.etfs[code];if(!m)return;
@@ -523,10 +525,10 @@ function kpi(cur){const h=H[cur]||{},f=v=>v==null?"—":(+v).toFixed(2);
    if(m.net_buy!=null)nets.push(+m.net_buy);
   });
  }
+ let totF="—",tailTxt="";
  if(tot!=null){
-  kA.innerHTML=tot.toFixed(1)+"<small>亿</small>";
+  totF=tot.toFixed(1);
   const hhmm=lastT?(lastT.slice(0,2)+":"+lastT.slice(2)):"";
-  let tailTxt="";
   if(hhmm>="15:00"&&LIVE&&LIVE.etfs){
    let todayTail=0,todayTot=0,baseTail=0,baseW=0;
    E.forEach(([n,code])=>{const m=LIVE.etfs[code],b=BASE&&BASE.codes&&BASE.codes[code];if(!m||!m.a||!b)return;
@@ -535,24 +537,23 @@ function kpi(cur){const h=H[cur]||{},f=v=>v==null?"—":(+v).toFixed(2);
     const tb=(m.t||[]).map((x,i)=>[String(x).replace(/\D/g,''),m.a[i]]).filter(x=>x[0]>"1430"&&x[0]<="1500");
     if(tb.length<4)return;
     todayTail+=tb.reduce((x,v)=>x+Math.max(0,v[1]||0),0);todayTot+=s;baseTail+=b.avg_amt_yi*b.tail_share;baseW+=b.avg_amt_yi});
-   if(todayTot>0&&baseW>0)tailTxt=" · 尾盘占比 "+(todayTail/todayTot*100).toFixed(1)+"%（20日均 "+(baseTail/baseW*100).toFixed(1)+"%）";
+   if(todayTot>0&&baseW>0)tailTxt="尾盘 "+(todayTail/todayTot*100).toFixed(1)+"% · 20 日均 "+(baseTail/baseW*100).toFixed(1)+"%";
   }
-  const shown=(hhmm>"15:00"?"15:00":hhmm);kAf.textContent=(shown?"截至 "+shown:"")+tailTxt;
- }else{kA.textContent="—";kAf.textContent="仅今日实时提供，历史日不补算"}
+ }
  const ratio=(tot!=null&&dens.length)?tot/dens.reduce((a,b)=>a+b,0):null;
  if(ratio!=null){
   kB.innerHTML=ratio.toFixed(2)+"<small>×</small>";
-  const ap=Math.round(progs.reduce((a,b)=>a+b,0)/progs.length);
-  kBf.textContent=(ap>=99?"全天 vs 20 日均额 · "+dens.length+"/7 只":"20日同时点 · 已完成 "+ap+"% · "+dens.length+"/7 只");
- }else{kB.textContent="—";kBf.textContent="对比 20 日同一时刻"}
+  const baseSum=dens.reduce((a,b)=>a+b,0),ap=Math.round(progs.reduce((a,b)=>a+b,0)/progs.length);
+  let l1=totF+" 亿 ÷ 20 日同时点基准 "+baseSum.toFixed(1)+" 亿 · "+dens.length+"/7 只";
+  if(ap<99)l1+=" · 已完成 "+ap+"%";
+  kBf.innerHTML=l1+(tailTxt?"<br>"+tailTxt:"");
+ }else{kB.textContent="—";kBf.textContent="历史日不补算同时点；切回「今日实时」查看"}
  if(nets.length){
   const nb=nets.reduce((a,b)=>a+b,0);
   kC.innerHTML=(nb>=0?"+":"")+nb.toFixed(1)+"<small>亿</small>";
   kCf.textContent="外盘−内盘推算 · "+nets.length+"/7 只 · 非净流入";
  }else{kC.textContent="—";kCf.textContent="逐笔方向需行情外盘/内盘字段"}
  const c=h["上证涨跌幅"];document.getElementById("k1").innerHTML=h["合计"]!=null?f(h["合计"])+"<small>亿</small>":"—";
- document.getElementById("k2").textContent=f(h["上证收盘"]);
- document.getElementById("k2f").textContent=c!=null?"较前收 "+(c>0?"+":"")+(+c).toFixed(2)+"%":"上证指数";
  const ks=Object.keys(H).sort();document.getElementById("k4").innerHTML=ks.length+"<small>天</small>";document.getElementById("k4f").textContent=ks.length?ks[0]+" 起":"data/history.json"}
 function table(cur){const tb=document.getElementById("tb");tb.innerHTML="";Object.keys(H).sort().reverse().forEach(d=>{const h=H[d],c=h["上证涨跌幅"],tr=document.createElement("tr");if(d==cur)tr.className="sel";
  tr.tabIndex=0;tr.innerHTML="<td>"+d+"</td><td>"+(h["合计"]!=null?(+h["合计"]).toFixed(2):"-")+"</td><td>"+(h["上证收盘"]!=null?(+h["上证收盘"]).toFixed(2):"-")+"</td><td>"+(c!=null?(c>0?"+":"")+(+c).toFixed(2)+"%":"-")+"</td><td><span class='tag "+(c>0?"up":"")+"'>"+(c==null?"-":c>0?"涨":c<0?"跌":"平")+"</span></td>";
