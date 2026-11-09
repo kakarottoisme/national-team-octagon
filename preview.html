@@ -487,7 +487,7 @@ async function refresh(){if(busy)return;busy=true;const rb=document.getElementBy
    if(LIVE.estimates){Object.assign(o,LIVE.estimates);s=LIVE.estimates["合计"]??s}else o["合计"]=+s.toFixed(2);
    const ix=rows.findIndex(x=>x[0]==TODAY);if(ix>0&&o["上证收盘"]==null){o["上证收盘"]=+rows[ix][2];o["上证涨跌幅"]=+((rows[ix][2]/rows[ix-1][2]-1)*100).toFixed(2)}
    H[TODAY]=Object.assign({},H[TODAY]||{},o);let l={};try{l=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}l[TODAY]=H[TODAY];try{localStorage.setItem(KEY,JSON.stringify(l))}catch(e){}
-   fillSel();drawSum(rows,TODAY);table(TODAY);const lastBar=(ms[0]&&ms[0].t&&ms[0].t.length)?ms[0].t[ms[0].t.length-1]:"";const cut=lastBar?(lastBar.slice(0,2)+":"+lastBar.slice(2)):"";st.textContent="缓存 "+(LIVE.updated||bj().toLocaleString("zh-CN",{hour12:false}))+(cut?" · 行情截止 "+cut:"")+" · 来源"+(LIVE.src||"站点")+" · "+(trading()?"交易中":"非交易时段")+" · 云端约5分钟"}
+   fillSel();drawSum(rows,TODAY);table(TODAY);const lastBar=(ms[0]&&ms[0].t&&ms[0].t.length)?ms[0].t[ms[0].t.length-1]:"";let cut=lastBar?(lastBar.slice(0,2)+":"+lastBar.slice(2)):"";if(cut>"15:00")cut="15:00";st.textContent="缓存 "+(LIVE.updated||bj().toLocaleString("zh-CN",{hour12:false}))+(cut?" · 行情截止 "+cut:"")+" · 来源"+(LIVE.src||"站点")+" · "+(trading()?"交易中":"非交易时段")+" · 云端约5分钟"}
   else{const rows=await sseRows();const d=view,h=H[d]||{};let m=null;try{m=await j("./data/minutes/"+d+".json")}catch(e){}
    E.forEach((e,i)=>{const x=m&&m.etfs[e[1]];x?drawEtf(i,x):noMin(i,h[e[0]])});
    if(!m){bn.style.display="block";bn.textContent=d+"：分时未存档，仅显示汇总数字（合计 "+(h["合计"]!=null?(+h["合计"]).toFixed(2)+" 亿":"无")+"）。"}else bn.style.display="none";
