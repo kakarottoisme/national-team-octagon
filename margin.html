@@ -64,10 +64,123 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
  .view-tab{flex:1;min-height:40px;padding:0 12px}
  .ctl{gap:8px}select{min-width:120px}
 }
-</style></head><body>
-<header class="top"><div class="wrap">
- <div class="brand">
-  <span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+
+/* ===== Unified dashboard UI v1: common geometry across all four tabs ===== */
+html{scrollbar-gutter:stable;-webkit-text-size-adjust:100%}
+body.ui-page{margin:0;overflow-x:visible;color:#4a5260;background:#f5f6f8;font:14px/1.6 "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.ui-page .wrap{width:100%;max-width:1600px;margin:0 auto;padding-left:24px;padding-right:24px}
+.ui-page .top{background:#fff;border-bottom:1px solid #e6e8ec}
+.ui-page .top .shell-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;height:72px;padding-top:14px;padding-bottom:14px}
+.ui-page .brand{display:grid;grid-template-columns:38px minmax(0,1fr);align-items:center;gap:10px;min-width:0;height:44px}
+.ui-page .mark,.ui-page .mark svg{display:block;width:38px;height:38px;flex:none;border-radius:0;background:transparent}
+.ui-page .brand-copy{min-width:0}
+.ui-page h1{margin:0;font-size:18px;font-weight:600;line-height:26px;color:#1f2733;white-space:nowrap}
+.ui-page .crumb{font-size:12px;line-height:18px;color:#868e9a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ui-page .pv-chip{display:inline-block;margin-left:8px;vertical-align:2px;font-size:11px;line-height:16px;height:20px;padding:1px 7px;border-radius:8px;background:#fdf3e0;border:1px solid #ecd9a6;color:#8a6d2f;font-weight:500;white-space:nowrap}
+.ui-page .ctl{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-end;gap:8px;height:44px;min-width:0}
+.ui-page .ctl label{display:flex;align-items:center;gap:6px;font-size:13px;color:#868e9a;white-space:nowrap}
+.ui-page button:not(.mrow),.ui-page select{box-sizing:border-box;font-family:inherit;font-size:14px!important;line-height:22px;height:44px!important;min-width:44px;padding:0 16px!important;border:1px solid #e0e5ed!important;border-radius:14px!important;background:#fff;color:#1f2733;box-shadow:0 1px 2px rgba(31,39,51,.025);cursor:pointer;vertical-align:middle}
+.ui-page select{max-width:100%;min-width:132px}
+.ui-page button:not(.mrow):hover,.ui-page select:hover{background:#f8faff;border-color:#bccce1!important}
+.ui-page button:disabled{opacity:.65;cursor:default;color:#868e9a}
+.ui-page button.on,.ui-page .gchip.on,.ui-page .chip.on{background:#edf3fc;border-color:#c8daf2!important;color:#3f6baf;font-weight:600}
+.ui-page #shareBtn{background:#edf3fc;border-color:#dfe9f7!important;color:#416698;font-weight:500}
+.ui-page :focus-visible{outline:2px solid #9fb6d3;outline-offset:2px}
+.ui-page .top .nav-row{display:block;height:64px;padding-top:0;padding-bottom:12px}
+.ui-page .view-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;width:528px;max-width:100%;height:52px;gap:4px;padding:4px;border:1px solid #e7ebf0;border-radius:18px;background:#f4f6f9;overflow:visible}
+.ui-page .view-tab{display:flex;flex:none;align-items:center;justify-content:center;gap:7px;min-width:0;min-height:42px;height:42px;padding:0 10px;border-radius:14px;font-size:14px;line-height:20px;font-weight:500;white-space:nowrap;color:#7b8492;text-decoration:none}
+.ui-page .view-tab svg{display:block;width:16px;height:16px;flex:none}
+.ui-page .view-tab:hover{background:#e9edf4;color:#4c678e;text-decoration:none}
+.ui-page .view-tab[aria-current="page"]{background:#fff;color:#3f6baf;box-shadow:0 1px 4px rgba(39,63,101,.09);font-weight:600}
+.ui-page main.wrap{padding-top:20px;padding-bottom:32px}
+.ui-page .sec{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;min-height:32px;margin:24px 0 12px}
+.ui-page main>.sec:first-child{margin-top:0}
+.ui-page h2{margin:0;font-size:15px;font-weight:600;line-height:24px;color:#1f2733}
+.ui-page .sec .side,.ui-page #st{font-size:12px;line-height:20px;color:#868e9a;min-width:0}
+.ui-page .sec #st{margin:0;max-width:calc(100% - 180px)}
+.ui-page .panel{border:1px solid #e6e8ec;border-radius:10px;background:#fff;margin-bottom:24px}
+.ui-page .panel-head{padding:12px 16px;min-height:48px;gap:8px}
+.ui-page .panel-head .t{font-size:14px;line-height:22px}
+.ui-page .foot{font-size:12px;line-height:20px;padding:10px 16px 12px;color:#868e9a}
+.ui-page .kpis{grid-template-columns:repeat(2,minmax(0,1fr));border-radius:10px}
+.ui-page .kpi{padding:12px 16px;min-width:0}
+.ui-page .kpi:only-child{grid-column:1/-1}
+.ui-page .kpi .lb{font-size:12px;line-height:18px;color:#868e9a}
+.ui-page .kpi .vl{font-size:24px;line-height:30px;margin-top:2px}
+.ui-page .kpi .vl small{font-size:13px;font-weight:400;color:#868e9a}
+.ui-page .kpi .ft{font-size:12px;line-height:20px;margin-top:3px;white-space:normal;overflow:visible;text-overflow:clip}
+.ui-page table{font-size:14px}
+.ui-page th,.ui-page td{padding:10px 16px;line-height:22px}
+.ui-page th{font-size:12px;font-weight:500}
+.ui-page .tbx{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ui-page .ctl-row{padding:12px 16px;gap:8px;border:1px solid #e6e8ec;border-radius:10px;background:#fff}
+.ui-page .ctl-row label{font-size:13px;line-height:22px}
+.ui-page .filter-group{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0}
+.ui-page .filter-group label{flex:none}
+.ui-page .groups{gap:8px;margin:12px 0}
+.ui-page .mrow{padding:12px 16px;min-height:76px;border-radius:0;box-shadow:none}
+.ui-page .mrow .n{font-size:14px;line-height:22px}
+.ui-page .mrow .v{font-size:13px;line-height:20px}
+.ui-page button.guide-link{display:flex;height:auto!important;min-height:44px;padding:10px 16px!important;line-height:22px}
+.ui-page .guide-link .gl-l b{font-size:14px}
+.ui-page .guide-link .gl-l span,.ui-page .guide-link .gl-r{font-size:13px}
+.ui-page[data-ui-view="margin"] .panel{padding:12px 12px 0}
+.ui-page[data-ui-view="margin"] #ch{height:calc(100vh - 266px);min-height:440px}
+.ui-page #sparks>div[style*="display:grid"]{gap:12px!important}
+.ui-page #sparks button{font-size:13px!important}
+.ui-page #sparks>div[style*="display:grid"]>div{padding:16px!important;border-radius:10px!important}
+.ui-page .ui-mask{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:24px}
+.ui-page .ui-mask[hidden]{display:none}
+.ui-page .ui-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.58)}
+.ui-page .ui-dialog{position:relative;display:flex;flex-direction:column;width:min(920px,100%);max-height:calc(100dvh - 48px);overflow:hidden;background:#fff;border:1px solid #e6e8ec;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.24);transform:none;transition:none;padding:0}
+.ui-page .ui-modal-head{display:flex;flex:none;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border-bottom:1px solid #f0f1f4}
+.ui-page .ui-modal-head>div{min-width:0}
+.ui-page .ui-modal-head h3{margin:0;font-size:16px;line-height:24px;font-weight:600;color:#1f2733}
+.ui-page .ui-modal-head .sub,.ui-page .ui-modal-head #dCat{display:block;margin:4px 0 0;font-size:12px;line-height:20px;color:#868e9a}
+.ui-page button.ui-close{width:44px;height:44px!important;min-width:44px;flex:none;padding:0!important;position:static;font-size:22px!important;line-height:22px}
+.ui-page .ui-modal-body{min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:4px 20px 20px;font-size:14px;line-height:1.75}
+.ui-page .ui-modal-body .mf{grid-template-columns:132px minmax(0,1fr);padding:12px 0;font-size:14px;line-height:1.75}
+.ui-page .ui-modal-body .mf .fd{min-width:0}
+.ui-page .ui-modal-body .mstep{font-size:13px;line-height:1.75;padding:12px}
+.ui-page .ui-modal-body .mmore h4{font-size:14px;line-height:22px}
+.ui-page .ui-modal-body .mmore ul{font-size:14px;line-height:1.75}
+.ui-page .ui-modal-body dl{display:grid;grid-template-columns:132px minmax(0,1fr);gap:12px 16px;margin:16px 0 0;font-size:14px;line-height:1.75}
+.ui-page .ui-modal-body dt{color:#868e9a}
+.ui-page .ui-modal-body dd{margin:0;color:#4a5260;word-break:break-word;overflow-wrap:anywhere}
+.ui-page .ui-modal-body p{margin:12px 0 0;line-height:1.75}
+.ui-page .ui-modal-body .foot{padding:12px 0;border:0;font-size:14px;color:#4a5260;line-height:1.75}
+@media(min-width:700px){.ui-page .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:699px){
+ .ui-page .wrap{padding-left:16px;padding-right:16px}
+ .ui-page .top .shell-head{height:112px;grid-template-columns:minmax(0,1fr);grid-template-rows:44px 44px;gap:0;padding-top:12px;padding-bottom:12px}
+ .ui-page .brand{gap:10px}
+ .ui-page h1{font-size:17px;line-height:26px}
+ .ui-page .ctl{justify-content:flex-start;overflow-x:auto;scrollbar-width:none}
+ .ui-page .ctl::-webkit-scrollbar{display:none}
+ .ui-page .ctl>*{flex:none}
+ .ui-page .ctl select{min-width:112px;max-width:132px}
+ .ui-page .ctl button{padding:0 12px!important}
+ .ui-page .top .nav-row{height:64px;padding-top:0;padding-bottom:12px}
+ .ui-page .view-tabs{width:100%;height:52px;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;padding:4px}
+ .ui-page .view-tab{padding:0 4px;font-size:13px;height:42px;min-height:42px}
+ .ui-page .view-tab svg{display:none}
+ .ui-page main.wrap{padding-top:16px}
+ .ui-page main>.sec:first-child{gap:4px;align-items:flex-start}
+ .ui-page main>.sec:first-child #st{flex-basis:100%;max-width:100%;height:40px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+ .ui-page .sec{margin:20px 0 12px}
+ .ui-page .ui-mask{padding:12px}
+ .ui-page .ui-dialog{max-height:calc(100dvh - 24px)}
+ .ui-page .ui-modal-head{padding:12px;gap:8px}
+ .ui-page .ui-modal-body{padding:4px 12px 16px}
+ .ui-page .ui-modal-body .mf,.ui-page .ui-modal-body dl{grid-template-columns:1fr;gap:4px}
+ .ui-page .guide-link .gl-r{white-space:normal}
+ .ui-page[data-ui-view="margin"] .panel{padding:12px 4px 0}
+ .ui-page[data-ui-view="margin"] #ch{height:500px;min-height:440px}
+}
+@media(prefers-reduced-motion:reduce){.ui-page *{scroll-behavior:auto;transition:none!important}}
+/* ===== End unified dashboard UI ===== */
+</style></head><body class="ui-page" data-ui-view="margin">
+<header class="top"><div class="wrap shell-head"><div class="brand"><span class="mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
   <defs>
     <linearGradient id="signal-blue" x1="12" y1="49" x2="38" y2="13" gradientUnits="userSpaceOnUse">
       <stop stop-color="#507CEA"/><stop offset="1" stop-color="#64A5ED"/>
@@ -79,28 +192,26 @@ button:hover,select:hover{background:#f8faff;border-color:#bccce1}
   <path d="M9 46 25 16c2-4 7-4 9 0l16 30c2 4-1 7-5 7h-5L28 29 17 49c-2 4-10 3-8-3Z" fill="url(#signal-blue)"/>
   <path d="m32 47 13-24c2-4 8-1 6 3L40 49c-3 6-11 3-8-2Z" fill="url(#signal-cyan)"/>
   <circle cx="51" cy="14" r="5" fill="#77CFD9"/>
-</svg></span>
-  <div><h1>两融余额 · 指数对比</h1><div class="crumb">沪深两市 · 日度数据</div></div>
- </div>
- <div class="ctl">
+</svg></span><div class="brand-copy"><h1>两融余额 · 指数对比</h1><div class="crumb" title="沪深两市 · 日度数据">沪深两市 · 日度数据</div></div></div><div class="ctl"><button type="button" onclick="openMarginGuide()">口径说明</button>
   <button type="button" onclick="location.reload()">刷新</button>
   <button id="shareBtn" type="button" onclick="copyMarginImage()" title="将当前显示范围的两融与指数图复制为一张图片">复制为图片</button>
- </div>
-</div><div class="wrap nav-row"><nav class="view-tabs" aria-label="数据视图切换">
- <a class="view-tab" href="index.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 14V9m5 5V5m5 9V8m4 6V3"/></svg><span>进场分时</span></a>
- <a class="view-tab" href="margin.html" aria-current="page"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 6h14M3 10h10M3 14h14"/><circle cx="7" cy="6" r="2" fill="#fff"/><circle cx="13" cy="14" r="2" fill="#fff"/></svg><span>两融余额</span></a>
-</nav></div></header>
+ </div></div><div class="wrap nav-row"><nav class="view-tabs" aria-label="数据视图导航"><a class="view-tab" href="index.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 14V9m5 5V5m5 9V8m4 6V3"/></svg><span>资金观察</span></a><a class="view-tab" href="margin.html" aria-current="page"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 6h14M3 10h10M3 14h14"/><circle cx="7" cy="6" r="2" fill="#fff"/><circle cx="13" cy="14" r="2" fill="#fff"/></svg><span>两融余额</span></a><a class="view-tab" href="futures-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 3h7l4 4v10H6z"/><path d="M13 3v4h4M9 11h5M9 14.5h5"/></svg><span>期指持仓</span></a><a class="view-tab" href="risk-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M3.5 10h13M10 3.5c-2.8 2.8-2.8 10.2 0 13 2.8-2.8 2.8-10.2 0-13Z"/></svg><span>全球风险</span></a></nav></div></header>
 <main class="wrap" id="dashboard">
- <span id="st">加载中…</span>
- <div class="sec"><h2>两融与指数走势</h2><details class="note"><summary><span>口径说明</span></summary><p>日频收盘数据（非分钟级）。两融余额 = 沪市 + 深市融资融券余额（亿元，左轴），交易所次日披露，通常滞后 1 个交易日。指数为收盘点位（右轴，对数刻度）；点击图例开关。科创板用科创50（000688）。数据：akshare（交易所/新浪）。</p></details></div>
+
+ <div class="sec"><h2>两融与指数走势</h2><span class="side" id="st">加载中…</span></div>
  <section class="panel"><div id="ch"></div><div class="foot">日频收盘数据，非实时行情 · 点击图例开关，拖动底部滑块调整显示范围</div></section>
-</main>
+</main><div class="ui-mask" id="marginGuide" hidden>
+ <div class="ui-backdrop" onclick="uiPanel.close()"></div>
+ <section class="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="marginGuideTitle">
+  <div class="ui-modal-head"><div><h3 id="marginGuideTitle">两融余额 · 口径说明</h3></div><button class="ui-close" type="button" aria-label="关闭" onclick="uiPanel.close()">&#215;</button></div>
+  <div class="ui-modal-body"><p>日频收盘数据（非分钟级）。两融余额 = 沪市 + 深市融资融券余额（亿元，左轴），交易所次日披露，通常滞后 1 个交易日。指数为收盘点位（右轴，对数刻度）；点击图例开关。科创板用科创50（000688）。数据：akshare（交易所/新浪）。</p></div>
+ </section>
+</div>
 <div id="shareStatus" class="share-status" role="status" aria-live="polite" aria-atomic="true"></div>
 <a id="shareDownload" class="share-fallback" hidden>保存图片（复制受限时备用）</a>
 <script>
-const notePanel=document.querySelector('details.note');
-document.addEventListener('click',ev=>{if(notePanel.open&&!notePanel.contains(ev.target))notePanel.open=false});
-document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&notePanel.open){notePanel.open=false;notePanel.querySelector('summary').focus()}});
+function openMarginGuide(){uiPanel.open('marginGuide')}
+
 let shareInProgress=false,shareDownloadURL=null,shareStatusTimer=null;
 function shareNotice(text){clearTimeout(shareStatusTimer);document.getElementById('shareStatus').textContent=text;shareStatusTimer=setTimeout(()=>{document.getElementById('shareStatus').textContent=''},12000)}
 function showShareDownload(blob){
@@ -166,4 +277,44 @@ fetch("data/margin_balance.json?"+Date.now()).then(r=>r.json()).then(d=>{
   dataZoom:[{type:"inside",start:70},{type:"slider",start:70,height:22,bottom:16,borderColor:"#e6e8ec",backgroundColor:"#f5f6f8",fillerColor:"rgba(61,106,158,0.10)",dataBackground:{lineStyle:{color:"#c3ccd7"},areaStyle:{color:"#e6eaf0"}},selectedDataBackground:{lineStyle:{color:"#8fa3b8"},areaStyle:{color:"#d5dde8"}},handleStyle:{color:"#fff",borderColor:"#9fb0c4"},moveHandleStyle:{color:"#c3ccd7"},textStyle:{color:ax,fontSize:11}}],series});
  addEventListener("resize",()=>c.resize());
 });
+</script><script>
+/* ===== Unified dashboard dialogs and route continuity ===== */
+window.uiPanel=(()=>{
+ let active=null;
+ function close(){
+  if(!active)return;const state=active;active=null;
+  state.node.hidden=true;document.body.style.overflow=state.overflow;
+  state.inert.forEach(item=>{item.el.inert=item.was});
+  if(state.focus&&state.focus.isConnected)state.focus.focus();
+ }
+ function open(id){
+  const node=document.getElementById(id);if(!node)return;
+  if(active&&active.node===node)return;if(active)close();
+  active={node,focus:document.activeElement,overflow:document.body.style.overflow,inert:[]};
+  for(const el of [document.querySelector('header.top'),document.querySelector('main')].filter(Boolean)){
+   active.inert.push({el,was:el.inert});el.inert=true;
+  }
+  node.hidden=false;document.body.style.overflow='hidden';
+  const body=node.querySelector('.ui-modal-body');if(body)body.scrollTop=0;
+  const focus=node.querySelector('button.ui-close');if(focus)focus.focus();
+ }
+ document.addEventListener('keydown',event=>{
+  if(!active)return;
+  if(event.key==='Escape'){event.preventDefault();close();return}
+  if(event.key!=='Tab')return;
+  const focusable=[...active.node.querySelectorAll('button,a[href],input,select,textarea,[tabindex]')].filter(el=>!el.disabled&&el.tabIndex>=0&&el.getClientRects().length);
+  if(!focusable.length){event.preventDefault();return}
+  const first=focusable[0],last=focusable[focusable.length-1];
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+ });
+ // Preserve an explicit version query across the four links so a user who
+ // opens the delivered cache-busting URL does not return to older tab HTML.
+ const version=new URLSearchParams(location.search).get('v');
+ if(version&&/^[A-Za-z0-9_-]{1,64}$/.test(version))document.querySelectorAll('.view-tab').forEach(link=>{
+  const url=new URL(link.getAttribute('href'),location.href);url.searchParams.set('v',version);link.href=url.href;
+ });
+ return {open,close};
+})();
+/* ===== End unified dashboard UI behavior ===== */
 </script></body></html>
