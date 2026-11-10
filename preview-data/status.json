@@ -1,44 +1,44 @@
 {
- "as_of": "2026-11-09",
- "calendar_days": 30,
+ "as_of": "2026-11-10",
+ "calendar_days": 31,
  "domestic": "ok",
  "errors": [],
  "futures_history": {
-  "as_of": "2026-11-09",
+  "as_of": "2026-11-10",
   "errors": [],
-  "last_attempt": "2026-11-10T07:50:00+08:00",
+  "last_attempt": "2026-11-11T05:23:20+08:00",
   "products": {
    "IC": {
-    "date": "2026-11-09",
+    "date": "2026-11-10",
     "product": "IC",
-    "published_before": 220,
-    "records_after": 221,
+    "published_before": 221,
+    "records_after": 222,
     "source_status": "published"
    },
    "IF": {
-    "date": "2026-11-09",
+    "date": "2026-11-10",
     "product": "IF",
-    "published_before": 220,
-    "records_after": 221,
+    "published_before": 221,
+    "records_after": 222,
     "source_status": "published"
    },
    "IH": {
-    "date": "2026-11-09",
+    "date": "2026-11-10",
     "product": "IH",
-    "published_before": 220,
-    "records_after": 221,
+    "published_before": 221,
+    "records_after": 222,
     "source_status": "published"
    },
    "IM": {
-    "date": "2026-11-09",
+    "date": "2026-11-10",
     "product": "IM",
-    "published_before": 220,
-    "records_after": 221,
+    "published_before": 221,
+    "records_after": 222,
     "source_status": "published"
    }
   }
  },
- "generated_at": "2026-11-10T07:50:00+08:00",
+ "generated_at": "2026-11-11T05:23:20+08:00",
  "global": "ok",
  "global_detail": {
   "connected": 6,
@@ -60,26 +60,26 @@
  "schema_version": "1.0.0",
  "sources": [
   {
-   "date": "2026-11-10",
+   "date": "2026-11-11",
    "http": 200,
    "name": "SSE",
    "rows": 0,
    "status": "unpublished"
   },
   {
-   "date": "2026-11-09",
+   "date": "2026-11-10",
    "http": 200,
    "name": "SSE",
    "rows": 923,
    "status": "ok"
   },
   {
-   "date": "2026-11-10",
+   "date": "2026-11-11",
    "name": "CFFEX",
    "status": "no_published"
   },
   {
-   "date": "2026-11-09",
+   "date": "2026-11-10",
    "name": "CFFEX",
    "status": "ok"
   },
