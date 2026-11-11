@@ -1,6 +1,6 @@
 {
   "schema_version": "2.1-safe",
-  "generated_at": "2026-11-10T21:26:40+00:00",
+  "generated_at": "2026-11-11T22:12:57+00:00",
   "data_status": "safe_public_with_attribution",
   "policy_notes": [
     "US Treasury data is public domain; Cboe index CSVs are public CDN downloads with attribution.",
@@ -15,7 +15,7 @@
       "degraded": false,
       "error": null,
       "as_of": "2026-11-10",
-      "last_attempt_at": "2026-11-10T21:26:40+00:00"
+      "last_attempt_at": "2026-11-11T22:12:57+00:00"
     },
     "cboe": {},
     "public_macro": {
@@ -48,7 +48,7 @@
         "sofr": {
           "state": "ok",
           "as_of": "2026-11-09",
-          "n": 272
+          "n": 271
         },
         "acm_tp_10y": {
           "state": "ok",
@@ -167,7 +167,7 @@
       },
       "as_of": "2026-11-10",
       "as_of_raw": null,
-      "collected_at": "2026-11-11T05:23:36+08:00",
+      "collected_at": "2026-11-12T06:09:54+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -11641,7 +11641,7 @@
       },
       "as_of": "2026-11-10",
       "as_of_raw": null,
-      "collected_at": "2026-11-11T05:23:37+08:00",
+      "collected_at": "2026-11-12T06:09:55+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -19440,7 +19440,7 @@
       "value": 2.78,
       "as_of": "2026-11-10",
       "as_of_raw": null,
-      "collected_at": "2026-11-11T05:23:37+08:00",
+      "collected_at": "2026-11-12T06:09:55+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -22331,7 +22331,7 @@
       "value": 0.709,
       "as_of": "2026-11-09",
       "as_of_raw": null,
-      "collected_at": "2026-11-11T05:23:39+08:00",
+      "collected_at": "2026-11-12T06:09:56+08:00",
       "history": [
         {
           "date": "2021-08-26",
@@ -27585,12 +27585,8 @@
       "value": 3.88,
       "as_of": "2026-11-09",
       "as_of_raw": null,
-      "collected_at": "2026-11-11T05:23:37+08:00",
+      "collected_at": "2026-11-12T06:09:55+08:00",
       "history": [
-        {
-          "date": "2025-10-07",
-          "value": 4.14
-        },
         {
           "date": "2025-10-08",
           "value": 4.12
@@ -28680,7 +28676,7 @@
       "change_pct": null,
       "stale": false,
       "last_attempt_at": null,
-      "source_url": "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2025-10-07&endDate=2026-11-11",
+      "source_url": "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2025-10-08&endDate=2026-11-12",
       "link_url": "https://www.newyorkfed.org/markets/reference-rates/sofr",
       "license": "https://resources.newyorkfed.org/privacy/termsofuse",
       "license_status": "official_source",
@@ -28773,7 +28769,7 @@
       "value": 2.2,
       "as_of": "2026-11-10",
       "as_of_raw": null,
-      "collected_at": "2026-11-11T05:23:37+08:00",
+      "collected_at": "2026-11-12T06:09:55+08:00",
       "history": [
         {
           "date": "2024-01-02",

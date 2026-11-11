@@ -4,41 +4,41 @@
  "domestic": "ok",
  "errors": [],
  "futures_history": {
-  "as_of": "2026-11-10",
+  "as_of": "2026-11-11",
   "errors": [],
-  "last_attempt": "2026-11-11T05:23:20+08:00",
+  "last_attempt": "2026-11-12T06:09:10+08:00",
   "products": {
    "IC": {
-    "date": "2026-11-10",
+    "date": "2026-11-11",
     "product": "IC",
-    "published_before": 221,
-    "records_after": 222,
+    "published_before": 222,
+    "records_after": 223,
     "source_status": "published"
    },
    "IF": {
-    "date": "2026-11-10",
+    "date": "2026-11-11",
     "product": "IF",
-    "published_before": 221,
-    "records_after": 222,
+    "published_before": 222,
+    "records_after": 223,
     "source_status": "published"
    },
    "IH": {
-    "date": "2026-11-10",
+    "date": "2026-11-11",
     "product": "IH",
-    "published_before": 221,
-    "records_after": 222,
+    "published_before": 222,
+    "records_after": 223,
     "source_status": "published"
    },
    "IM": {
-    "date": "2026-11-10",
+    "date": "2026-11-11",
     "product": "IM",
-    "published_before": 221,
-    "records_after": 222,
+    "published_before": 222,
+    "records_after": 223,
     "source_status": "published"
    }
   }
  },
- "generated_at": "2026-11-11T05:23:20+08:00",
+ "generated_at": "2026-11-12T06:09:10+08:00",
  "global": "ok",
  "global_detail": {
   "connected": 6,
@@ -60,6 +60,13 @@
  "schema_version": "1.0.0",
  "sources": [
   {
+   "date": "2026-11-12",
+   "http": 200,
+   "name": "SSE",
+   "rows": 0,
+   "status": "unpublished"
+  },
+  {
    "date": "2026-11-11",
    "http": 200,
    "name": "SSE",
@@ -74,12 +81,12 @@
    "status": "ok"
   },
   {
-   "date": "2026-11-11",
+   "date": "2026-11-12",
    "name": "CFFEX",
    "status": "no_published"
   },
   {
-   "date": "2026-11-10",
+   "date": "2026-11-11",
    "name": "CFFEX",
    "status": "ok"
   },
