@@ -1,12 +1,12 @@
 {
- "as_of": "2026-11-10",
+ "as_of": "2026-11-12",
  "as_of_confirmed_by": [
   "sse_stat_date",
   "cffex_trading_day"
  ],
- "calendar_days": 31,
+ "calendar_days": 32,
  "calendar_source": "sse_observed_trading_days",
- "collected_at": "2026-11-12T06:09:10+08:00",
+ "collected_at": "2026-11-13T05:53:23+08:00",
  "errors": [],
  "etfs": [
   {
@@ -18,12 +18,12 @@
    "coverage_reason_20d": null,
    "coverage_reason_5d": null,
    "exch": "SH",
-   "growth_1d_pct": 1.05,
-   "growth_20d_pct": 130.41,
-   "growth_5d_pct": 2.17,
+   "growth_1d_pct": -2.5,
+   "growth_20d_pct": 124.13,
+   "growth_5d_pct": 0.39,
    "name": "上证50ETF",
    "shares_status": "official_confirmed",
-   "shares_yi": 168.1717
+   "shares_yi": 163.9687
   },
   {
    "amount_calc": "not_enabled_nav_unverified",
@@ -34,12 +34,12 @@
    "coverage_reason_20d": null,
    "coverage_reason_5d": null,
    "exch": "SH",
-   "growth_1d_pct": -0.7,
-   "growth_20d_pct": 86.14,
-   "growth_5d_pct": 3.94,
+   "growth_1d_pct": -1.13,
+   "growth_20d_pct": 85.57,
+   "growth_5d_pct": -1.18,
    "name": "沪深300ETF华泰柏瑞",
    "shares_status": "official_confirmed",
-   "shares_yi": 463.4239
+   "shares_yi": 458.1769
   },
   {
    "amount_calc": "not_enabled_nav_unverified",
@@ -64,12 +64,12 @@
    "coverage_reason_20d": null,
    "coverage_reason_5d": null,
    "exch": "SH",
-   "growth_1d_pct": -1.51,
-   "growth_20d_pct": 68.75,
-   "growth_5d_pct": 9.4,
+   "growth_1d_pct": -3.91,
+   "growth_20d_pct": 66.06,
+   "growth_5d_pct": -7.13,
    "name": "中证500ETF南方",
    "shares_status": "official_confirmed",
-   "shares_yi": 96.2937
+   "shares_yi": 92.5257
   },
   {
    "amount_calc": "not_enabled_nav_unverified",
@@ -80,12 +80,12 @@
    "coverage_reason_20d": null,
    "coverage_reason_5d": null,
    "exch": "SH",
-   "growth_1d_pct": -0.98,
-   "growth_20d_pct": 135.26,
-   "growth_5d_pct": 14.18,
+   "growth_1d_pct": -3.68,
+   "growth_20d_pct": 139.32,
+   "growth_5d_pct": -5.85,
    "name": "中证1000ETF南方",
    "shares_status": "official_confirmed",
-   "shares_yi": 193.1322
+   "shares_yi": 186.0322
   },
   {
    "amount_calc": "not_enabled_nav_unverified",
@@ -110,12 +110,12 @@
    "coverage_reason_20d": null,
    "coverage_reason_5d": null,
    "exch": "SH",
-   "growth_1d_pct": -0.02,
-   "growth_20d_pct": 68.27,
-   "growth_5d_pct": 2.73,
+   "growth_1d_pct": -3.1,
+   "growth_20d_pct": 60.56,
+   "growth_5d_pct": -2.68,
    "name": "科创50ETF华夏",
    "shares_status": "official_confirmed",
-   "shares_yi": 1076.3067
+   "shares_yi": 1042.9767
   },
   {
    "amount_calc": "not_enabled_nav_unverified",
@@ -126,12 +126,12 @@
    "coverage_reason_20d": null,
    "coverage_reason_5d": null,
    "exch": "SH",
-   "growth_1d_pct": -0.23,
-   "growth_20d_pct": 114.69,
-   "growth_5d_pct": 5.49,
+   "growth_1d_pct": -0.93,
+   "growth_20d_pct": 112.79,
+   "growth_5d_pct": -0.01,
    "name": "沪深300ETF易方达",
    "shares_status": "official_confirmed",
-   "shares_yi": 261.1144
+   "shares_yi": 258.6934
   },
   {
    "amount_calc": "not_enabled_nav_unverified",
@@ -142,12 +142,12 @@
    "coverage_reason_20d": null,
    "coverage_reason_5d": null,
    "exch": "SH",
-   "growth_1d_pct": -0.03,
-   "growth_20d_pct": 82.66,
-   "growth_5d_pct": 2.15,
+   "growth_1d_pct": -1.05,
+   "growth_20d_pct": 80.72,
+   "growth_5d_pct": -0.09,
    "name": "沪深300ETF华夏",
    "shares_status": "official_confirmed",
-   "shares_yi": 156.6205
+   "shares_yi": 154.9735
   },
   {
    "amount_calc": "not_enabled_nav_unverified",
@@ -172,12 +172,12 @@
    "coverage_reason_20d": null,
    "coverage_reason_5d": null,
    "exch": "SH",
-   "growth_1d_pct": 0.04,
+   "growth_1d_pct": 0.01,
    "growth_20d_pct": 0.51,
-   "growth_5d_pct": 0.08,
+   "growth_5d_pct": 0.11,
    "name": "上证180ETF华安",
    "shares_status": "official_confirmed",
-   "shares_yi": 44.5156
+   "shares_yi": 44.5206
   },
   {
    "amount_calc": "not_enabled_nav_unverified",
@@ -188,12 +188,12 @@
    "coverage_reason_20d": null,
    "coverage_reason_5d": null,
    "exch": "SH",
-   "growth_1d_pct": -0.39,
-   "growth_20d_pct": 6.83,
-   "growth_5d_pct": 5.78,
+   "growth_1d_pct": -1.05,
+   "growth_20d_pct": 8.7,
+   "growth_5d_pct": -1.13,
    "name": "中证500ETF华夏",
    "shares_status": "official_confirmed",
-   "shares_yi": 20.5121
+   "shares_yi": 20.2961
   },
   {
    "amount_calc": "not_enabled_nav_unverified",
@@ -218,12 +218,12 @@
    "coverage_reason_20d": null,
    "coverage_reason_5d": null,
    "exch": "SH",
-   "growth_1d_pct": 0.05,
-   "growth_20d_pct": 55.86,
-   "growth_5d_pct": 16.42,
+   "growth_1d_pct": 0.76,
+   "growth_20d_pct": 58.43,
+   "growth_5d_pct": -1.15,
    "name": "中证1000ETF广发",
    "shares_status": "official_confirmed",
-   "shares_yi": 39.2862
+   "shares_yi": 39.5862
   },
   {
    "amount_calc": "not_enabled_nav_unverified",
@@ -248,12 +248,12 @@
    "coverage_reason_20d": null,
    "coverage_reason_5d": null,
    "exch": "SH",
-   "growth_1d_pct": 1.48,
-   "growth_20d_pct": 19.57,
-   "growth_5d_pct": 6.36,
+   "growth_1d_pct": -0.46,
+   "growth_20d_pct": 18.46,
+   "growth_5d_pct": 6.05,
    "name": "科创板50ETF易方达",
    "shares_status": "official_confirmed",
-   "shares_yi": 342.0163
+   "shares_yi": 340.4263
   },
   {
    "amount_calc": "not_enabled_nav_unverified",
@@ -271,8 +271,8 @@
   }
  ],
  "futures": {
-  "as_of": "2026-11-11",
-  "async_with_etf": true,
+  "as_of": "2026-11-12",
+  "async_with_etf": false,
   "member": "中信期货",
   "note": "期指与ETF份额各自独立最新发布日,异步;勿与ETF as_of混作同一资金数",
   "products": {
@@ -280,35 +280,35 @@
     "contracts": [
      [
       "IC2611",
-      7031,
-      577,
-      13650,
-      723
+      7486,
+      455,
+      11659,
+      -1991
      ],
      [
       "IC2612",
-      27813,
-      1759,
-      35231,
-      2283
+      27456,
+      -357,
+      33790,
+      -1441
      ],
      [
       "IC2703",
-      8620,
-      469,
-      14077,
-      577
+      9275,
+      655,
+      14485,
+      408
      ],
      [
       "IC2706",
-      3103,
-      -4,
-      4446,
-      12
+      3516,
+      413,
+      6574,
+      2128
      ]
     ],
-    "long": 46567,
-    "net_short": 20837,
+    "long": 47733,
+    "net_short": 18775,
     "note": "仅CFFEX前20上榜合约汇总;某合约当日未上榜=缺席,不等于0手",
     "observed_contracts": [
      "IC2611",
@@ -316,41 +316,41 @@
      "IC2703",
      "IC2706"
     ],
-    "short": 67404
+    "short": 66508
    },
    "IF": {
     "contracts": [
      [
       "IF2611",
-      6465,
-      402,
-      7924,
-      383
+      6173,
+      -292,
+      6670,
+      -1254
      ],
      [
       "IF2612",
-      20282,
-      688,
-      30542,
-      576
+      20919,
+      637,
+      32249,
+      1707
      ],
      [
       "IF2703",
-      4990,
-      -78,
-      15362,
-      16
+      5311,
+      321,
+      16005,
+      643
      ],
      [
       "IF2706",
-      2285,
-      258,
-      4545,
-      235
+      2289,
+      4,
+      4622,
+      77
      ]
     ],
-    "long": 34022,
-    "net_short": 24351,
+    "long": 34692,
+    "net_short": 24854,
     "note": "仅CFFEX前20上榜合约汇总;某合约当日未上榜=缺席,不等于0手",
     "observed_contracts": [
      "IF2611",
@@ -358,75 +358,75 @@
      "IF2703",
      "IF2706"
     ],
-    "short": 58373
+    "short": 59546
    },
    "IH": {
     "contracts": [
      [
       "IH2611",
-      1996,
-      273,
-      4013,
-      109
+      1951,
+      -45,
+      3954,
+      -59
      ],
      [
       "IH2612",
-      9302,
-      1143,
-      11298,
-      775
+      8696,
+      -606,
+      9910,
+      -1388
      ],
      [
       "IH2703",
-      2175,
-      -22,
-      4437,
-      24
+      2075,
+      -100,
+      4262,
+      -175
      ]
     ],
-    "long": 13473,
-    "net_short": 6275,
+    "long": 12722,
+    "net_short": 5404,
     "note": "仅CFFEX前20上榜合约汇总;某合约当日未上榜=缺席,不等于0手",
     "observed_contracts": [
      "IH2611",
      "IH2612",
      "IH2703"
     ],
-    "short": 19748
+    "short": 18126
    },
    "IM": {
     "contracts": [
      [
       "IM2611",
-      12858,
-      -680,
-      24805,
-      -1698
+      12619,
+      -239,
+      23233,
+      -1572
      ],
      [
       "IM2612",
-      47491,
-      1214,
-      62823,
-      1730
+      47975,
+      484,
+      62634,
+      -189
      ],
      [
       "IM2703",
-      12186,
-      -704,
-      22114,
-      -844
+      13303,
+      1117,
+      23015,
+      901
      ],
      [
       "IM2706",
-      4938,
-      -336,
-      7384,
-      61
+      3721,
+      -1217,
+      7727,
+      343
      ]
     ],
-    "long": 77473,
-    "net_short": 39653,
+    "long": 77618,
+    "net_short": 38991,
     "note": "仅CFFEX前20上榜合约汇总;某合约当日未上榜=缺席,不等于0手",
     "observed_contracts": [
      "IM2611",
@@ -434,11 +434,11 @@
      "IM2703",
      "IM2706"
     ],
-    "short": 117126
+    "short": 116609
    }
   }
  },
- "generated_at": "2026-11-12T06:09:10+08:00",
+ "generated_at": "2026-11-13T05:53:23+08:00",
  "global": {
   "connected": 6,
   "connected_stale": 0,
@@ -461,33 +461,26 @@
  "schema_version": "1.0.0",
  "sources": [
   {
+   "date": "2026-11-13",
+   "http": 200,
+   "name": "SSE",
+   "rows": 0,
+   "status": "unpublished"
+  },
+  {
    "date": "2026-11-12",
    "http": 200,
    "name": "SSE",
-   "rows": 0,
-   "status": "unpublished"
-  },
-  {
-   "date": "2026-11-11",
-   "http": 200,
-   "name": "SSE",
-   "rows": 0,
-   "status": "unpublished"
-  },
-  {
-   "date": "2026-11-10",
-   "http": 200,
-   "name": "SSE",
-   "rows": 923,
+   "rows": 924,
    "status": "ok"
   },
   {
-   "date": "2026-11-12",
+   "date": "2026-11-13",
    "name": "CFFEX",
    "status": "no_published"
   },
   {
-   "date": "2026-11-11",
+   "date": "2026-11-12",
    "name": "CFFEX",
    "status": "ok"
   },
