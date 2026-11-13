@@ -4,8 +4,8 @@
  "product": "IC",
  "source": "CFFEX",
  "range_start": "2026-04-01",
- "range_end": "2026-11-12",
- "collected_at": "2026-11-13T05:53:36+08:00",
+ "range_end": "2026-11-13",
+ "collected_at": "2026-11-14T05:31:02+08:00",
  "records": {
   "2026-04-01": {
    "trading_date": "2026-04-01",
@@ -9719,6 +9719,66 @@
    "short_observed": 66508,
    "net_short": 18775,
    "observed_difference": 18775,
+   "coverage_status": "complete_observed",
+   "note": ""
+  },
+  "2026-11-13": {
+   "trading_date": "2026-11-13",
+   "source_url": "http://www.cffex.com.cn/sj/ccpm/202611/13/IC_1.csv",
+   "source_sha256": "46c17dc46d8202187bfeb64e2fb7825cd309088e601daecf57b0fd4938758791",
+   "source_status": "published",
+   "source_date_evidence": "2026-11-13",
+   "contracts": [
+    {
+     "contract": "IC2611",
+     "long": 7319,
+     "short": 10902,
+     "long_change": -167,
+     "short_change": -757,
+     "long_rank": 2,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IC2612",
+     "long": 27791,
+     "short": 34193,
+     "long_change": 335,
+     "short_change": 403,
+     "long_rank": 2,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IC2703",
+     "long": 9314,
+     "short": 14588,
+     "long_change": 39,
+     "short_change": 103,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IC2706",
+     "long": 3475,
+     "short": 6506,
+     "long_change": -41,
+     "short_change": -68,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    }
+   ],
+   "both_absent_contracts": [],
+   "long_observed": 47899,
+   "short_observed": 66189,
+   "net_short": 18290,
+   "observed_difference": 18290,
    "coverage_status": "complete_observed",
    "note": ""
   }
