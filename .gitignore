@@ -2,3 +2,5 @@ emb.txt
 data.json
 fetch.py
 data/live.json.tmp
+__pycache__/
+*.pyc

@@ -1,0 +1,89 @@
+name: Refresh IC close signal
+
+# 收盘后重算 data/ic_strategy.json，供期指持仓页的「IC 策略 · 收盘信号」。
+# Cron 是 UTC。
+#   40 9 * * 1-5  = 周一至周五 17:40 Asia/Shanghai（收盘后，中金所日行情通常已出）
+#   10 12 * * 1-5 = 周一至周五 20:10 Asia/Shanghai（当天文件晚到时再补一次）
+# 休市日指数没有新收盘，脚本重算后若只有 updated 变了，就不提交。
+# 定时和手动都只在本文件位于默认分支之后才会跑。
+on:
+  schedule:
+    - cron: "40 9 * * 1-5"
+    - cron: "10 12 * * 1-5"
+  workflow_dispatch:
+
+# 只写 data/ic_strategy.json。仓库 Settings → Actions → Workflow permissions
+# 需要 Read and write permissions；若 main 禁止直接推送，还要放行 github-actions[bot]。
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-ic-strategy
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+          persist-credentials: true
+
+      - name: Compute IC close signal
+        shell: bash
+        run: python3 ic_strategy.py
+
+      - name: Commit data/ic_strategy.json when the signal changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          export GIT_TERMINAL_PROMPT=0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python3 - << 'PY'
+          import json, pathlib, sys
+          def load(path):
+              data = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+              data.pop("updated", None)
+              return data
+          new = load("data/ic_strategy.json")
+          old_path = pathlib.Path("/tmp/ic_strategy.prev.json")
+          import subprocess
+          show = subprocess.run(["git", "show", "HEAD:data/ic_strategy.json"], capture_output=True)
+          if show.returncode != 0:
+              sys.exit(0)
+          old_path.write_bytes(show.stdout)
+          old = load(old_path)
+          if old == new:
+              pathlib.Path("/tmp/ic_strategy.same").write_text("same", encoding="utf-8")
+          PY
+          if [[ -f /tmp/ic_strategy.same ]]; then
+            git checkout -- data/ic_strategy.json
+            echo "signal unchanged; skip commit"
+            exit 0
+          fi
+          git add data/ic_strategy.json
+          if git diff --cached --quiet; then
+            echo "nothing staged; skip commit"
+            exit 0
+          fi
+          STAMP=$(python3 -c 'import json; print(json.load(open("data/ic_strategy.json", encoding="utf-8")).get("latest",""))')
+          git commit -m "ic strategy ${STAMP}"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "pushed data/ic_strategy.json (${STAMP})"
+              exit 0
+            fi
+            echo "push failed (attempt ${attempt}); rebasing onto origin/main"
+            git fetch --depth=20 origin main
+            if ! git rebase origin/main; then
+              echo "::error::rebase 冲突，保留工作树，不自动解决、不 force"
+              git rebase --abort || true
+              exit 1
+            fi
+          done
+          echo "::error::多次 push 失败"
+          exit 1
