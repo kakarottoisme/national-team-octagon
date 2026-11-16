@@ -21,3 +21,11 @@
 ## 两融余额 · 指数对比（margin.html）
 `data/margin_balance.json`：两融余额（沪+深，亿元，2010-03-31 起）与创业板指 399006、科创50 000688、中证500 000905、中证1000 000852、沪深300 000300、上证50 000016 日收盘（全量历史）。
 收盘后（建议 17:00 以后/次日，交易所两融披露滞后约 1 交易日）运行 `python3 margin.py`（需 akshare，可用 /workspace/.venv-nt），然后 commit 并 push `data/margin_balance.json`。脚本每次全量重拉，漏跑无影响。
+
+## IC 策略 · 收盘信号（futures-preview.html 顶部）
+`data/ic_strategy.json`：中证500收盘算出的 IC 只做多目标手数、三条腿、建议合约、下一交易日触发价，以及可回看的历史。页面上的「最终规则」是计算口径。
+
+- 指数：新浪 `sh000905` 日收盘。期货：新浪 IC 日线收盘（字段 `c`），与中金所日行情「今收盘」核对，不用结算价。只使用标准库。
+- 本地收盘后可运行 `python3 ic_strategy.py`。单元测试：`python3 -m unittest tests/test_ic_strategy.py`。
+- 云端由 **Refresh IC close signal**（`.github/workflows/ic-strategy.yml`）在北京时间周一至周五 17:40 计算，20:10 再补一次（GitHub cron 为 UTC：`40 9 * * 1-5` 与 `10 12 * * 1-5`）。休市或行情没变就不提交。只改 `data/ic_strategy.json`。
+- 和实时页一样，需要 Settings → Actions → General → Workflow permissions 选 **Read and write permissions**。若 `main` 禁止直接推送，还要放行 `github-actions[bot]`。工作流合并到 `main` 之后，定时任务才会开始跑。
