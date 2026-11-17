@@ -61,10 +61,17 @@ class TempWorkdir(unittest.TestCase):
         # 关键: 重定向到独立临时目录,绝不读写主 repo 的 preview-data/official
         import tempfile
         self._tmp = tempfile.mkdtemp(prefix="pvtest_")
+        self._original_repo = cp.REPO
+        cp.REPO = self._tmp
         cp.OFFICIAL_DIR = self._tmp
         cp.HIST_PATH = os.path.join(self._tmp, "history.json")
         cp.SNAP_PATH = os.path.join(self._tmp, "snapshot-latest.json")
         cp.STATUS_PATH = os.path.join(self._tmp, "status.json")
+        import futures_history
+        from unittest.mock import patch
+        self._network_patch = patch.object(futures_history, "http_get", return_value=(200, b""))
+        self._network_patch.start()
+        self.addCleanup(self._network_patch.stop)
         # stub 全球模块,测试不触网
         self._orig_global = cp.maybe_collect_global
         cp.maybe_collect_global = lambda: ("ok", {"state": "ok", "connected": 1, "test": True})
@@ -73,6 +80,7 @@ class TempWorkdir(unittest.TestCase):
         import shutil
         shutil.rmtree(self._tmp, ignore_errors=True)
         cp.maybe_collect_global = self._orig_global
+        cp.REPO = self._original_repo
         cp.OFFICIAL_DIR = os.path.join(REPO, "preview-data", "official")
         cp.HIST_PATH = os.path.join(cp.OFFICIAL_DIR, "history.json")
         cp.SNAP_PATH = os.path.join(cp.OFFICIAL_DIR, "snapshot-latest.json")

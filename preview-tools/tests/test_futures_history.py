@@ -5,6 +5,9 @@ import os
 import sys
 import unittest
 import datetime as dt
+from pathlib import Path
+import tempfile
+import json
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(REPO, "preview-tools"))
@@ -125,38 +128,44 @@ class TestFuturesHistory(unittest.TestCase):
 
     def test_collect_daily_preserves_history(self):
         import tempfile, os, json
-        tmp = tempfile.mkdtemp(); out = os.path.join(tmp, "IH.json")
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        out = str(Path(temporary.name) / "IH.json")
         # 预置一个既有历史日(模拟回补后的145)
         pre = {"schema_version": "futures-history-2.0", "member": "中信期货(代客)",
                "product": "IH", "source": "CFFEX", "range_start": "2026-10-01",
                "range_end": "2026-10-01", "records": {"2026-10-01": {"source_status": "published"}}}
-        json.dump(pre, open(out, "w"))
+        Path(out).write_text(json.dumps(pre), encoding="utf-8")
         class F:
             def __call__(self, url, *a, **k): return 200, SAMPLE
         fh.collect_daily("IH", dt.date(2026, 11, 4), out, fetcher=F())
-        sh = json.load(open(out))
+        sh = json.loads(Path(out).read_text(encoding="utf-8"))
         self.assertEqual(len(sh["records"]), 2)  # 旧10-01不丢
         self.assertIn("2026-10-01", sh["records"])
         self.assertEqual(sh["range_end"], "2026-11-04")
 
     def test_collect_daily_idempotent_no_overwrite(self):
         import tempfile, os
-        tmp = tempfile.mkdtemp(); out = os.path.join(tmp, "IH.json")
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        out = str(Path(temporary.name) / "IH.json")
         class F:
             def __call__(self, url, *a, **k): return 200, SAMPLE
         fh.collect_daily("IH", dt.date(2026, 11, 4), out, fetcher=F())
-        n1 = len(__import__("json").load(open(out))["records"])
+        n1 = len(json.loads(Path(out).read_text(encoding="utf-8"))["records"])
         fh.collect_daily("IH", dt.date(2026, 11, 4), out, fetcher=F())  # 同日重跑
-        n2 = len(__import__("json").load(open(out))["records"])
+        n2 = len(json.loads(Path(out).read_text(encoding="utf-8"))["records"])
         self.assertEqual(n1, n2)
 
     def test_partial_side_net_null_after_daily(self):
         import tempfile, os
-        tmp = tempfile.mkdtemp(); out = os.path.join(tmp, "IH.json")
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        out = str(Path(temporary.name) / "IH.json")
         class F:
             def __call__(self, url, *a, **k): return 200, SAMPLE
         fh.collect_daily("IH", dt.date(2026, 11, 4), out, fetcher=F())
-        rec = __import__("json").load(open(out))["records"]["2026-11-04"]
+        rec = json.loads(Path(out).read_text(encoding="utf-8"))["records"]["2026-11-04"]
         self.assertIsNone(rec["net_short"])  # IH2612 short缺榜
         self.assertEqual(rec["coverage_status"], "partial_side")
 
