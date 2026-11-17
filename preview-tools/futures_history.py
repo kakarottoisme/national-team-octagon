@@ -204,7 +204,8 @@ def collect_daily(product, date, out_path, raw_dir=None, fetcher=None):
     只写独立 futures/{product}.json,不碰ETF history;单源失败保留既有值并标旧。"""
     fetcher = fetcher or http_get
     if os.path.exists(out_path):
-        shard = _json.load(open(out_path, encoding="utf-8"))
+        with open(out_path, encoding="utf-8") as stream:
+            shard = _json.load(stream)
     else:
         shard = {"schema_version": SCHEMA_VERSION, "member": "中信期货(代客)",
                  "product": product, "source": "CFFEX",

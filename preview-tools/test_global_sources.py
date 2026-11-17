@@ -151,16 +151,35 @@ class TestStaleCache(unittest.TestCase):
         self.assertFalse(a3["stale"])
 
 
+from unittest.mock import patch
+
+
 class TestUpdateGlobal(unittest.TestCase):
+    def setUp(self):
+        self.treasury = patch.object(gs, "fetch_treasury_nominal_curve", return_value={
+            "ok": True, "as_of": "2026-11-03", "as_of_raw": "11/03/2026",
+            "rates": {"2 Yr": 4.61, "10 Yr": 4.95},
+            "collected_at": "2026-11-04T04:00:00+00:00", "history": []})
+        self.treasury_mock = self.treasury.start()
+        self.addCleanup(self.treasury.stop)
+        for name, value in (("fetch_finra_margin", {"ok": False}),
+                            ("_try_collect_public_macro", {"metrics": [], "fetch_status": {}, "errors": []})):
+            stub = patch.object(gs, name, return_value=value)
+            stub.start()
+            self.addCleanup(stub.stop)
+
+    def fail_treasury(self):
+        self.treasury_mock.return_value = {"ok": False, "error": "fixture: network down"}
+
     def test_update_writes_file_and_returns_status(self):
         with tempfile.TemporaryDirectory() as td:
             out = os.path.join(td, "global.json")
-            # Call real update_global (will hit Treasury; acceptable for this test)
+            # Fixed Treasury response; FINRA and public_macro also stubbed in setUp.
             status = gs.update_global(out)
             self.assertTrue(os.path.exists(out))
             with open(out, encoding="utf-8") as f:
                 payload = json.load(f)
-            self.assertEqual(payload["schema_version"], "2.0-safe")
+            self.assertEqual(payload["schema_version"], "2.1-safe")
             self.assertEqual(status["metrics_total"], len(payload["metrics"]))
             for k in ("connected", "connected_stale", "restricted", "link_only",
                       "pending", "missing", "state"):
@@ -170,7 +189,7 @@ class TestUpdateGlobal(unittest.TestCase):
         """If Treasury URL is unreachable AND no prior file exists, value=null, state=failed_no_cache."""
         original = gs.TREASURY_NOMINAL_CSV_URL
         try:
-            gs.TREASURY_NOMINAL_CSV_URL = "https://nonexistent.invalid.invalid/x.csv"
+            self.fail_treasury()
             with tempfile.TemporaryDirectory() as td:
                 out = os.path.join(td, "global.json")
                 status = gs.update_global(out)
@@ -191,16 +210,16 @@ class TestUpdateGlobal(unittest.TestCase):
         try:
             with tempfile.TemporaryDirectory() as td:
                 out = os.path.join(td, "global.json")
-                # Run 1: real fetch (assume network OK in test env)
+                # Run 1: deterministic fixture success.
                 status1 = gs.update_global(out)
                 with open(out, encoding="utf-8") as f:
                     p1 = json.load(f)
                 a3_1 = next(m for m in p1["metrics"] if m["id"] == "A3_yield_curve_nominal")
                 # Run 2: break URL, should preserve p1 snapshot as stale
-                gs.TREASURY_NOMINAL_CSV_URL = "https://nonexistent.invalid.invalid/x.csv"
+                self.fail_treasury()
                 status2 = gs.update_global(out)
                 self.assertFalse(status2["ok"])
-                self.assertEqual(status2["state"], "degraded_stale_cached")
+                self.assertEqual(status2["state"], "degraded_partial")
                 with open(out, encoding="utf-8") as f:
                     p2 = json.load(f)
                 a3_2 = next(m for m in p2["metrics"] if m["id"] == "A3_yield_curve_nominal")
@@ -226,10 +245,10 @@ class TestUpdateGlobal(unittest.TestCase):
                 with open(out, encoding="utf-8") as f:
                     a1 = next(m for m in json.load(f)["metrics"] if m["id"] == "A3_yield_curve_nominal")
                 # Break URL
-                gs.TREASURY_NOMINAL_CSV_URL = "https://nonexistent.invalid.invalid/x.csv"
+                self.fail_treasury()
                 # Run 2: failure -> stale
                 s2 = gs.update_global(out)
-                self.assertEqual(s2["state"], "degraded_stale_cached")
+                self.assertEqual(s2["state"], "degraded_partial")
                 with open(out, encoding="utf-8") as f:
                     a2 = next(m for m in json.load(f)["metrics"] if m["id"] == "A3_yield_curve_nominal")
                 self.assertEqual(a2["status"], "connected_stale")
@@ -238,7 +257,7 @@ class TestUpdateGlobal(unittest.TestCase):
                 self.assertEqual(a2["collected_at"], a1["collected_at"])
                 # Run 3: still failing — must NOT clear value
                 s3 = gs.update_global(out)
-                self.assertEqual(s3["state"], "degraded_stale_cached")
+                self.assertEqual(s3["state"], "degraded_partial")
                 with open(out, encoding="utf-8") as f:
                     a3 = next(m for m in json.load(f)["metrics"] if m["id"] == "A3_yield_curve_nominal")
                 self.assertEqual(a3["status"], "connected_stale")
@@ -251,7 +270,7 @@ class TestUpdateGlobal(unittest.TestCase):
     def test_cached_snapshot_rejects_future_date(self):
         """A cached row with future as_of must be rejected (tampered/malformed)."""
         tampered = {
-            "schema_version": "2.0-safe",
+            "schema_version": "2.1-safe",
             "metrics": [{
                 "id": "A3_yield_curve_nominal",
                 "status": "connected",
@@ -271,7 +290,7 @@ class TestUpdateGlobal(unittest.TestCase):
 
     def test_cached_snapshot_rejects_non_numeric_value(self):
         tampered = {
-            "schema_version": "2.0-safe",
+            "schema_version": "2.1-safe",
             "metrics": [{
                 "id": "A3_yield_curve_nominal",
                 "status": "connected",
