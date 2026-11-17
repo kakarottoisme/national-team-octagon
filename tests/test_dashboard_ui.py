@@ -57,9 +57,9 @@ class DashboardContract(unittest.TestCase):
             cls.parsed[name] = p
 
     def test_common_style_is_identical(self):
-        styles = [re.search(r"/\* ===== Unified dashboard UI v2:.*?/\* ===== End unified dashboard UI ===== \*/", text, re.S).group() for text in self.sources.values()]
+        styles = [re.search(r"/\* ===== Reviewed shared UI:.*?/\* ===== End reviewed shared UI ===== \*/", text, re.S).group() for text in self.sources.values()]
         self.assertEqual(len(set(styles)), 1)
-        self.assertIn("height:44px!important", styles[0])
+        self.assertIn("min-height:44px", styles[0])
         self.assertIn("repeat(4,minmax(0,1fr))", styles[0])
         self.assertNotIn("auto-fit", styles[0])
 
@@ -67,14 +67,14 @@ class DashboardContract(unittest.TestCase):
         self.assertEqual(len({repr(p.icons) for p in self.parsed.values()}), 1)
         for text in self.sources.values():
             self.assertIn('src="favicon.svg?v=ui-2" width="38" height="38"', text)
-            self.assertIn('data-ui-version="2"', text)
+            self.assertIn('data-ui-version="3"', text)
             self.assertNotIn('rel="icon" type="image/png" sizes="64x64" href="data:', text)
 
     def test_no_duplicate_ids_or_accordion(self):
         for name, p in self.parsed.items():
             with self.subTest(page=name):
                 self.assertEqual(len(p.ids), len(set(p.ids)))
-                self.assertEqual(p.details, 0)
+                self.assertEqual(p.details, 0 if name != "futures-preview.html" else 0)
                 self.assertGreater(len(p.dialogs), 0)
                 for d in p.dialogs:
                     self.assertEqual(d.get("aria-modal"), "true")
@@ -99,7 +99,7 @@ class DashboardContract(unittest.TestCase):
 
     def test_data_paths_and_financial_formulas_preserved(self):
         funds = self.sources["index.html"]
-        for token in ['"./data/live.json?t="', '"./data/history.json"', '"./data/minutes/"', "preview-data/turnover-baseline.json", "tot/dens.reduce((a,b)=>a+b,0)", "amt/den", "v=>v>1", "setInterval(()=>{if(view==\"live\")refresh()},30000)"]:
+        for token in ['"./data/live.json?t="', '"./data/history.json?t="', "'./data/minutes/'", "preview-data/turnover-baseline.json", "alignedTotal/dens.reduce((a,b)=>a+b,0)", "amt/den", "v=>v>1", "setInterval(()=>{if(view==='live'&&!document.hidden)refresh()},60000)"]:
             self.assertIn(token, funds)
         futures = self.sources["futures-preview.html"]
         for token in ["preview-data/official/futures/", "data/ic_strategy.json?t=", "rec.net_short", "rec.long_observed", "rec.short_observed", "connectNulls:false"]:
@@ -108,7 +108,7 @@ class DashboardContract(unittest.TestCase):
         risk = self.sources["risk-preview.html"]
         self.assertIn("preview-data/global.json?t=", risk)
         self.assertIn("m.status==='connected'||m.status==='connected_stale'", risk)
-        self.assertIn("m.status==='restricted'?'受限不转录':'—'", risk)
+        self.assertIn("m.status==='restricted'?'受限不转录':'未接入，不能据此判断风险'", risk)
 
     def test_inline_javascript_parses(self):
         for name, p in self.parsed.items():
