@@ -561,10 +561,21 @@ window.uiPanel=(()=>{
  const lotsOf=day=>day&&day.total!=null?+day.total:+(day&&day.target!=null?day.target:0);
  function pos0(){return (HOLD&&Array.isArray(HOLD.positions)&&HOLD.positions[0])||{};}
  function liveStart(){return HOLD?(HOLD.d_live_start||pos0().entry_date||''):'';}
+ function cTile(n){n=+n;return n<0?'−'+Math.abs(n):String(n);}
+ function legFormula(a,b,c,d){
+  function piece(letter,n,first){
+   n=+n||0;
+   const body=letter+Math.abs(n);
+   if(n<0) return '− '+body;
+   if(first) return body;
+   return '+ '+body;
+  }
+  return [piece('A',a,true),piece('B',b,false),piece('C',c,false),piece('D',d,false)].join(' ');
+ }
  function abcdText(day,d){
   const base=day&&day.target!=null?+day.target:0;
   const tot=Math.max(0,Math.min(10,base+(+d||0)));
-  return 'A'+(day?day.leg_a:'—')+' + B'+sgn(day?day.leg_b:0)+' + C'+sgn(day?day.leg_c:0)+' + D'+d+' = '+tot;
+  return legFormula(day?day.leg_a:0, day?day.leg_b:0, day?day.leg_c:0, d)+' = '+tot;
  }
  function liveAddon(base, accountPnl, price){
   const b=+base||0;
@@ -732,7 +743,7 @@ window.uiPanel=(()=>{
   const latestModel=modelView(latest, snap);
   host.innerHTML=
    '<section class="hero" aria-label="模型建议"><div class="hero-main"><div class="lb">模型建议 · 信号日 '+esc(day.date)+'</div><div class="vl">'+esc(total)+'<small>手</small></div><div class="ft">'+pickFt+'</div></div>'
-   +'<div class="hero-side"><div class="legs"><div class="leg"><span>A 网格</span><b>'+esc(day.leg_a)+'</b></div><div class="leg"><span>B 趋势</span><b>'+esc(sgn(day.leg_b))+'</b></div><div class="leg"><span>C 贴水</span><b>'+esc(sgn(day.leg_c))+'</b></div><div class="leg"><span>D 盈利</span><b>'+esc(legD)+'</b></div></div>'
+   +'<div class="hero-side"><div class="legs"><div class="leg"><span>A 网格</span><b>'+esc(day.leg_a)+'</b></div><div class="leg"><span>B 趋势</span><b>'+esc(sgn(day.leg_b))+'</b></div><div class="leg"><span>C 贴水</span><b>'+esc(cTile(day.leg_c))+'</b></div><div class="leg"><span>D 盈利</span><b>'+esc(legD)+'</b></div></div>'
    +'<div class="ft">'+esc(abcdText(day, legD))+'</div></div></section>'
    +'<section class="panel"><div class="hold-note">实际持仓 '+(snap.code?esc(snap.code)+' '+esc(snap.dir)+' '+(snap.lots==null?'—':esc(snap.lots))+' 手':'见 data/holdings.json')+'。'+gap+(day.date===latest.date?'':' 这是信号日 '+esc(day.date)+' 的模型，不是把更早的回测仓说成今天的持仓。')+'</div></section>'
    +'<div class="kpis"><div class="kpi"><div class="lb">中证500收盘</div><div class="vl">'+num(day.index_close,3)+'</div><div class="ft">信号日 '+esc(day.date)+' 收盘</div></div>'

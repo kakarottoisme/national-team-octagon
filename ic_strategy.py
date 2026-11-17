@@ -109,6 +109,25 @@ def signed(n: int) -> str:
     return "0"
 
 
+def leg_formula(a: int, b: int, c: int, d: int) -> str:
+    """A2 + B0 + C2 + D0。负数把减号放在字母前：A2 + B0 − C2 + D0。"""
+    def piece(letter: str, n: int, first: bool) -> str:
+        n = int(n)
+        body = f"{letter}{abs(n)}"
+        if n < 0:
+            return f"− {body}"
+        if first:
+            return body
+        return f"+ {body}"
+
+    return " ".join((
+        piece("A", a, True),
+        piece("B", b, False),
+        piece("C", c, False),
+        piece("D", d, False),
+    ))
+
+
 def add_months(year: int, month: int, n: int) -> tuple[int, int]:
     z = year * 12 + (month - 1) + n
     return z // 12, z % 12 + 1
@@ -290,7 +309,7 @@ def _total_with_d(a: int, b: int, c: int, leg_d: int, ma_exit: bool = False) -> 
 
 def _with_breakdown(effect: str, a: int, b: int, c: int, d: int) -> str:
     """在「合计」前写上 A/B/C/D，避免只看到一串没有名字的数字。"""
-    br = f"A{a} + B{signed(b)} + C{signed(c)} + D{d}"
+    br = leg_formula(a, b, c, d)
     token = "，合计"
     if token in effect:
         return effect.replace(token, f"，{br}{token}", 1)
@@ -625,7 +644,7 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
         total = min(10, target + d_lots)
         total_notional = total * held_px * MULTIPLIER if held_px and total else 0.0
         raw = a + b + c
-        sum_text = f"A{a} + B{signed(b)} + C{signed(c)} + D{d_lots} = {total}"
+        sum_text = f"{leg_formula(a, b, c, d_lots)} = {total}"
         if raw != target:
             sum_text += f"（底仓未限制前 {raw}）"
         out.append({

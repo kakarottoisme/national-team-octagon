@@ -145,10 +145,10 @@ class TestTriggers(unittest.TestCase):
     def test_grid_phrases_for_nov_16(self):
         rows = ic.trigger_rows(6297.183, 2, 0, 2, 7900.0, 7700.0, "2026-11-19", "IC2612", 0.1427)
         text = {r["cond"]: r["effect"] for r in rows}
-        self.assertEqual(text["收盘跌破 6000"], "网格腿升到 4 手，A4 + B0 + C+2 + D0，合计加到 6 手")
-        self.assertEqual(text["收盘站上 6500"], "网格腿降到 0 手，A0 + B0 + C+2 + D0，合计减到 2 手")
-        self.assertIn("趋势腿升到 2 手，A2 + B+2 + C+2 + D0，合计加到 6 手", text["收盘站上 7,900.00"])
-        self.assertIn("趋势腿维持 0 手，A2 + B0 + C+2 + D0，合计仍为 4 手", text["收盘跌破 7,700.00"])
+        self.assertEqual(text["收盘跌破 6000"], "网格腿升到 4 手，A4 + B0 + C2 + D0，合计加到 6 手")
+        self.assertEqual(text["收盘站上 6500"], "网格腿降到 0 手，A0 + B0 + C2 + D0，合计减到 2 手")
+        self.assertIn("趋势腿升到 2 手，A2 + B2 + C2 + D0，合计加到 6 手", text["收盘站上 7,900.00"])
+        self.assertIn("趋势腿维持 0 手，A2 + B0 + C2 + D0，合计仍为 4 手", text["收盘跌破 7,700.00"])
         self.assertIn("14.27%", text["2026-11-19 收盘决定贴水腿"])
         self.assertIn("C = +2", text["2026-11-19 收盘决定贴水腿"])
         self.assertIn("C 维持 +2", text["2026-11-19 收盘决定贴水腿"])
@@ -167,6 +167,16 @@ class TestTriggers(unittest.TestCase):
         self.assertTrue(on + 0.01 > 1.01 * ma(on + 0.01))
         self.assertFalse(off < 0.99 * ma(off))
         self.assertTrue(off - 0.01 < 0.99 * ma(off - 0.01))
+
+    def test_negative_c_puts_minus_before_the_letter(self):
+        rows = ic.trigger_rows(5700, 4, 0, -2, None, None, None, None, None)
+        text = {r["cond"]: r["effect"] for r in rows}
+        self.assertIn("A6 + B0 − C2 + D0", text["收盘跌破 5500"])
+        self.assertNotIn("C-2", text["收盘跌破 5500"])
+        self.assertNotIn("+ C-", text["收盘跌破 5500"])
+        self.assertEqual(ic.leg_formula(2, 0, 2, 0), "A2 + B0 + C2 + D0")
+        self.assertEqual(ic.leg_formula(2, 0, -2, 0), "A2 + B0 − C2 + D0")
+        self.assertEqual(ic.leg_formula(2, 2, -2, 1), "A2 + B2 − C2 + D1")
 
     def test_close_call_note(self):
         rows = ic.trigger_rows(6002, 2, 0, 0, None, None, None, None, None)
@@ -215,8 +225,8 @@ class TestDLeg(unittest.TestCase):
     def test_trigger_total_includes_d_until_exit(self):
         rows = ic.trigger_rows(6297.183, 2, 0, 2, 7900.0, 7700.0, None, None, None, leg_d=2)
         text = {r["cond"]: r["effect"] for r in rows}
-        self.assertEqual(text["收盘跌破 6000"], "网格腿升到 4 手，A4 + B0 + C+2 + D2，合计加到 8 手")
-        self.assertEqual(text["收盘跌破 7,700.00"], "趋势腿维持 0 手，D 腿撤出，A2 + B0 + C+2 + D0，合计减到 4 手")
+        self.assertEqual(text["收盘跌破 6000"], "网格腿升到 4 手，A4 + B0 + C2 + D2，合计加到 8 手")
+        self.assertEqual(text["收盘跌破 7,700.00"], "趋势腿维持 0 手，D 腿撤出，A2 + B0 + C2 + D0，合计减到 4 手")
 
 
 class TestPageCopy(unittest.TestCase):
