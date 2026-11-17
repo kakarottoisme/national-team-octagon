@@ -1,54 +1,58 @@
-# 用法: python3 archive.py  —— 收盘后运行，归档当日分时与估算到 data/
-import json, urllib.request, os
+"""Archive the current ETF minutes after close. Importing does not fetch or write."""
+from __future__ import annotations
 
-def g(u):
-    q = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
-    return json.loads(urllib.request.urlopen(q, timeout=15).read().decode("utf-8", "ignore"))
+import json
+import urllib.request
+from pathlib import Path
 
-E = [
-    ("上证50", "sh510050"),
-    ("沪深300", "sh510300"),
-    ("中证A500", "sz159352"),
-    ("中证500", "sh510500"),
-    ("中证1000", "sh512100"),
-    ("创业板", "sz159915"),
-    ("科创50", "sh588000"),
-]
-mins, row, date = {}, {}, None
-for n, c in E:
-    raw = g(f"https://web.ifzq.gtimg.cn/appstock/app/minute/query?code={c}")["data"][c]
-    d = raw["data"]
-    date = d["date"]
-    pa = 0
-    t, p, a = [], [], []
-    for s in d["data"]:
-        r = s.split()
-        am = float(r[3])
-        t.append(r[0])
-        p.append(float(r[1]))
-        a.append(round((am - pa) / 1e8, 4))
-        pa = am
-    try:
-        pre = float(raw["qt"][c][4])
-    except Exception:
-        pre = p[0] if p else None
-    mins[c] = {"t": t, "p": p, "a": a, "pre": pre}
-    row[n] = round(sum(x for x in a if x > 1), 2)
-ds = f"{date[:4]}-{date[4:6]}-{date[6:]}"
-row["合计"] = round(sum(row.values()), 2)
-k = g("https://proxy.finance.qq.com/ifzqgtimg/appstock/app/newfqkline/get?param=sh000001,day,,,40,qfq")["data"]["sh000001"]
-k = k.get("day") or k.get("qfqday")
-idx = [i for i, x in enumerate(k) if x[0] == ds]
-if idx:
-    i = idx[0]
-    c = float(k[i][2])
-    pc = float(k[i - 1][2])
-    row["上证收盘"] = c
-    row["上证涨跌幅"] = round((c / pc - 1) * 100, 2)
-hp = "data/history.json"
-h = json.load(open(hp)) if os.path.exists(hp) else {}
-h[ds] = row
-json.dump(dict(sorted(h.items())), open(hp, "w"), ensure_ascii=False, indent=1)
-os.makedirs("data/minutes", exist_ok=True)
-json.dump({"date": ds, "etfs": mins}, open(f"data/minutes/{ds}.json", "w"), separators=(",", ":"))
-print(ds, row)
+from backend_common import ETF_UNIVERSE, estimated_large_minutes, iso_market_date, parse_minutes
+from backend_io import write_json_atomic
+
+ROOT = Path(__file__).resolve().parent
+E = list(ETF_UNIVERSE)
+
+
+def g(url):
+    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(request, timeout=15) as response:
+        return json.loads(response.read().decode("utf-8", "ignore"))
+
+
+def build_archive(fetch=None):
+    """Return (date, summary, minutes) without touching the filesystem."""
+    fetch = fetch or g
+    minutes, summary, date = {}, {}, None
+    for name, code in E:
+        raw = fetch(f"https://web.ifzq.gtimg.cn/appstock/app/minute/query?code={code}")["data"][code]
+        parsed = parse_minutes(raw, code)
+        date = parsed["date"]
+        minutes[code] = {key: parsed[key] for key in ("t", "p", "a", "pre")}
+        summary[name] = estimated_large_minutes(parsed["a"])
+    iso_date = iso_market_date(date)
+    summary["合计"] = round(sum(summary.values()), 2)
+    kline = fetch("https://proxy.finance.qq.com/ifzqgtimg/appstock/app/newfqkline/get?param=sh000001,day,,,40,qfq")["data"]["sh000001"]
+    kline = kline.get("day") or kline.get("qfqday")
+    indices = [i for i, row in enumerate(kline) if row[0] == iso_date]
+    if indices:
+        i = indices[0]
+        close, previous = float(kline[i][2]), float(kline[i-1][2])
+        summary["上证收盘"] = close
+        summary["上证涨跌幅"] = round((close / previous - 1) * 100, 2)
+    return iso_date, summary, {"date": iso_date, "etfs": minutes}
+
+
+def main(data_dir=None, fetch=None):
+    date, summary, minutes = build_archive(fetch=fetch)
+    directory = Path(data_dir) if data_dir is not None else ROOT / "data"
+    history_path = directory / "history.json"
+    history = json.loads(history_path.read_text(encoding="utf-8")) if history_path.exists() else {}
+    history[date] = summary
+    write_json_atomic(history_path, dict(sorted(history.items())), ensure_ascii=False, indent=1)
+    # Keep the historical archive's ASCII JSON encoding and compact separators.
+    write_json_atomic(directory / "minutes" / f"{date}.json", minutes, separators=(",", ":"))
+    print(date, summary)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

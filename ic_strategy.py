@@ -30,6 +30,8 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from backend_io import write_text_atomic
+
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "data" / "ic_strategy.json"
 MULTIPLIER = 200
@@ -1040,8 +1042,7 @@ def main(argv: list[str] | None = None) -> int:
         payload["latest"] = payload["days"][-1]["date"]
     text = dump_payload(payload)
     out = Path(args.out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(text, encoding="utf-8")
+    write_text_atomic(out, text)
     print(f"wrote {out} days={len(payload['days'])} latest={payload['latest']} {cffex_note}")
     for day in payload["days"]:
         if day["date"] >= "2026-10-01":

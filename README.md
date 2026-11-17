@@ -1,5 +1,13 @@
 # 国家队·分时八宫格
-七只宽基 ETF 分时 + 分钟成交额>1亿合计估算。「今日实时」可按日期切换存档，页面大约每 30 秒重读 `data/live.json`。成交额阈值代理，非官方国家队认定。数据：腾讯行情。
+七只宽基 ETF 分时 + 分钟成交额>1亿合计估算。「今日实时」可按日期切换存档，页面大约每 60 秒重读 `data/live.json`。成交额阈值代理，非官方国家队认定。数据：腾讯行情。
+
+## 维护与 AI 交接
+
+- [AGENTS.md](AGENTS.md)：后续 AI 的改造边界、检查顺序与交付规则
+- [BACKEND.md](BACKEND.md)：脚本地图、页面→JSON→生产者、运行入口、数据口径及失败语义
+- 离线回归：仓库根目录运行 `python3 check_backend.py`，禁止联网，检查前端和生产数据没有被测试改写
+- 后台是 Python/Shell 采集到 JSON 的管线，不是独立 HTTP 服务；不需要重新搭服务器或改页面框架
+
 
 ## 实时数据在云端
 页面由 GitHub Pages 从 `main` 提供，手机打开不依赖笔记本。盘中 `data/live.json` 由 Actions 工作流 **Refresh live.json**（`.github/workflows/live.yml`）更新：

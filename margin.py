@@ -10,6 +10,8 @@ import json
 import time
 from pathlib import Path
 
+from backend_io import write_json_atomic
+
 import akshare as ak
 import pandas as pd
 
@@ -98,8 +100,7 @@ def main() -> None:
         "margin": m,
         "index": {k: idx(c) for k, c in IDX.items()},
     }
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    write_json_atomic(OUT, out, ensure_ascii=False, separators=(",", ":"))
     print("margin", min(m), max(m), len(m))
 
 
