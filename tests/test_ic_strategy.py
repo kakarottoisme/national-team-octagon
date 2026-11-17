@@ -112,6 +112,7 @@ class TestSelection(unittest.TestCase):
         self.assertEqual(decision["contract"], "IC2611")
         self.assertEqual(decision["position_roll"], "2026-11-19")
         self.assertEqual(decision["roll_hint"], "IC2612")
+        self.assertEqual(ic.fresh_entry(slots, self._prices(), self._discounts()), "IC2612")
         self.assertIn("持有 IC2611", decision["action_text"])
         self.assertIn("2026-11-19", decision["action_text"])
         self.assertIn("IC2612", decision["note"])
@@ -144,10 +145,10 @@ class TestTriggers(unittest.TestCase):
     def test_grid_phrases_for_nov_16(self):
         rows = ic.trigger_rows(6297.183, 2, 0, 2, 7900.0, 7700.0, "2026-11-19", "IC2612", 0.1427)
         text = {r["cond"]: r["effect"] for r in rows}
-        self.assertEqual(text["收盘跌破 6000"], "网格腿升到 4 手，合计加到 6 手")
-        self.assertEqual(text["收盘站上 6500"], "网格腿降到 0 手，合计减到 2 手")
-        self.assertIn("趋势腿升到 2 手，合计加到 6 手", text["收盘站上 7,900.00"])
-        self.assertIn("趋势腿维持 0 手，合计仍为 4 手", text["收盘跌破 7,700.00"])
+        self.assertEqual(text["收盘跌破 6000"], "网格腿升到 4 手，A4 + B0 + C+2 + D0，合计加到 6 手")
+        self.assertEqual(text["收盘站上 6500"], "网格腿降到 0 手，A0 + B0 + C+2 + D0，合计减到 2 手")
+        self.assertIn("趋势腿升到 2 手，A2 + B+2 + C+2 + D0，合计加到 6 手", text["收盘站上 7,900.00"])
+        self.assertIn("趋势腿维持 0 手，A2 + B0 + C+2 + D0，合计仍为 4 手", text["收盘跌破 7,700.00"])
         self.assertIn("14.27%", text["2026-11-19 收盘决定贴水腿"])
         self.assertIn("C = +2", text["2026-11-19 收盘决定贴水腿"])
         self.assertIn("C 维持 +2", text["2026-11-19 收盘决定贴水腿"])
@@ -214,8 +215,8 @@ class TestDLeg(unittest.TestCase):
     def test_trigger_total_includes_d_until_exit(self):
         rows = ic.trigger_rows(6297.183, 2, 0, 2, 7900.0, 7700.0, None, None, None, leg_d=2)
         text = {r["cond"]: r["effect"] for r in rows}
-        self.assertEqual(text["收盘跌破 6000"], "网格腿升到 4 手，合计加到 8 手")
-        self.assertEqual(text["收盘跌破 7,700.00"], "趋势腿维持 0 手，D 腿撤出，合计减到 4 手")
+        self.assertEqual(text["收盘跌破 6000"], "网格腿升到 4 手，A4 + B0 + C+2 + D2，合计加到 8 手")
+        self.assertEqual(text["收盘跌破 7,700.00"], "趋势腿维持 0 手，D 腿撤出，A2 + B0 + C+2 + D0，合计减到 4 手")
 
 
 class TestPageCopy(unittest.TestCase):
@@ -238,7 +239,12 @@ class TestPageCopy(unittest.TestCase):
         self.assertEqual(pos["direction"], "多")
         self.assertEqual(pos["lots"], 4)
         self.assertEqual(pos["entry_price"], 6051.0)
+        self.assertEqual(holdings["d_live_start"], "2026-11-17")
         self.assertNotIn("14%", json.dumps(holdings, ensure_ascii=False))
+        self.assertNotIn("day.action_text", page)
+        self.assertIn("模型建议", page)
+        self.assertIn("按信号日", page)
+        self.assertIn("不沿用回测累计", page)
 
 
 class TestMerge(unittest.TestCase):

@@ -288,6 +288,15 @@ def _total_with_d(a: int, b: int, c: int, leg_d: int, ma_exit: bool = False) -> 
     return d, min(10, base + d)
 
 
+def _with_breakdown(effect: str, a: int, b: int, c: int, d: int) -> str:
+    """在「合计」前写上 A/B/C/D，避免只看到一串没有名字的数字。"""
+    br = f"A{a} + B{signed(b)} + C{signed(c)} + D{d}"
+    token = "，合计"
+    if token in effect:
+        return effect.replace(token, f"，{br}{token}", 1)
+    return f"{effect}，{br}"
+
+
 def _with_d_note(effect: str, old_d: int, new_d: int) -> str:
     if new_d == old_d:
         return effect
@@ -318,7 +327,7 @@ def trigger_rows(close: float, leg_a_now: int, leg_b_now: int, leg_c_now: int,
             rows.append({
                 "kind": "grid_down",
                 "cond": f"收盘跌破 {_fmt_level(lv, True)}",
-                "effect": _with_d_note(_leg_effect("网格腿", leg_a_now, new_a, target, new_total), d_now, new_d) + _near_note(close, lv),
+                "effect": _with_breakdown(_with_d_note(_leg_effect("网格腿", leg_a_now, new_a, target, new_total), d_now, new_d), new_a, leg_b_now, leg_c_now, new_d) + _near_note(close, lv),
             })
     above = [lv for lv in GRID if lv >= close]
     if above:
@@ -329,21 +338,21 @@ def trigger_rows(close: float, leg_a_now: int, leg_b_now: int, leg_c_now: int,
             rows.append({
                 "kind": "grid_up",
                 "cond": f"收盘站上 {_fmt_level(lv, True)}",
-                "effect": _with_d_note(_leg_effect("网格腿", leg_a_now, new_a, target, new_total), d_now, new_d) + _near_note(close, lv),
+                "effect": _with_breakdown(_with_d_note(_leg_effect("网格腿", leg_a_now, new_a, target, new_total), d_now, new_d), new_a, leg_b_now, leg_c_now, new_d) + _near_note(close, lv),
             })
     if on_above:
         new_d, new_total = _total_with_d(leg_a_now, 2, leg_c_now, d_now, False)
         rows.append({
             "kind": "trend_on",
             "cond": f"收盘站上 {_fmt_level(on_above, False)}",
-            "effect": _with_d_note(_leg_effect("趋势腿", leg_b_now, 2, target, new_total), d_now, new_d) + _near_note(close, on_above),
+            "effect": _with_breakdown(_with_d_note(_leg_effect("趋势腿", leg_b_now, 2, target, new_total), d_now, new_d), leg_a_now, 2, leg_c_now, new_d) + _near_note(close, on_above),
         })
     if off_below:
         new_d, new_total = _total_with_d(leg_a_now, 0, leg_c_now, d_now, True)
         rows.append({
             "kind": "trend_off",
             "cond": f"收盘跌破 {_fmt_level(off_below, False)}",
-            "effect": _with_d_note(_leg_effect("趋势腿", leg_b_now, 0, target, new_total), d_now, new_d) + _near_note(close, off_below),
+            "effect": _with_breakdown(_with_d_note(_leg_effect("趋势腿", leg_b_now, 0, target, new_total), d_now, new_d), leg_a_now, 0, leg_c_now, new_d) + _near_note(close, off_below),
         })
     if next_roll:
         if c_basis_now is not None and c_code:
@@ -378,6 +387,16 @@ def choose_open(eligible: list[str], benchmark: str, discounts: dict[str, float]
     if not contenders:
         return base
     return _best(contenders, discounts)
+
+
+def fresh_entry(slots: list[dict], prices: dict[str, float | None], discounts: dict[str, float]) -> str | None:
+    """新开仓会选的合约。近月不足 10 日时，基准改成次月，不沿用回测路径上的旧仓。"""
+    eligible = eligible_codes(slots, prices)
+    if not eligible or not slots:
+        return None
+    near = slots[0]["code"]
+    bench = slots[1]["code"] if near not in eligible else near
+    return choose_open(eligible, bench, discounts)
 
 
 def choose_switch(held: str, eligible: list[str], discounts: dict[str, float]) -> str:
@@ -585,6 +604,8 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
                 ev_days = (last_trade_day(*parse_code(eval_code), holidays) - asof).days
                 eval_basis = ann_discount(close, px, ev_days)
         rows = trigger_rows(close, a, b, c, on_above, off_below, next_roll, eval_code, eval_basis, d_lots)
+        entry_pick = fresh_entry(slots, prices, discounts)
+        entry_roll = _future_roll(entry_pick, asof, holidays)
         contract_rows = []
         for s in slots:
             px = prices.get(s["code"])
@@ -604,8 +625,7 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
         total = min(10, target + d_lots)
         total_notional = total * held_px * MULTIPLIER if held_px and total else 0.0
         raw = a + b + c
-        c_term = f"({signed(c)})" if c < 0 else str(c)
-        sum_text = f"{a} + {b} + {c_term} + {d_lots} = {total}"
+        sum_text = f"A{a} + B{signed(b)} + C{signed(c)} + D{d_lots} = {total}"
         if raw != target:
             sum_text += f"（底仓未限制前 {raw}）"
         out.append({
@@ -627,6 +647,8 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
             "total": total,
             "sum_text": sum_text,
             "contract": held,
+            "entry_pick": entry_pick,
+            "entry_roll": entry_roll,
             "action": decision["action"],
             "action_text": decision["action_text"],
             "note": decision["note"],
@@ -806,6 +828,91 @@ def fetch_cffex_closes(yyyymmdd: str, cache: str | None) -> dict[str, float]:
     return out
 
 
+def parse_sina_fut_quote(text: str) -> dict | None:
+    """新浪 nf_ 行情。只接受带日期、且时间不早于 15:00 的最新价，当作收盘。"""
+    i = text.find('="')
+    j = text.rfind('"')
+    if i < 0 or j <= i + 2:
+        return None
+    parts = text[i + 2:j].split(",")
+    if len(parts) < 5:
+        return None
+    date = next((p for p in parts if re.fullmatch(r"\d{4}-\d{2}-\d{2}", p)), None)
+    if date is None:
+        return None
+    idx = parts.index(date)
+    clock = parts[idx + 1] if idx + 1 < len(parts) else ""
+    if not re.fullmatch(r"\d{2}:\d{2}:\d{2}", clock) or clock < "15:00:00":
+        return None
+    try:
+        price = round(float(parts[3]), 1)
+    except ValueError:
+        return None
+    return {"date": date, "time": clock, "price": price}
+
+
+def fetch_sina_session_close(code: str) -> dict | None:
+    url = f"https://hq.sinajs.cn/list=nf_{code}"
+    req = urllib.request.Request(url, headers=SINA_UA)
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            text = resp.read().decode("gbk", "replace")
+    except Exception as exc:  # noqa: BLE001
+        print(f"[warn] realtime {code} {exc}", file=sys.stderr)
+        return None
+    return parse_sina_fut_quote(text)
+
+
+def fetch_cffex_quote_last() -> dict[str, float]:
+    """中金所 quote_IC.txt 的 lastprice。文件本身不带日期，只用来核对同一时刻的新浪收盘。"""
+    url = "http://www.cffex.com.cn/quote_IC.txt"
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Referer": "http://www.cffex.com.cn/"})
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            text = resp.read().decode("utf-8", "replace")
+    except Exception as exc:  # noqa: BLE001
+        print(f"[warn] cffex quote {exc}", file=sys.stderr)
+        return {}
+    out = {}
+    for line in text.splitlines()[1:]:
+        parts = [p.strip() for p in line.split(",")]
+        if len(parts) < 5 or not re.fullmatch(r"IC\d{4}", parts[0]):
+            continue
+        try:
+            out[parts[0]] = round(float(parts[4]), 1)
+        except ValueError:
+            continue
+    return out
+
+
+def fill_latest_closes(last_day: str, codes: list[str], price_map: dict[str, dict[str, float]]) -> str:
+    """日 K 还没有最后交易日时，用新浪 15:00 最新价补收盘，并与中金所 lastprice 核对。"""
+    missing = [c for c in codes if last_day not in price_map.get(c, {})]
+    if not missing:
+        return ""
+    quote = fetch_cffex_quote_last()
+    filled = []
+    skipped = []
+    for code in missing:
+        live = fetch_sina_session_close(code)
+        if live is None or live["date"] != last_day:
+            continue
+        official = quote.get(code)
+        if official is not None and abs(official - live["price"]) > 0.15:
+            skipped.append(f"{code}:sina {live['price']} cffex {official}")
+            continue
+        price_map.setdefault(code, {})[last_day] = official if official is not None else live["price"]
+        filled.append(code)
+    if not filled and not skipped:
+        return ""
+    note = f"{last_day} 日K未含收盘，已用新浪 15:00 最新价补 " + ",".join(filled)
+    if quote and filled:
+        note += "，与中金所 quote_IC.txt lastprice 一致"
+    if skipped:
+        note += "；以下两边不一致已跳过 " + ",".join(skipped)
+    return note
+
+
 def month_codes(start: tuple[int, int], end: tuple[int, int]) -> list[str]:
     y, m = start
     codes = []
@@ -902,6 +1009,11 @@ def main(argv: list[str] | None = None) -> int:
             series[index_rows[-1][0]] = px
         cffex_note = "中金所日行情今收盘已核对" + (("，覆盖 " + ",".join(replaced)) if replaced else "，与新浪一致")
     holidays = infer_holidays([d for d, _ in index_rows])
+    slot_codes = [s["code"] for s in list_slots(last_day, holidays)]
+    extra = fill_latest_closes(index_rows[-1][0], slot_codes, price_map)
+    if extra:
+        cffex_note = cffex_note + "。" + extra
+        print(extra)
     payload = build_payload(index_rows, price_map, holidays, cffex_note)
     old = load_old(Path(args.out))
     payload["days"] = merge_history(old, payload["days"])
@@ -915,7 +1027,8 @@ def main(argv: list[str] | None = None) -> int:
     for day in payload["days"]:
         if day["date"] >= "2026-10-01":
             print(f"  {day['date']} A{day['leg_a']} B{day['leg_b']} C{day['leg_c']} D{day['leg_d']} "
-                  f"base{day['target']} T{day['total']} pnl={day['d_pnl']} {day['action']:6} {day['contract']}")
+                  f"base{day['target']} T{day['total']} pick={day.get('entry_pick')} "
+                  f"pnl={day['d_pnl']} {day['action']:6} path={day['contract']}")
     return 0
 
 
