@@ -1,44 +1,44 @@
 {
- "as_of": "2026-11-16",
- "calendar_days": 34,
+ "as_of": "2026-11-17",
+ "calendar_days": 35,
  "domestic": "ok",
  "errors": [],
  "futures_history": {
-  "as_of": "2026-11-16",
+  "as_of": "2026-11-17",
   "errors": [],
-  "last_attempt": "2026-11-17T07:48:39+08:00",
+  "last_attempt": "2026-11-18T07:04:17+08:00",
   "products": {
    "IC": {
-    "date": "2026-11-16",
+    "date": "2026-11-17",
     "product": "IC",
-    "published_before": 225,
-    "records_after": 226,
+    "published_before": 226,
+    "records_after": 227,
     "source_status": "published"
    },
    "IF": {
-    "date": "2026-11-16",
+    "date": "2026-11-17",
     "product": "IF",
-    "published_before": 225,
-    "records_after": 226,
+    "published_before": 226,
+    "records_after": 227,
     "source_status": "published"
    },
    "IH": {
-    "date": "2026-11-16",
+    "date": "2026-11-17",
     "product": "IH",
-    "published_before": 225,
-    "records_after": 226,
+    "published_before": 226,
+    "records_after": 227,
     "source_status": "published"
    },
    "IM": {
-    "date": "2026-11-16",
+    "date": "2026-11-17",
     "product": "IM",
-    "published_before": 225,
-    "records_after": 226,
+    "published_before": 226,
+    "records_after": 227,
     "source_status": "published"
    }
   }
  },
- "generated_at": "2026-11-17T07:48:39+08:00",
+ "generated_at": "2026-11-18T07:04:17+08:00",
  "global": "ok",
  "global_detail": {
   "connected": 6,
@@ -60,26 +60,26 @@
  "schema_version": "1.0.0",
  "sources": [
   {
-   "date": "2026-11-17",
+   "date": "2026-11-18",
    "http": 200,
    "name": "SSE",
    "rows": 0,
    "status": "unpublished"
   },
   {
-   "date": "2026-11-16",
+   "date": "2026-11-17",
    "http": 200,
    "name": "SSE",
-   "rows": 924,
+   "rows": 925,
    "status": "ok"
   },
   {
-   "date": "2026-11-17",
+   "date": "2026-11-18",
    "name": "CFFEX",
    "status": "no_published"
   },
   {
-   "date": "2026-11-16",
+   "date": "2026-11-17",
    "name": "CFFEX",
    "status": "ok"
   },
