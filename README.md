@@ -23,7 +23,7 @@
 收盘后（建议 17:00 以后/次日，交易所两融披露滞后约 1 交易日）运行 `python3 margin.py`（需 akshare，可用 /workspace/.venv-nt），然后 commit 并 push `data/margin_balance.json`。脚本每次全量重拉，漏跑无影响。
 
 ## IC 策略 · 收盘信号（futures-preview.html 顶部）
-`data/ic_strategy.json`：中证500收盘算出的 IC 只做多目标手数、三条腿、建议合约、下一交易日触发价，以及可回看的历史。页面上的「最终规则」是计算口径。
+`data/ic_strategy.json`：中证500收盘算出的 IC 只做多目标手数、A/B/C 底仓、D 腿（盈利覆盖加仓）和建议手数、建议合约、下一交易日触发价，以及可回看的历史。页面上的「最终规则」是计算口径。实际持仓写在 `data/holdings.json`，页面「当前持仓」只读这份配置。保证金按交易所 12% 估算。
 
 - 指数：新浪 `sh000905` 日收盘。期货：新浪 IC 日线收盘（字段 `c`），与中金所日行情「今收盘」核对，不用结算价。只使用标准库。
 - 本地收盘后可运行 `python3 ic_strategy.py`。单元测试：`python3 -m unittest tests/test_ic_strategy.py`。

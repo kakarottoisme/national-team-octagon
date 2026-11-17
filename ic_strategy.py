@@ -12,6 +12,11 @@
       遇周末或已知休市顺延到下一交易日。
 
 规则摘要见页面「最终规则」。本文件只计算，不给出交易指令。
+
+D 腿（盈利覆盖加仓）叠在 A+B+C 的底仓上，用指数收盘把全历史重放一遍：
+累计盈亏按上一日（底仓 + D）× 指数涨跌 × 200。自上次 D 撤出以来的盈利，
+有 50% 够付 1 手 12% 保证金就加 1 手，D 最多 4，底仓 + D 不超过 10。
+收盘低于 MA250×0.99，或底仓为 0，D 归零并把累计盈亏记为新的起点。
 """
 from __future__ import annotations
 
@@ -33,6 +38,10 @@ GRID = (5000, 5250, 5500, 6000, 6500)
 OPEN_GAP = 0.03
 SWITCH_GAP = 0.02
 MIN_DAYS = 10
+# D 腿：盈利的 50% 覆盖 12% 保证金才加仓，最多 4 手，底仓 + D 不超过 10。
+D_FRAC = 0.5
+D_MAX = 4
+D_MARGIN = 0.12
 # 指数窗口之外、脚本还要用到的休市（元旦）。已过去的休市从指数缺口回填。
 FUTURE_HOLIDAYS = {"2027-01-01"}
 SINA_UA = {
@@ -223,46 +232,118 @@ def _near_note(close: float, level: float) -> str:
     return ""
 
 
+def advance_d(lots: int, cum: float, cum0: float, prev_base: int, prev_close: float | None,
+              base: int, close: float, ma: float) -> tuple[int, float, float]:
+    """重放一天 D 腿。盈亏用上一日底仓和 D，撤出与加仓用当日底仓和收盘。
+
+    与回测同一顺序：先记盈亏，底仓归零或收盘跌破 MA250×0.99 则 D 归零并重置起点，
+    然后按 50% 盈利覆盖 12% 保证金加仓。D 不超过 4，也不让底仓 + D 超过 10。
+    """
+    if prev_close is not None:
+        cum += (prev_base + lots) * (close - prev_close) * MULTIPLIER
+    if base <= 0 and lots > 0:
+        lots = 0
+        cum0 = cum
+    if lots > 0 and close < ma * 0.99:
+        lots = 0
+        cum0 = cum
+    unit = D_MARGIN * close * MULTIPLIER
+    avail = D_FRAC * max(cum - cum0, 0.0)
+    tgt = min(D_MAX, int(avail // unit)) if unit > 0 else 0
+    room = max(0, 10 - int(base))
+    tgt = min(tgt, room)
+    if tgt > lots:
+        lots = tgt
+    if lots > room:
+        lots = room
+    return lots, cum, cum0
+
+
+def d_next_yuan(lots: int, cum: float, cum0: float, base: int, close: float) -> float | None:
+    """再加 1 手还差多少累计盈利（元）。已到 D 上限或总手数上限时返回 None。"""
+    cap = min(D_MAX, max(0, 10 - int(base)))
+    if lots >= cap:
+        return None
+    unit = D_MARGIN * close * MULTIPLIER
+    if unit <= 0:
+        return None
+    # 触发线是累计盈利（可为负）达到 (D+1) 手保证金 / 50%。还需金额含把亏损赚回来的部分。
+    target_profit = (lots + 1) * unit / D_FRAC
+    need = target_profit - (cum - cum0)
+    if need < 0:
+        need = 0.0
+    return need
+
+
+def _d_after_base(base: int, leg_d: int, ma_exit: bool) -> int:
+    """触发价只改一条底仓腿时，D 保持不变，除非撤出或被 10 手上限挤掉。不加仓。"""
+    if ma_exit or base <= 0:
+        return 0
+    return min(max(0, int(leg_d)), D_MAX, max(0, 10 - int(base)))
+
+
+def _total_with_d(a: int, b: int, c: int, leg_d: int, ma_exit: bool = False) -> tuple[int, int]:
+    base = clip_lots(a + b + c)
+    d = _d_after_base(base, leg_d, ma_exit)
+    return d, min(10, base + d)
+
+
+def _with_d_note(effect: str, old_d: int, new_d: int) -> str:
+    if new_d == old_d:
+        return effect
+    if new_d <= 0:
+        note = "D 腿撤出"
+    elif new_d < old_d:
+        note = f"D 腿减到 {new_d} 手"
+    else:
+        note = f"D 腿加到 {new_d} 手"
+    head, sep, tail = effect.partition("，")
+    if not sep:
+        return f"{effect}，{note}"
+    return f"{head}，{note}，{tail}"
+
+
 def trigger_rows(close: float, leg_a_now: int, leg_b_now: int, leg_c_now: int,
                  on_above: float, off_below: float, next_roll: str | None,
-                 c_code: str | None, c_basis_now: float | None) -> list[dict]:
+                 c_code: str | None, c_basis_now: float | None, leg_d: int = 0) -> list[dict]:
     rows = []
-    target = clip_lots(leg_a_now + leg_b_now + leg_c_now)
+    d_now = max(0, int(leg_d))
+    _, target = _total_with_d(leg_a_now, leg_b_now, leg_c_now, d_now, False)
     below = [lv for lv in GRID if lv < close]
     if below:
         lv = max(below)
         new_a = leg_a(lv)
         if new_a != leg_a_now:
-            new_total = clip_lots(new_a + leg_b_now + leg_c_now)
+            new_d, new_total = _total_with_d(new_a, leg_b_now, leg_c_now, d_now, False)
             rows.append({
                 "kind": "grid_down",
                 "cond": f"收盘跌破 {_fmt_level(lv, True)}",
-                "effect": _leg_effect("网格腿", leg_a_now, new_a, target, new_total) + _near_note(close, lv),
+                "effect": _with_d_note(_leg_effect("网格腿", leg_a_now, new_a, target, new_total), d_now, new_d) + _near_note(close, lv),
             })
     above = [lv for lv in GRID if lv >= close]
     if above:
         lv = min(above)
         new_a = leg_a(lv + 1e-6)
         if new_a != leg_a_now:
-            new_total = clip_lots(new_a + leg_b_now + leg_c_now)
+            new_d, new_total = _total_with_d(new_a, leg_b_now, leg_c_now, d_now, False)
             rows.append({
                 "kind": "grid_up",
                 "cond": f"收盘站上 {_fmt_level(lv, True)}",
-                "effect": _leg_effect("网格腿", leg_a_now, new_a, target, new_total) + _near_note(close, lv),
+                "effect": _with_d_note(_leg_effect("网格腿", leg_a_now, new_a, target, new_total), d_now, new_d) + _near_note(close, lv),
             })
     if on_above:
-        new_total = clip_lots(leg_a_now + 2 + leg_c_now)
+        new_d, new_total = _total_with_d(leg_a_now, 2, leg_c_now, d_now, False)
         rows.append({
             "kind": "trend_on",
             "cond": f"收盘站上 {_fmt_level(on_above, False)}",
-            "effect": _leg_effect("趋势腿", leg_b_now, 2, target, new_total) + _near_note(close, on_above),
+            "effect": _with_d_note(_leg_effect("趋势腿", leg_b_now, 2, target, new_total), d_now, new_d) + _near_note(close, on_above),
         })
     if off_below:
-        new_total = clip_lots(leg_a_now + 0 + leg_c_now)
+        new_d, new_total = _total_with_d(leg_a_now, 0, leg_c_now, d_now, True)
         rows.append({
             "kind": "trend_off",
             "cond": f"收盘跌破 {_fmt_level(off_below, False)}",
-            "effect": _leg_effect("趋势腿", leg_b_now, 0, target, new_total) + _near_note(close, off_below),
+            "effect": _with_d_note(_leg_effect("趋势腿", leg_b_now, 0, target, new_total), d_now, new_d) + _near_note(close, off_below),
         })
     if next_roll:
         if c_basis_now is not None and c_code:
@@ -419,9 +500,15 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
     c_basis = None
     c_contract = None
     held = None
+    d_lots = 0
+    d_cum = 0.0
+    d_cum0 = 0.0
+    d_prev_base = 0
+    d_prev_close = None
     out = []
     for i, (ds, close) in enumerate(index_rows):
         if i < MA_N - 1:
+            d_prev_close = close
             continue
         window = index_rows[i - (MA_N - 1):i + 1]
         sum250 = sum(px for _, px in window)
@@ -442,9 +529,18 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
                 c_set_on = ds
                 c_basis = basis
                 c_contract = nxt["code"]
+        base = clip_lots(a + b + c)
+        d_lots, d_cum, d_cum0 = advance_d(
+            d_lots, d_cum, d_cum0, d_prev_base, d_prev_close, base, close, ma,
+        )
+        d_prev_base = base
+        d_prev_close = close
+        d_pnl = d_cum - d_cum0
+        d_need = d_next_yuan(d_lots, d_cum, d_cum0, base, close)
         if c_set_on is None:
             # 贴水腿还没有一次换月可以落定，持仓状态仍向前走，但不发布。
-            target_shadow = clip_lots(a + b + c)
+            # D 已按当日底仓重放，状态留到下一天。
+            target_shadow = base
             discounts = {}
             for s in slots:
                 px = prices.get(s["code"])
@@ -460,7 +556,7 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
             decision = decide_position(asof, slots, prices, discounts, held, holidays, target_shadow)
             held = decision["contract"]
             continue
-        target = clip_lots(a + b + c)
+        target = base
         discounts = {}
         for s in slots:
             px = prices.get(s["code"])
@@ -488,7 +584,7 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
             if px is not None:
                 ev_days = (last_trade_day(*parse_code(eval_code), holidays) - asof).days
                 eval_basis = ann_discount(close, px, ev_days)
-        rows = trigger_rows(close, a, b, c, on_above, off_below, next_roll, eval_code, eval_basis)
+        rows = trigger_rows(close, a, b, c, on_above, off_below, next_roll, eval_code, eval_basis, d_lots)
         contract_rows = []
         for s in slots:
             px = prices.get(s["code"])
@@ -505,11 +601,13 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
             })
         held_px = prices.get(held) if held else None
         notional = target * held_px * MULTIPLIER if held_px and target else 0.0
+        total = min(10, target + d_lots)
+        total_notional = total * held_px * MULTIPLIER if held_px and total else 0.0
         raw = a + b + c
         c_term = f"({signed(c)})" if c < 0 else str(c)
-        sum_text = f"{a} + {b} + {c_term} = {target}"
+        sum_text = f"{a} + {b} + {c_term} + {d_lots} = {total}"
         if raw != target:
-            sum_text += f"（未限制前 {raw}）"
+            sum_text += f"（底仓未限制前 {raw}）"
         out.append({
             "date": ds,
             "index_close": round(close, 3),
@@ -519,10 +617,14 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
             "leg_a": a,
             "leg_b": b,
             "leg_c": c,
+            "leg_d": d_lots,
+            "d_pnl": round(d_pnl, 2),
+            "d_next_yuan": None if d_need is None else round(d_need, 2),
             "c_set_on": c_set_on,
             "c_basis": None if c_basis is None else round(c_basis, 6),
             "c_contract": c_contract,
             "target": target,
+            "total": total,
             "sum_text": sum_text,
             "contract": held,
             "action": decision["action"],
@@ -536,6 +638,8 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
             "margin_12": round(notional * 0.12, 2),
             "margin_14": round(notional * 0.14, 2),
             "buffer_15": round(notional * 0.15, 2),
+            "total_notional": round(total_notional, 2),
+            "total_margin_12": round(total_notional * 0.12, 2),
             "contracts": contract_rows,
             "triggers": rows,
             "trend_on_above": round(on_above, 2),
@@ -589,11 +693,15 @@ def sanity_check(days: list[dict]) -> None:
         problems.append("缺少跌破 6000 文案")
     if "收盘站上 6500" not in texts or "合计减到 2 手" not in texts:
         problems.append("缺少站上 6500 文案")
+    if d.get("leg_d") is None or not 0 <= int(d["leg_d"]) <= D_MAX:
+        problems.append(f"leg_d={d.get('leg_d')}")
+    if d.get("total") != min(10, d["target"] + d.get("leg_d", 0)):
+        problems.append(f"total={d.get('total')}")
     if problems:
         for day in days:
             if day["date"] >= "2026-09-01":
-                print(f"  {day['date']} A{day['leg_a']} B{day['leg_b']} C{day['leg_c']} "
-                      f"T{day['target']} {day['action']:6} {day['contract']} set={day['c_set_on']}")
+                print(f"  {day['date']} A{day['leg_a']} B{day['leg_b']} C{day['leg_c']} D{day.get('leg_d')} "
+                      f"base{day['target']} T{day.get('total')} {day['action']:6} {day['contract']} set={day['c_set_on']}")
         raise SystemExit("2026-11-16 核对失败: " + "; ".join(problems))
     print("sanity 2026-11-16 OK", d["action_text"], d["note"], "target", d["target"])
 
@@ -716,6 +824,14 @@ def build_payload(index_rows, price_map, holidays, cffex_note: str) -> dict:
         "updated": now,
         "latest": days[-1]["date"] if days else None,
         "multiplier": MULTIPLIER,
+        "d_leg": {
+            "name": "盈利覆盖加仓",
+            "frac": D_FRAC,
+            "d_max": D_MAX,
+            "margin_rate": D_MARGIN,
+            "total_cap": 10,
+            "exit": "收盘 < MA250×0.99，或底仓 <= 0",
+        },
         "sources": {
             "index": "新浪财经 sh000905 日K收盘（CN_MarketDataService.getKLineData scale=240）",
             "futures": "新浪财经 IC 日K收盘（InnerFuturesNewService.getDailyKLine 字段 c）",
@@ -798,8 +914,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"wrote {out} days={len(payload['days'])} latest={payload['latest']} {cffex_note}")
     for day in payload["days"]:
         if day["date"] >= "2026-10-01":
-            print(f"  {day['date']} A{day['leg_a']} B{day['leg_b']} C{day['leg_c']} "
-                  f"T{day['target']} {day['action']:6} {day['contract']}")
+            print(f"  {day['date']} A{day['leg_a']} B{day['leg_b']} C{day['leg_c']} D{day['leg_d']} "
+                  f"base{day['target']} T{day['total']} pnl={day['d_pnl']} {day['action']:6} {day['contract']}")
     return 0
 
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """IC 收盘信号的纯函数测试，不访问网络。"""
 import datetime as dt
+import json
 import os
 import sys
 import unittest
@@ -170,6 +171,74 @@ class TestTriggers(unittest.TestCase):
         rows = ic.trigger_rows(6002, 2, 0, 0, None, None, None, None, None)
         down = next(r for r in rows if r["kind"] == "grid_down")
         self.assertIn("收盘后请再核对", down["effect"])
+
+
+class TestDLeg(unittest.TestCase):
+    def test_replay_matches_reference_path(self):
+        closes = [6000, 7000, 7100, 6900, 7200, 8000]
+        bases = [4, 4, 4, 4, 6, 6]
+        mas = [5000, 5000, 5000, 7000, 5000, 5000]
+        lots = 0
+        cum = 0.0
+        cum0 = 0.0
+        prev_base = 0
+        prev_close = None
+        got = []
+        for i, close in enumerate(closes):
+            lots, cum, cum0 = ic.advance_d(lots, cum, cum0, prev_base, prev_close, bases[i], close, mas[i])
+            prev_base = bases[i]
+            prev_close = close
+            got.append(lots)
+        # 第 2 天 4 手 × 1000 点 × 200 = 80 万，50% 够 2 手保证金；第 4 天跌破 MA 撤出；
+        # 撤出后按新起点重新积累，第 6 天加到 3 手。
+        self.assertEqual(got, [0, 2, 2, 0, 0, 3])
+        self.assertAlmostEqual(cum0, 680000.0)
+
+    def test_flat_base_exits_and_does_not_reenter_same_day(self):
+        lots, cum, cum0 = ic.advance_d(2, 0.0, 0.0, 8, 5000.0, 0, 8000.0, 4000.0)
+        self.assertEqual(lots, 0)
+        self.assertEqual(cum0, cum)
+
+    def test_room_caps_below_dmax(self):
+        lots, cum, cum0 = ic.advance_d(0, 10_000_000.0, 0.0, 0, 6000.0, 8, 9000.0, 5000.0)
+        self.assertEqual(lots, 2)
+        self.assertEqual(cum0, 0.0)
+
+    def test_next_lot_yuan(self):
+        need = ic.d_next_yuan(0, 0.0, 0.0, 4, 7000.0)
+        self.assertAlmostEqual(need, 0.12 * 7000 * 200 / 0.5)
+        self.assertAlmostEqual(ic.d_next_yuan(0, -100000.0, 0.0, 4, 7000.0), need + 100000.0)
+        self.assertIsNone(ic.d_next_yuan(4, 10_000_000.0, 0.0, 4, 7000.0))
+        self.assertIsNone(ic.d_next_yuan(2, 10_000_000.0, 0.0, 8, 7000.0))
+
+    def test_trigger_total_includes_d_until_exit(self):
+        rows = ic.trigger_rows(6297.183, 2, 0, 2, 7900.0, 7700.0, None, None, None, leg_d=2)
+        text = {r["cond"]: r["effect"] for r in rows}
+        self.assertEqual(text["收盘跌破 6000"], "网格腿升到 4 手，合计加到 8 手")
+        self.assertEqual(text["收盘跌破 7,700.00"], "趋势腿维持 0 手，D 腿撤出，合计减到 4 手")
+
+
+class TestPageCopy(unittest.TestCase):
+    def test_rules_holdings_and_no_broker_rate(self):
+        from pathlib import Path
+        page = Path(__file__).resolve().parents[1].joinpath("futures-preview.html").read_text(encoding="utf-8")
+        self.assertIn("D 腿（盈利覆盖加仓）：自上次 D 撤出以来累计盈利的 50% 够付 1 手保证金（按 12%）即加 1 手，最多 4 手，总手数不超过 10；收盘跌破 MA250×0.99 或底仓归零时 D 全撤。", page)
+        self.assertIn("页面盈利按指数点估算，实盘以期货账户实际盈亏为准；D 在场期间不要提走盈利，否则急跌时 400 万不够（9031→4018 压力测试需约 603 万）。", page)
+        self.assertIn("400万池 全样本年化 43.96%（基线 35.26%），样本外 2022–26 35.64%（基线 26.55%），夏普 0.981，最大回撤 48.80%", page)
+        self.assertIn("data/holdings.json", page)
+        self.assertIn("当前持仓", page)
+        self.assertNotIn("margin_14", page)
+        self.assertNotIn("按 14%", page)
+        self.assertNotIn("14% 档", page)
+        self.assertNotIn("14% 约", page)
+        holdings = json.loads(Path(__file__).resolve().parents[1].joinpath("data/holdings.json").read_text(encoding="utf-8"))
+        self.assertEqual(holdings["account_balance"], 1450000)
+        pos = holdings["positions"][0]
+        self.assertEqual(pos["contract"], "IC2703")
+        self.assertEqual(pos["direction"], "多")
+        self.assertEqual(pos["lots"], 4)
+        self.assertEqual(pos["entry_price"], 6051.0)
+        self.assertNotIn("14%", json.dumps(holdings, ensure_ascii=False))
 
 
 class TestMerge(unittest.TestCase):

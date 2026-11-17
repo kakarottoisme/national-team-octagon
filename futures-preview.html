@@ -211,6 +211,9 @@ body.ui-page{margin:0;color:var(--ink-2);background:var(--page);font:14px/1.6 "P
 @media(max-width:699px){.ui-page .sec #st{flex-basis:100%}.ui-page .crumb{font-size:14px}.ui-page[data-ui-view="funds"] .t .cd,.ui-page[data-ui-view="funds"] .t .m1,.ui-page[data-ui-view="funds"] .lg{font-size:14px}.ui-page[data-ui-view="funds"] .t{min-height:132px}.ui-page .sec .side{font-size:14px}.ui-page .section-actions{width:100%}.ui-page .mrow{grid-template-columns:minmax(0,1fr);min-height:132px}.ui-page .mrow .b{grid-column:1;grid-row:auto;flex-direction:row;justify-content:space-between;max-width:none;width:100%;font-size:14px}.ui-page .mrow .tag,.ui-page .mrow .b span:last-child{font-size:14px!important}}
 @media(prefers-reduced-motion:reduce){.ui-page *{scroll-behavior:auto;transition:none!important}}
 /* ===== End unified dashboard UI ===== */
+.ui-page[data-ui-view="futures"] .legs{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ui-page .hold-note{font-size:13px;line-height:22px;padding:10px 16px 12px;color:var(--muted)}
+@media(max-width:699px){.ui-page[data-ui-view="futures"] .legs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body data-ui-version="2" class="ui-page" data-ui-view="futures">
 <header class="top"><div class="wrap shell-head"><div class="brand"><span class="mark" aria-hidden="true"><img src="favicon.svg?v=ui-2" width="38" height="38" alt=""></span><div class="brand-copy"><h1>期指持仓</h1><div class="crumb" title="中信期货(代客) · CFFEX 前20会员 · 选中日多空/净空 · 换月跳变不解读为观点突变">中信期货(代客) · CFFEX 前20会员 · 选中日多空/净空 · 换月跳变不解读为观点突变</div></div></div><div class="ctl">
   <button type="button" onclick="openDrawer()">口径说明</button>
@@ -264,13 +267,16 @@ body.ui-page{margin:0;color:var(--ink-2);background:var(--page);font:14px/1.6 "P
   <dt>网格腿 A</dt><dd>收盘 ≤6500 为 2 手，≤6000 为 4 手，≤5500 为 6 手，≤5250 为 8 手，≤5000 为 10 手，否则 0。</dd>
   <dt>趋势腿 B</dt><dd>收盘高于 MA250×1.01 为 +2，低于 MA250×0.99 为 0，落在两条线之间则维持前一日状态。MA250 是含当日收盘的 250 日简单移动平均。</dd>
   <dt>贴水腿 C</dt><dd>近月最后交易日的前一交易日收盘，看新近月的年化贴水：不低于 10% 为 +2，低于 3% 为 −2，介于其间为 0。一旦确定，保持到下一次换月。</dd>
-  <dt>合计</dt><dd>目标手数 = A + B + C，限制在 0 到 10 手。</dd>
+  <dt>盈利覆盖加仓 D</dt><dd>D 腿（盈利覆盖加仓）：自上次 D 撤出以来累计盈利的 50% 够付 1 手保证金（按 12%）即加 1 手，最多 4 手，总手数不超过 10；收盘跌破 MA250×0.99 或底仓归零时 D 全撤。</dd>
+  <dt>合计</dt><dd>底仓 = A + B + C，限制在 0 到 10 手。建议手数 = 底仓 + D，不超过 10 手。</dd>
   <dt>年化贴水</dt><dd>(指数收盘 − 期货收盘) / 指数收盘 × 365 / 距最后交易日的日历天数。</dd>
   <dt>选约</dt><dd>只在当月、次月、当季里比较，下季不参与。距最后交易日不足 10 个日历日的合约不参与比较。开仓以及强制移仓当日，若某张合约的年化贴水比基准近月高出不少于 3 个百分点，就用贴水最高的那张，否则用近月；近月若已不足 10 日，基准改为最近的一张可比较合约。持有期间，若另一张可比较合约比持仓高出不少于 2 个百分点，整仓换过去。全部手数在同一个合约。</dd>
   <dt>强制移仓</dt><dd>最后交易日是合约月份的第三个星期五，遇休市顺延。持仓合约最后交易日的前一交易日收盘必须移仓，并按开仓的 3 个百分点规则重选。</dd>
-  <dt>资金</dt><dd>这条规则的回测里，保证金峰值大约 129 万（按 12%）和 145 万（按 14%）。最坏情形大约 400 万（按 14%），建议账户至少准备 400 万。页面上另给的是按当日目标手数和当日期货价估算的保证金，不是这段峰值。</dd>
+  <dt>资金</dt><dd>这条规则的回测里，按交易所保证金 12% 估算，峰值大约 129 万。建议账户至少准备 400 万。页面上的保证金按当日建议手数和当日期货价、以 12% 估算，不是这段峰值。</dd>
   <dt>资金管理</dt><dd>可选：账户留下保证金，再加名义本金的 15%。名义本金 = 手数 × 期货价 × 200。</dd>
  </dl>
+ <p class="rules-note">页面盈利按指数点估算，实盘以期货账户实际盈亏为准；D 在场期间不要提走盈利，否则急跌时 400 万不够（9031→4018 压力测试需约 603 万）。</p>
+ <p class="rules-note">回测参考：400万池 全样本年化 43.96%（基线 35.26%），样本外 2022–26 35.64%（基线 26.55%），夏普 0.981，最大回撤 48.80%。</p>
  <p class="rules-note">这是用户自己的回测规则，不是投资建议，也不保证将来重复。</p></div></section></div>
 
 <div class="ui-mask" id="mask" hidden>
@@ -530,29 +536,95 @@ window.uiPanel=(()=>{
 (function(){
  const host=document.getElementById('icDynamic');
  const sel=document.getElementById('icDate');
- let IC=null;
+ let IC=null,HOLD=null;
  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
  const num=(n,d)=>n==null||!isFinite(+n)?'—':Number(n).toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d});
  const wan=n=>n==null||!isFinite(+n)?'—':(n/10000).toLocaleString('zh-CN',{minimumFractionDigits:1,maximumFractionDigits:1})+' 万';
+ const money=n=>{
+  if(n==null||!isFinite(+n))return '—';
+  const v=+n/10000, neg=v<0;
+  const digits=(Math.abs(v)%1)<1e-8?0:2;
+  const s=Math.abs(v).toLocaleString('zh-CN',{minimumFractionDigits:digits,maximumFractionDigits:2});
+  return (neg?'−':'')+s+' 万';
+ };
+ const wan2=n=>{
+  if(n==null||!isFinite(+n))return '—';
+  const v=+n/10000;
+  const s=Math.abs(v).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return (v<0?'−':'')+s+' 万';
+ };
  const sgn=n=>{n=+n;return n>0?'+'+n:(n<0?'−'+Math.abs(n):'0')};
  const pct=b=>b==null?'—':(b*100).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+ const lotsOf=day=>day&&day.total!=null?+day.total:+(day&&day.target!=null?day.target:0);
+ function holdingsBlock(latest){
+  if(!HOLD){
+   return '<div class="sec"><h2>当前持仓</h2></div><section class="panel"><div class="hold-note">还没有持仓配置（data/holdings.json）。</div></section>';
+  }
+  const pos=(Array.isArray(HOLD.positions)&&HOLD.positions[0])||{};
+  const code=pos.contract||'';
+  const lots=pos.lots==null?null:+pos.lots;
+  const dir=pos.direction||'多';
+  const entry=pos.entry_price==null||pos.entry_price===''?null:+pos.entry_price;
+  const bal=HOLD.account_balance==null?null:+HOLD.account_balance;
+  let px=null,pxDate='',pxVia='';
+  if(latest&&code){
+   const row=(latest.contracts||[]).find(c=>c.code===code);
+   if(row&&row.price!=null&&(!pos.entry_date||latest.date>=pos.entry_date)){px=+row.price;pxDate=latest.date;pxVia='signal';}
+  }
+  if(px==null&&pos.last_price!=null&&pos.last_price!==''){px=+pos.last_price;pxDate=pos.last_date||pos.entry_date||'';pxVia='quote';}
+  let pnl=null;
+  if(entry!=null&&px!=null&&lots!=null)pnl=(dir==='空'?-1:1)*lots*(px-entry)*200;
+  const equity=bal!=null&&pnl!=null?bal+pnl:null;
+  let margin=null,ratio=null;
+  if(px!=null&&lots!=null){margin=lots*px*200*0.12;if(bal)ratio=margin/bal;}
+  const suggested=latest?lotsOf(latest):null;
+  let cmp='';
+  if(suggested!=null&&lots!=null)cmp='建议 '+suggested+' 手，实际 '+lots+' 手，差 '+sgn(suggested-lots)+' 手。';
+  let uni='';
+  if(latest&&code){
+   const row=(latest.contracts||[]).find(c=>c.code===code);
+   if(!(row&&(row.role==='near'||row.role==='next'||row.role==='quarter')))uni=esc(code)+' 不在模型当月、次月、当季范围内。';
+  }
+  const asof=esc(HOLD.balance_as_of||HOLD.as_of||pos.entry_date||'');
+  const src=pos.entry_source?esc(pos.entry_source):'';
+  const pxFt=px==null?'信号里还没有不早于开仓日的收盘':(esc(pxDate)+(pxVia==='signal'?' · 信号合约收盘':' · 收盘时点最新价'));
+  return '<div class="sec"><h2>当前持仓</h2><span class="side">截至 '+asof+(latest?' · 对照信号 '+esc(latest.date):'')+'</span></div>'
+   +'<div class="kpis">'
+   +'<div class="kpi"><div class="lb">合约</div><div class="vl">'+esc(code||'—')+'</div><div class="ft">'+esc(dir)+' · '+(lots==null?'—':esc(lots))+' 手</div></div>'
+   +'<div class="kpi"><div class="lb">开仓价</div><div class="vl">'+(entry==null?'未填':num(entry,1))+'</div><div class="ft">'+(entry==null?'开仓价：未填':esc(pos.entry_date||'')+' 收盘')+'</div></div>'
+   +'<div class="kpi"><div class="lb">最新价</div><div class="vl">'+(px==null?'—':num(px,1))+'</div><div class="ft">'+pxFt+'</div></div>'
+   +'<div class="kpi"><div class="lb">账户余额</div><div class="vl">'+money(bal)+'</div><div class="ft">'+(bal==null?'—':num(bal,0)+' 元')+'</div></div>'
+   +'<div class="kpi"><div class="lb">浮动盈亏</div><div class="vl">'+wan2(pnl)+'</div><div class="ft">手数 ×（最新价 − 开仓价）× 200</div></div>'
+   +'<div class="kpi"><div class="lb">估算权益</div><div class="vl">'+money(equity)+'</div><div class="ft">账户余额 + 自开仓日起浮盈</div></div>'
+   +'<div class="kpi"><div class="lb">保证金 · 12%</div><div class="vl">'+money(margin)+'</div><div class="ft">实际手数 × 最新价 × 200 × 12%</div></div>'
+   +'<div class="kpi"><div class="lb">保证金占用</div><div class="vl">'+pct(ratio)+'</div><div class="ft">12% 保证金 / 账户余额</div></div>'
+   +'</div><section class="panel"><div class="hold-note">'+cmp+uni+(latest?' 对照最新信号日 '+esc(latest.date)+'。':'')+(src?' 开仓价来源：'+src:'')+'</div></section>';
+ }
  function render(){
   const days=(IC&&Array.isArray(IC.days))?IC.days:[];
+  const latest=days.length?days[days.length-1]:null;
   if(!days.length){
-   host.innerHTML='<section class="panel"><div class="foot">收盘信号还没有生成（data/ic_strategy.json）。</div></section>';
+   host.innerHTML='<section class="panel"><div class="foot">收盘信号还没有生成（data/ic_strategy.json）。</div></section>'+holdingsBlock(null);
    sel.innerHTML='';
+   moveICFootnotes();
    return;
   }
-  const sig=days.length+':'+days[days.length-1].date;
+  const sig=days.length+':'+latest.date;
   if(sel.dataset.sig!==sig){
    const cur=sel.value;
    sel.innerHTML=days.slice().reverse().map(d=>'<option value="'+d.date+'">'+d.date+'</option>').join('');
    sel.dataset.sig=sig;
-   sel.value=(cur&&days.some(d=>d.date===cur))?cur:days[days.length-1].date;
+   sel.value=(cur&&days.some(d=>d.date===cur))?cur:latest.date;
   }
-  const day=days.find(d=>d.date===sel.value)||days[days.length-1];
+  const day=days.find(d=>d.date===sel.value)||latest;
+  const total=lotsOf(day);
+  const legD=day.leg_d==null?0:+day.leg_d;
+  const dState=legD>0?'在场':'未在场';
+  const nextTxt=day.leg_d==null?'—':(day.d_next_yuan==null?'已达上限':wan2(day.d_next_yuan));
   const cSet=day.c_basis==null?'':(' · '+esc(day.c_contract||'')+' 在 '+esc(day.c_set_on||'')+' 按 '+pct(day.c_basis)+' 定为 '+sgn(day.leg_c));
-  const reserve=day.notional?(' · 若再留名义 15%，12% 档约 '+wan(day.margin_12+day.buffer_15)+'，14% 档约 '+wan(day.margin_14+day.buffer_15)):'';
+  const m12=day.total_margin_12!=null?day.total_margin_12:day.margin_12;
+  const notion=day.total_notional!=null?day.total_notional:day.notional;
+  const reserve=notion?(' · 若再留名义 15%，约 '+wan(+m12+notion*0.15)):'';
   const trig=(day.triggers||[]).map(r=>'<tr><td>'+esc(r.cond)+'：'+esc(r.effect)+'</td></tr>').join('')
    ||'<tr><td>这一天没有可列出的触发线。</td></tr>';
   const cons=(day.contracts||[]).map(c=>{
@@ -560,13 +632,20 @@ window.uiPanel=(()=>{
    return '<tr class="'+(held?'held':'')+'"><td>'+esc(c.code)+'</td><td>'+esc(c.label)+'</td><td>'+num(c.price,1)+'</td><td>'+esc(c.expiry)+'</td><td>'+esc(c.days)+'</td><td>'+pct(c.basis)+'</td><td>'+esc(c.status)+'</td></tr>';
   }).join('')||'<tr><td colspan="7">这一天没有挂牌合约。</td></tr>';
   host.innerHTML=
-   '<section class="hero" aria-label="当前建议持仓"><div class="hero-main"><div class="lb">当前建议持仓</div><div class="vl">'+esc(day.target)+'<small>手</small></div><div class="ft">'+esc(day.action_text)+'</div></div>'
-   +'<div class="hero-side"><div class="legs"><div class="leg"><span>A 网格</span><b>'+esc(day.leg_a)+'</b></div><div class="leg"><span>B 趋势</span><b>'+esc(sgn(day.leg_b))+'</b></div><div class="leg"><span>C 贴水</span><b>'+esc(sgn(day.leg_c))+'</b></div></div>'
+   '<section class="hero" aria-label="当前建议持仓"><div class="hero-main"><div class="lb">当前建议持仓</div><div class="vl">'+esc(total)+'<small>手</small></div><div class="ft">'+esc(day.action_text)+'</div></div>'
+   +'<div class="hero-side"><div class="legs"><div class="leg"><span>A 网格</span><b>'+esc(day.leg_a)+'</b></div><div class="leg"><span>B 趋势</span><b>'+esc(sgn(day.leg_b))+'</b></div><div class="leg"><span>C 贴水</span><b>'+esc(sgn(day.leg_c))+'</b></div><div class="leg"><span>D 盈利</span><b>'+esc(legD)+'</b></div></div>'
    +'<div class="ft">'+esc(day.sum_text)+(day.contract?' · 合约 '+esc(day.contract):'')+(day.note?' · '+esc(day.note):'')+'</div></div></section>'
    +'<div class="kpis"><div class="kpi"><div class="lb">中证500收盘</div><div class="vl">'+num(day.index_close,3)+'</div><div class="ft">'+esc(day.date)+'</div></div>'
    +'<div class="kpi"><div class="lb">MA250</div><div class="vl">'+num(day.ma250,2)+'</div><div class="ft">上轨 '+num(day.ma_upper,2)+' · 下轨 '+num(day.ma_lower,2)+' · 趋势'+(day.b_open?'打开':'关闭')+'</div></div>'
    +'<div class="kpi"><div class="lb">下次换月</div><div class="vl">'+(day.next_roll?esc(day.next_roll):'—')+'</div><div class="ft">贴水腿 '+esc(sgn(day.leg_c))+cSet+'</div></div>'
-   +'<div class="kpi"><div class="lb">保证金 · 12%</div><div class="vl">'+wan(day.margin_12)+'</div><div class="ft">14% 约 '+wan(day.margin_14)+reserve+'</div></div></div>'
+   +'<div class="kpi"><div class="lb">保证金 · 12%</div><div class="vl">'+wan(m12)+'</div><div class="ft">按建议手数 · 交易所 12%'+reserve+'</div></div></div>'
+   +'<div class="sec"><h2>D 腿 · 盈利覆盖</h2><span class="side">'+dState+' · 0–4 手</span></div>'
+   +'<div class="kpis"><div class="kpi"><div class="lb">D 手数</div><div class="vl">'+esc(legD)+'<small>手</small></div><div class="ft">'+dState+'</div></div>'
+   +'<div class="kpi"><div class="lb">自上次撤出盈利</div><div class="vl">'+wan2(day.d_pnl)+'</div><div class="ft">指数点估算，单位万元</div></div>'
+   +'<div class="kpi"><div class="lb">下一手还需盈利</div><div class="vl">'+nextTxt+'</div><div class="ft">50% 盈利覆盖 1 手 12% 保证金</div></div>'
+   +'<div class="kpi"><div class="lb">撤出线</div><div class="vl">'+num(day.ma_lower,2)+'</div><div class="ft">MA250×0.99，收盘跌破则 D 全撤</div></div></div>'
+   +'<section class="panel"><div class="hold-note">自上次撤出盈利的 50% 够付 1 手保证金（按 12%）即加 1 手，最多 4 手，建议手数不超过 10。收盘跌破撤出线或底仓归零时 D 全撤。</div></section>'
+   +holdingsBlock(latest)
    +'<div class="sec"><h2>明日触发价位</h2><span class="side">趋势腿当前'+(day.b_open?'打开':'关闭')+' · 每行只动一条腿</span></div>'
    +'<section class="panel"><div class="tbx"><table class="wrap-cells"><tbody>'+trig+'</tbody></table></div>'
    +'<div class="foot">约 14:50 用实时价对照上表，14:57 前下单。若距某条线约 0.15% 以内，收盘后再核对一次。趋势价位已把下一交易日收盘滚入 MA250；只看今日 MA250 则上轨 '+num(day.ma_upper,2)+'、下轨 '+num(day.ma_lower,2)+'。这是用户自己的回测规则，不是投资建议。</div></section>'
@@ -581,9 +660,9 @@ window.uiPanel=(()=>{
   notes.replaceChildren();host.querySelectorAll('.foot').forEach(el=>notes.appendChild(el));
  }
  sel.addEventListener('change',render);
- fetch('data/ic_strategy.json?t='+Date.now(),{cache:'no-store'}).then(r=>{
-  if(!r.ok) throw new Error(String(r.status));
-  return r.json();
- }).then(j=>{IC=j;render();}).catch(()=>{IC=null;render();});
+ Promise.all([
+  fetch('data/ic_strategy.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
+  fetch('data/holdings.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
+ ]).then(([j,h])=>{IC=j;HOLD=h;render();});
 })();
 </script></body></html>
