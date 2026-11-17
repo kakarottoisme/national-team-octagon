@@ -214,6 +214,7 @@ body.ui-page{margin:0;color:var(--ink-2);background:var(--page);font:14px/1.6 "P
 .ui-page[data-ui-view="futures"] .legs{grid-template-columns:repeat(4,minmax(0,1fr))}
 .ui-page .hold-note{font-size:13px;line-height:22px;padding:10px 16px 12px;color:var(--muted)}
 .ui-page tr.suggest td{background:#f4f6f9}
+@media(min-width:700px){.ui-page[data-ui-view="futures"] .kpis.signal-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:699px){.ui-page[data-ui-view="futures"] .legs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body data-ui-version="2" class="ui-page" data-ui-view="futures">
 <header class="top"><div class="wrap shell-head"><div class="brand"><span class="mark" aria-hidden="true"><img src="favicon.svg?v=ui-2" width="38" height="38" alt=""></span><div class="brand-copy"><h1>期指持仓</h1><div class="crumb" title="中信期货(代客) · CFFEX 前20会员 · 选中日多空/净空 · 换月跳变不解读为观点突变">中信期货(代客) · CFFEX 前20会员 · 选中日多空/净空 · 换月跳变不解读为观点突变</div></div></div><div class="ctl">
@@ -274,7 +275,7 @@ body.ui-page{margin:0;color:var(--ink-2);background:var(--page);font:14px/1.6 "P
   <dt>选约</dt><dd>只在当月、次月、当季里比较，下季不参与。距最后交易日不足 10 个日历日的合约不参与比较。开仓以及强制移仓当日，若某张合约的年化贴水比基准近月高出不少于 3 个百分点，就用贴水最高的那张，否则用近月；近月若已不足 10 日，基准改为最近的一张可比较合约。持有期间，若另一张可比较合约比持仓高出不少于 2 个百分点，整仓换过去。全部手数在同一个合约。页面「模型建议」按新开仓规则选合约。回测路径上记着的旧合约不是当前账户持仓。</dd>
   <dt>页面上的两套持仓</dt><dd>模型建议是信号日的 A、B、C，加上从开仓日起按账户浮盈算出的 D。实际持仓只读 data/holdings.json。两边不同就写明合约和手数差。信号日会写在数字旁边；信号日不是当天时，不当成当天的官方收盘。</dd>
   <dt>强制移仓</dt><dd>最后交易日是合约月份的第三个星期五，遇休市顺延。持仓合约最后交易日的前一交易日收盘必须移仓，并按开仓的 3 个百分点规则重选。</dd>
-  <dt>资金</dt><dd>这条规则的回测里，按交易所保证金 12% 估算，峰值大约 129 万。建议账户至少准备 400 万。页面上的保证金按当日建议手数和当日期货价、以 12% 估算，不是这段峰值。</dd>
+  <dt>资金</dt><dd>这条规则的回测里，按交易所保证金 12% 估算，峰值大约 129 万。建议账户至少准备 400 万。页面上的保证金只出现在「当前持仓」，按实际手数、最新价和 12% 估算，不是这段峰值。</dd>
   <dt>资金管理</dt><dd>可选：账户留下保证金，再加名义本金的 15%。名义本金 = 手数 × 期货价 × 200。</dd>
  </dl>
  <p class="rules-note">当前账户的 D 盈亏从 data/holdings.json 的开仓日算起，用账户浮盈，不沿用回测累计。回测重放只在查看更早的信号日时出现，并标明不是这笔账户。</p>
@@ -675,7 +676,7 @@ window.uiPanel=(()=>{
    +'<div class="kpi"><div class="lb">估算权益</div><div class="vl">'+money(equity)+'</div><div class="ft">账户余额 + 自开仓日起浮盈</div></div>'
    +'<div class="kpi"><div class="lb">保证金 · 12%</div><div class="vl">'+money(margin)+'</div><div class="ft">实际手数 × 最新价 × 200 × 12%</div></div>'
    +'<div class="kpi"><div class="lb">保证金占用</div><div class="vl">'+pct(ratio)+'</div><div class="ft">12% 保证金 / 账户余额</div></div>'
-   +'</div><section class="panel"><div class="hold-note">'+cmp+uni+(latest?' 对照最新信号日 '+esc(latest.date)+'。':'')+(src?' 开仓价来源：'+src:'')+'</div></section>';
+   +'</div><section class="panel"><div class="hold-note">'+(cmp||'')+(uni?uni:'')+(src?' 开仓价来源：'+src:'')+'</div></section>';
  }
  function render(){
   const days=(IC&&Array.isArray(IC.days))?IC.days:[];
@@ -715,10 +716,6 @@ window.uiPanel=(()=>{
   const dState=legD>0?'在场':'未在场';
   const nextTxt=shownModel.need==null?(shownModel.live||day.leg_d!=null?'已达上限':'—'):wan2(shownModel.need);
   const cSet=day.c_basis==null?'':('。贴水腿于 '+esc(day.c_set_on||'')+' 按当时新近月 '+esc(day.c_contract||'')+' 的 '+pct(day.c_basis)+' 定为 '+sgn(day.leg_c));
-  const pickPx=shownModel.pickPx;
-  const m12=pickPx!=null?total*pickPx*200*0.12:(day.total_margin_12!=null?day.total_margin_12:day.margin_12);
-  const notion=pickPx!=null?total*pickPx*200:(day.total_notional!=null?day.total_notional:day.notional);
-  const reserve=notion?(' · 若再留名义 15%，约 '+wan(+m12+notion*0.15)):'';
   const trig=(day.triggers||[]).map(r=>'<tr><td>'+esc(r.cond)+'：'+esc(r.effect)+'</td></tr>').join('')
    ||'<tr><td>这一天没有可列出的触发线。</td></tr>';
   const actualCode=snap.code;
@@ -732,7 +729,6 @@ window.uiPanel=(()=>{
    return '<tr class="'+cls+'"><td>'+esc(c.code)+'</td><td>'+esc(c.label)+'</td><td>'+num(c.price,1)+'</td><td>'+esc(c.expiry)+'</td><td>'+esc(c.days)+'</td><td>'+pct(c.basis)+'</td><td>'+esc(bits.join(' · ')||'—')+'</td></tr>';
   }).join('')||'<tr><td colspan="7">这一天没有挂牌合约。</td></tr>';
   const pickFt=shownModel.pick?('新开仓 '+esc(shownModel.pick)+(day.entry_roll?' · 该合约 '+esc(day.entry_roll)+' 收盘强制换月':'')+'。这是模型要开的合约，不是账户持仓'):'这一天没有算出新开仓合约';
-  const gap=diffSentence(shownModel.pick, total, snap.pos);
   const dTitle=shownModel.live?'D 腿 · 自 '+esc(shownModel.start)+' 账户起':'D 腿 · 回测重放';
   const dSide=shownModel.live?(dState+' · 不沿用回测累计'):'不是当前账户';
   const dPnlFt=shownModel.live?('账户浮盈，自 '+esc(shownModel.start)+' 开仓起'):'回测自上次 D 撤出的指数点盈亏，不是这笔账户';
@@ -745,11 +741,9 @@ window.uiPanel=(()=>{
    '<section class="hero" aria-label="模型建议"><div class="hero-main"><div class="lb">模型建议 · 信号日 '+esc(day.date)+'</div><div class="vl">'+esc(total)+'<small>手</small></div><div class="ft">'+pickFt+'</div></div>'
    +'<div class="hero-side"><div class="legs"><div class="leg"><span>A 网格</span><b>'+esc(day.leg_a)+'</b></div><div class="leg"><span>B 趋势</span><b>'+esc(sgn(day.leg_b))+'</b></div><div class="leg"><span>C 贴水</span><b>'+esc(cTile(day.leg_c))+'</b></div><div class="leg"><span>D 盈利</span><b>'+esc(legD)+'</b></div></div>'
    +'<div class="ft">'+esc(abcdText(day, legD))+'</div></div></section>'
-   +'<section class="panel"><div class="hold-note">实际持仓 '+(snap.code?esc(snap.code)+' '+esc(snap.dir)+' '+(snap.lots==null?'—':esc(snap.lots))+' 手':'见 data/holdings.json')+'。'+gap+(day.date===latest.date?'':' 这是信号日 '+esc(day.date)+' 的模型，不是把更早的回测仓说成今天的持仓。')+'</div></section>'
-   +'<div class="kpis"><div class="kpi"><div class="lb">中证500收盘</div><div class="vl">'+num(day.index_close,3)+'</div><div class="ft">信号日 '+esc(day.date)+' 收盘</div></div>'
+   +'<div class="kpis signal-kpis"><div class="kpi"><div class="lb">中证500收盘</div><div class="vl">'+num(day.index_close,3)+'</div><div class="ft">信号日 '+esc(day.date)+' 收盘</div></div>'
    +'<div class="kpi"><div class="lb">MA250</div><div class="vl">'+num(day.ma250,2)+'</div><div class="ft">上轨 '+num(day.ma_upper,2)+' · 下轨 '+num(day.ma_lower,2)+' · 趋势'+(day.b_open?'打开':'关闭')+'</div></div>'
-   +'<div class="kpi"><div class="lb">贴水腿定价</div><div class="vl">'+(day.next_roll?esc(day.next_roll):'—')+'</div><div class="ft">这一天重定贴水腿，不是账户换月'+cSet+'</div></div>'
-   +'<div class="kpi"><div class="lb">保证金 · 12%</div><div class="vl">'+wan(m12)+'</div><div class="ft">按建议手数'+(shownModel.pick?'和 '+esc(shownModel.pick)+' 收盘':'')+' · 交易所 12%'+reserve+'</div></div></div>'
+   +'<div class="kpi"><div class="lb">贴水腿定价</div><div class="vl">'+(day.next_roll?esc(day.next_roll):'—')+'</div><div class="ft">这一天重定贴水腿，不是账户换月'+cSet+'</div></div></div>'
    +'<div class="sec"><h2>'+dTitle+'</h2><span class="side">'+dSide+'</span></div>'
    +'<div class="kpis"><div class="kpi"><div class="lb">D 手数</div><div class="vl">'+esc(legD)+'<small>手</small></div><div class="ft">'+dState+'</div></div>'
    +'<div class="kpi"><div class="lb">'+(shownModel.live?'自开仓日起浮盈':'回测累计盈亏')+'</div><div class="vl">'+wan2(shownModel.pnl)+'</div><div class="ft">'+dPnlFt+'</div></div>'
