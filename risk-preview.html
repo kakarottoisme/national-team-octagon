@@ -1,5 +1,13 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=ui-2"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=ui-2"><link rel="icon" type="image/svg+xml" sizes="any" href="favicon.svg?v=ui-2"><title>全球风险</title>
+<script src="dashboard-tabs.js?v=ui-20261117-4"></script><link rel="apple-touch-icon" href="apple-touch-icon.png?v=ui-2"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=ui-2"><link rel="icon" type="image/svg+xml" sizes="any" href="favicon.svg?v=ui-2"><title>全球风险</title>
+<script>/* Shared safe primitives: no data assumptions or account mutations. */
+window.uiEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+window.uiNumber=v=>v==null||v===''||!Number.isFinite(+v)?null:+v;
+window.readJSON=async(url)=>{const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),12000);try{const r=await fetch(url,{cache:'no-store',signal:ctl.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(timer)}};
+window.pageNotice=text=>{let el=document.getElementById('pageNotice');if(!el){el=document.createElement('div');el.id='pageNotice';el.className='data-notice';el.setAttribute('role','status');document.querySelector('main')?.prepend(el)}el.textContent=text;el.hidden=!text};
+window.addEventListener('error',event=>{if(event.target?.tagName==='SCRIPT')window.pageNotice?.('图表组件加载失败。已有文字数据仍可查看，请联网后刷新。')},true);
+window.syncPressed=()=>document.querySelectorAll('button[data-p],button[data-w],button[data-m],button.gchip').forEach(x=>x.setAttribute('aria-pressed',String(x.classList.contains('on'))));
+</script>
 <style>
 :root{--page:#f5f6f8;--card:#fff;--line:#e6e8ec;--line-2:#f0f1f4;--ink:#1f2733;--ink-2:#4a5260;--muted:#868e9a;--faint:#b0b6bf;--accent:#3d6a9e;--chip:#f2f4f7;--font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
@@ -60,152 +68,102 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
 @media(min-width:1100px){.grid{grid-template-columns:1fr 1fr}}
 @media(max-width:699px){.view-tabs{display:flex;width:100%;overflow-x:auto;scrollbar-width:none}.view-tab{flex:none;min-height:40px;padding:0 14px}.view-tab svg{display:none}}
 
-/* ===== Unified dashboard UI v2: one visual contract for all four tabs ===== */
-:root{--page:#f5f6f8;--card:#fff;--line:#e6e8ec;--line-2:#f0f1f4;--ink:#1f2733;--ink-2:#4a5260;--muted:#707b8b;--faint:#868e9a;--accent:#3d6a9e;--chip:#f2f4f7;--accent-bg:#edf2f8}
-html{scrollbar-gutter:stable;-webkit-text-size-adjust:100%}
-body.ui-page{margin:0;color:var(--ink-2);background:var(--page);font:14px/1.6 "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;font-variant-numeric:tabular-nums}
-.ui-page .wrap{width:100%;max-width:1600px;margin:0 auto;padding:0 16px}
-.ui-page .top{background:var(--card);border-bottom:1px solid var(--line)}
-.ui-page .top .shell-head{display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:12px;padding-top:16px;padding-bottom:12px;height:auto}
-.ui-page .brand{display:grid;grid-template-columns:38px minmax(0,1fr);align-items:center;gap:10px;min-width:0;height:auto;min-height:44px}
-.ui-page .mark{display:block;width:38px;height:38px;border-radius:0;background:transparent;flex:none}
-.ui-page .mark img{display:block;width:38px;height:38px}
-.ui-page .brand-copy{min-width:0}
-.ui-page h1{margin:0;font-size:18px;font-weight:600;line-height:26px;color:var(--ink);white-space:normal;overflow-wrap:anywhere}
-.ui-page .crumb{font-size:13px;line-height:20px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ui-page .ctl{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;min-width:0;height:auto}
-.ui-page button:not(.mrow),.ui-page select{box-sizing:border-box;font-family:inherit;font-size:14px!important;line-height:22px;height:44px!important;min-width:44px;padding:0 14px!important;border:1px solid #e0e5ed!important;border-radius:12px!important;background:#fff;color:var(--ink);box-shadow:none;cursor:pointer;vertical-align:middle;white-space:nowrap;flex:none}
-.ui-page select{font-size:16px!important;min-width:140px;max-width:100%}
-.ui-page button:not(.mrow):hover,.ui-page select:hover{background:#f8faff;border-color:#bccce1!important}
-.ui-page button:disabled{opacity:.65;cursor:default;color:var(--muted)}
-.ui-page button.on,.ui-page .gchip.on,.ui-page .chip.on{background:#edf3fc;border-color:#c8daf2!important;color:#3f6baf;font-weight:600}
-.ui-page #shareBtn{background:#edf3fc;border-color:#dfe9f7!important;color:#416698;font-weight:500}
-.ui-page :focus-visible{outline:2px solid #9fb6d3;outline-offset:2px}
-.ui-page .top .nav-row{display:block;height:auto;padding-top:0;padding-bottom:12px}
-.ui-page .view-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;width:100%;max-width:528px;min-height:54px;height:auto;gap:2px;padding:4px;border:1px solid #e7ebf0;border-radius:16px;background:#f4f6f9;overflow:visible}
-.ui-page .view-tab{display:flex;align-items:center;justify-content:center;gap:7px;min-width:0;min-height:44px;height:44px;padding:0 4px;border-radius:12px;font-size:14px;line-height:20px;font-weight:500;white-space:nowrap;color:#707b8b;text-decoration:none}
+/* ===== Reviewed shared UI: scoped tokens, mobile-first ===== */
+:root{--page:#f5f6f8;--card:#fff;--line:#e6e8ec;--line-2:#f0f1f4;--ink:#1f2733;--ink-2:#4a5260;--muted:#606c7c;--faint:#697586;--accent:#3d6a9e;--chip:#f2f4f7;--accent-bg:#edf2f8}
+html{-webkit-text-size-adjust:100%;scrollbar-gutter:stable}
+body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif;color:var(--ink-2);background:var(--page);margin:0}
+.ui-page .wrap{width:100%;max-width:1600px;padding:0 16px;margin:auto;min-width:0}
+.ui-page .top .shell-head{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding-top:16px;padding-bottom:12px}
+.ui-page .brand{display:grid;grid-template-columns:38px minmax(0,1fr);gap:10px;align-items:center;min-width:0}
+.ui-page .mark,.ui-page .mark img{display:block;width:38px;height:38px;background:transparent}
+.ui-page h1{font-size:18px;line-height:26px;margin:0;color:var(--ink)}
+.ui-page .crumb{font-size:14px;line-height:22px;white-space:normal;overflow-wrap:anywhere;color:var(--muted)}
+.ui-page .ctl{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;min-width:0}
+.ui-page button:not(.mrow),.ui-page select{font:inherit;font-size:14px;line-height:22px;min-height:44px;height:auto;min-width:44px;padding:10px 12px;border:1px solid #ccd5df;border-radius:10px;background:#fff;color:var(--ink);cursor:pointer;box-shadow:none}
+.ui-page select{font-size:16px;padding:8px 10px;max-width:100%}
+.ui-page button:disabled{opacity:.6;cursor:default}
+.ui-page button.on,.ui-page [aria-pressed="true"]{background:#edf3fc;border-color:#9db8db;color:#325b90;font-weight:600}
+.ui-page :focus-visible{outline:3px solid #3d6a9e;outline-offset:3px}
+.ui-page .top .nav-row{display:block;padding-top:0;padding-bottom:12px}
+.ui-page .view-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;max-width:528px;gap:2px;padding:4px;background:#f4f6f9;border:1px solid #e7ebf0;border-radius:14px;overflow:visible}
+.ui-page .view-tab{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:4px;min-width:0;color:var(--muted);font-size:14px;line-height:20px;white-space:normal;text-align:center;text-decoration:none}
 .ui-page .view-tab svg{display:none;width:16px;height:16px;flex:none}
-.ui-page .view-tab:hover{background:#e9edf4;color:#4c678e;text-decoration:none}
-.ui-page .view-tab[aria-current="page"]{background:#fff;color:#3f6baf;box-shadow:0 1px 4px rgba(39,63,101,.09);font-weight:600}
+.ui-page .view-tab[aria-current="page"]{background:#fff;color:#325b90;font-weight:600;border-radius:10px}
 .ui-page main.wrap{padding-top:20px;padding-bottom:32px}
-.ui-page .sec{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 12px;min-height:44px;margin:24px 0 12px}
+.ui-page .sec{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;margin:24px 0 12px;min-height:40px}
 .ui-page main>.sec:first-child{margin-top:0}
-.ui-page h2{margin:0;font-size:15px;font-weight:600;line-height:24px;color:var(--ink);min-width:0;overflow-wrap:anywhere}
-.ui-page .sec .side,.ui-page #st{font-size:13px;line-height:20px;color:var(--muted);min-width:0;overflow-wrap:anywhere;white-space:normal}
-.ui-page .sec #st{max-width:100%;height:auto;overflow:visible;display:block}
-.ui-page .section-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;margin-left:auto;min-width:0}
-.ui-page .inline-select,.ui-page .section-actions label{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:14px;flex-wrap:wrap}
-.ui-page .panel{border:1px solid var(--line);border-radius:10px;background:var(--card);margin-bottom:24px;min-width:0;overflow:hidden}
-.ui-page .panel-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;min-height:60px;gap:8px}
-.ui-page .panel-head .t{display:block;padding:0;min-height:0;font-size:14px;line-height:22px}
-.ui-page .panel-head .c{font-size:13px;line-height:20px}
-.ui-page .foot{font-size:13px;line-height:22px;padding:10px 16px 12px;color:var(--muted)}
-.ui-page .panel-help{display:flex;justify-content:flex-end;align-items:center;min-height:60px;padding:8px 16px;border-bottom:1px solid var(--line-2)}
-.ui-page .kpis{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;align-items:stretch}
-.ui-page .kpi{background:#fff;padding:16px;min-width:0;min-height:132px;display:flex;flex-direction:column}
+.ui-page h2{font-size:16px;line-height:24px;color:var(--ink);margin:0}
+.ui-page .sec .side,.ui-page #st{font-size:14px;line-height:22px;color:var(--muted);white-space:normal;overflow-wrap:anywhere;max-width:100%}
+.ui-page .section-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-width:0}
+.ui-page .section-actions label,.ui-page .inline-select{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}
+.ui-page .panel{background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:20px;min-width:0;overflow:hidden}
+.ui-page .panel-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:12px 16px}
+.ui-page .panel-head .t{padding:0;min-height:0;font-size:15px}
+.ui-page .panel-head .c{font-size:14px}
+.ui-page .foot,.ui-page .hold-note{padding:12px 16px;font-size:14px;line-height:22px;color:var(--muted)}
+.ui-page .kpis{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ui-page .kpi{padding:16px;background:#fff;min-width:0;min-height:112px}
 .ui-page .kpi:only-child{grid-column:1/-1}
-.ui-page .kpi .lb{font-size:14px;line-height:22px;color:var(--muted)}
-.ui-page .kpi .vl{font-size:26px;line-height:34px;margin-top:4px;font-weight:600;color:var(--ink);white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
-.ui-page .kpi .vl small{font-size:14px;font-weight:400;color:var(--muted);margin-left:4px}
-.ui-page .kpi .ft{font-size:14px;line-height:22px;margin-top:6px;color:var(--muted);white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
-.ui-page .tbx{overflow-x:auto;-webkit-overflow-scrolling:touch;min-width:0}
-.ui-page table{font-size:14px;min-width:760px}
-.ui-page th,.ui-page td{padding:12px 16px;line-height:22px}
-.ui-page th{font-size:13px;font-weight:500}
-.ui-page .ctl-row{display:flex;flex-wrap:wrap;align-items:center;padding:16px;gap:16px;border:1px solid var(--line);border-radius:10px;background:#fff}
-.ui-page .ctl-row label{font-size:14px;line-height:22px}
-.ui-page .filter-group{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0}
-.ui-page .filter-group>label{flex:0 0 100%;font-weight:500}
-.ui-page .groups{gap:8px;margin:12px 0;flex-wrap:wrap}
-.ui-page .mrow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:6px 12px;width:100%;padding:16px;min-height:104px;height:auto;border:0;border-bottom:1px solid var(--line-2);border-radius:0;box-shadow:none;white-space:normal}
-.ui-page .mrow .n{font-size:14px;line-height:22px;min-width:0;overflow-wrap:anywhere}
-.ui-page .mrow .v{font-size:14px;line-height:22px;color:var(--muted);min-width:0;overflow-wrap:anywhere}
-.ui-page .mrow .b{font-size:12px;line-height:20px;max-width:92px;white-space:normal;text-align:right;overflow-wrap:anywhere}
-.ui-page .mrow .tag,.ui-page .mrow .b span:last-child{font-size:12px!important;line-height:20px}
-.ui-page .grid{align-items:stretch}
-.ui-page .grid .panel{margin-bottom:0}
-.ui-page .grid .panel:last-child{border-radius:10px}
-.ui-page .guide-link{display:none!important}
-.ui-page[data-ui-view="margin"] .panel{padding:12px 4px 0}
-.ui-page[data-ui-view="margin"] #ch{height:500px;min-height:440px}
-.ui-page .filter-panel{margin-bottom:0}
-.ui-page .filter-panel .ctl-row{border:0;border-radius:0}
-.ui-page #icDynamic .panel{margin-bottom:0}
-.ui-page .hero{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:0 0 12px}
-.ui-page .hero-main,.ui-page .hero-side{background:#fff;padding:16px;min-width:0}
-.ui-page .hero-main .lb,.ui-page .leg span{font-size:14px;line-height:22px;color:var(--muted)}
-.ui-page .hero-main .vl{margin-top:4px;font-size:40px;line-height:48px;font-weight:600;color:var(--ink)}
-.ui-page .hero-main .vl small{font-size:16px;font-weight:400;color:var(--muted);margin-left:4px}
-.ui-page .hero .ft{margin-top:8px;font-size:14px;line-height:22px;color:var(--ink-2)}
-.ui-page .hero-side{display:flex;flex-direction:column;justify-content:center;gap:10px}
-.ui-page .legs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.ui-page .leg{min-width:0;padding:10px 12px;border-radius:8px;background:#f4f6f9}
-.ui-page .leg b{display:block;margin-top:2px;font-size:20px;line-height:26px;font-weight:600;color:var(--ink)}
+.ui-page .kpi .lb,.ui-page .kpi .ft{font-size:14px;line-height:22px;white-space:normal;overflow:visible;color:var(--muted);overflow-wrap:anywhere}
+.ui-page .kpi .vl{font-size:26px;line-height:34px;margin:4px 0;font-weight:600;color:var(--ink);white-space:normal;overflow:visible;overflow-wrap:anywhere}
+.ui-page .kpi .vl small{font-size:14px;font-weight:400}
+.ui-page .tbx{overflow:auto;-webkit-overflow-scrolling:touch;min-width:0;max-width:100%}
+.ui-page table{font-size:14px}
+.ui-page th,.ui-page td{padding:10px 12px;line-height:22px}
+.ui-page th{font-size:14px}
 .ui-page table.wrap-cells{min-width:0;table-layout:fixed}
-.ui-page table.wrap-cells th,.ui-page table.wrap-cells td{text-align:left;white-space:normal;overflow-wrap:anywhere}
-.ui-page tr.held td{background:#edf3fc}
-.ui-page[data-ui-view="futures"] table:not(.wrap-cells){min-width:960px}
-.ui-page[data-ui-view="funds"] .c{min-width:0;overflow:hidden}
-.ui-page[data-ui-view="funds"] .t{min-height:124px;padding:12px 14px 8px;align-content:start}
-.ui-page[data-ui-view="funds"] .t .nm{font-size:14px;white-space:normal;overflow:visible}
-.ui-page[data-ui-view="funds"] .t .cd,.ui-page[data-ui-view="funds"] .t .m1{font-size:12px;line-height:20px;white-space:normal;overflow:visible}
-.ui-page[data-ui-view="funds"] .t .es .k,.ui-page[data-ui-view="funds"] .t .es .u{font-size:12px}
-.ui-page[data-ui-view="funds"] .ch,.ui-page[data-ui-view="funds"] .c.sum .ch{height:256px}
-.ui-page[data-ui-view="funds"] .lg{font-size:12px;line-height:20px;min-height:44px;align-content:center;gap:4px 10px}
-.ui-page .risk-chart-card{border:1px solid var(--line);border-radius:10px;background:#fff;padding:16px;margin-bottom:16px}
-.ui-page .curve-heading{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin:4px 0 12px}
-.ui-page .curve-heading h2{font-size:14px}
-.ui-page .curve-heading span{font-size:14px;color:var(--muted)}
-.ui-page .spark-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;width:100%;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:10px;font-size:14px;color:var(--muted)}
-.ui-page .spark-grid{display:grid;grid-template-columns:1fr;gap:12px;width:100%}
-.ui-page .spark-card{display:flex;flex-direction:column;padding:16px;background:#fff;border:1px solid var(--line);border-radius:10px;min-width:0;overflow:hidden;min-height:250px}
-.ui-page .spark-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-height:66px}
-.ui-page .spark-name{font-size:14px;line-height:22px;min-width:0;overflow-wrap:anywhere;color:var(--muted)}
-.ui-page .spark-value{font-size:26px;line-height:34px;font-weight:600;color:var(--ink);margin-top:8px}
-.ui-page .spark-change{font-size:14px;line-height:22px;color:var(--accent);margin-top:4px}
+.ui-page table.wrap-cells td{white-space:normal;overflow-wrap:anywhere}
+.ui-page .ctl-row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding:16px}
+.ui-page .filter-group{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0}
+.ui-page .filter-group>label{flex-basis:100%;font-size:14px;font-weight:500}
+.ui-page .filter-panel{margin-bottom:0}
+.ui-page .groups{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
 .ui-page .ui-mask{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:12px}
 .ui-page .ui-mask[hidden]{display:none}
 .ui-page .ui-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.48)}
-.ui-page .ui-dialog{position:relative;display:flex;flex-direction:column;width:min(920px,100%);max-height:calc(100dvh - 24px);overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.20);transform:none;transition:none;padding:0;min-width:0}
+.ui-page .ui-dialog{position:relative;display:flex;flex-direction:column;width:min(920px,100%);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:hidden;background:#fff;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.2);min-width:0}
 .ui-page .ui-modal-head{display:flex;flex:none;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line-2)}
-.ui-page .ui-modal-head>div{min-width:0}
-.ui-page .ui-modal-head h3{margin:0;font-size:16px;line-height:24px;font-weight:600;color:var(--ink);overflow-wrap:anywhere}
-.ui-page .ui-modal-head .sub,.ui-page .ui-modal-head #dCat{display:block;margin:4px 0 0;font-size:14px;line-height:22px;color:var(--muted);overflow-wrap:anywhere}
-.ui-page button.ui-close{width:44px;height:44px!important;min-width:44px;flex:none;padding:0!important;position:static;font-size:22px!important;line-height:22px}
+.ui-page .ui-modal-head h3{font-size:16px;line-height:24px;margin:0;color:var(--ink);overflow-wrap:anywhere}
+.ui-page .ui-modal-head .sub,.ui-page #dCat{font-size:14px;line-height:22px;color:var(--muted)}
+.ui-page button.ui-close{width:44px;height:44px;min-width:44px;padding:0;flex:none;font-size:24px}
 .ui-page .ui-modal-body{min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:4px 16px 20px;font-size:14px;line-height:1.75;overflow-wrap:anywhere}
-.ui-page .ui-modal-body .mf{grid-template-columns:1fr;gap:4px;padding:12px 0;font-size:14px;line-height:1.75}
-.ui-page .ui-modal-body .mf .fd{min-width:0}
-.ui-page .ui-modal-body .mstep{font-size:14px;line-height:1.75;padding:12px}
-.ui-page .ui-modal-body .mmore h4{font-size:14px;line-height:22px}
-.ui-page .ui-modal-body .mmore ul{font-size:14px;line-height:1.75}
-.ui-page .ui-modal-body dl{display:grid;grid-template-columns:1fr;gap:4px;margin:16px 0 0;font-size:14px;line-height:1.75}
-.ui-page .ui-modal-body dt{color:var(--muted)}
-.ui-page .ui-modal-body dd{margin:0 0 12px;color:var(--ink-2);word-break:normal;overflow-wrap:anywhere}
-.ui-page .ui-modal-body p{margin:12px 0 0;line-height:1.75}
-.ui-page .ui-modal-body .foot{padding:12px 0;border:0;font-size:14px;color:var(--ink-2);line-height:1.75}
-.ui-page .ui-modal-body .rules-note{font-size:14px;line-height:22px;color:var(--muted)}
+.ui-page .ui-modal-body dl,.ui-page .ui-modal-body .mf{display:grid;grid-template-columns:1fr;gap:4px;margin:16px 0 0;font-size:14px}
+.ui-page .ui-modal-body dd{margin:0 0 12px;word-break:normal;overflow-wrap:anywhere}
+.ui-page .ui-modal-body .foot{padding:12px 0;border:0}
+.ui-page .ui-modal-body .mstep,.ui-page .ui-modal-body .mmore ul,.ui-page .ui-modal-body .mmore h4,.ui-page .rules-note{font-size:14px}
+.quick-read{margin:0 0 16px;padding:12px 16px;background:#edf2f8;border-radius:8px;font-size:14px;line-height:1.7;color:#4a5260}
+.quick-read p{margin:0}.quick-read b{color:#1f2733}
+.data-notice{padding:12px 16px;background:#fff6e4;color:#705217;border:1px solid #dfc688;border-radius:8px;margin:12px 0;font-size:14px}
+.chart-help,.window-note{font-size:14px;color:var(--muted);margin:8px 0 12px}
+.scroll-hint{font-size:14px;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--line);display:none}
+.date-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.skip-link{position:fixed;top:-90px;left:12px;z-index:200;background:#fff;padding:12px;color:#325b90}.skip-link:focus{top:12px}
 @media(min-width:500px){.ui-page .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(min-width:700px){
- .ui-page .wrap{padding-left:24px;padding-right:24px}
- .ui-page .top .shell-head{grid-template-columns:minmax(0,1fr) auto;min-height:76px}
- .ui-page .view-tabs{gap:4px}.ui-page .view-tab svg{display:block}
- .ui-page .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
- .ui-page .hero{grid-template-columns:minmax(240px,.86fr) minmax(0,1.5fr)}
- .ui-page .hero-main,.ui-page .hero-side{padding:16px 20px}
- .ui-page .ui-mask{padding:24px}.ui-page .ui-dialog{max-height:calc(100dvh - 48px)}
- .ui-page .ui-modal-head{padding:16px 20px}.ui-page .ui-modal-body{padding:4px 20px 20px}
- .ui-page .ui-modal-body .mf,.ui-page .ui-modal-body dl{grid-template-columns:132px minmax(0,1fr);gap:12px 16px}
- .ui-page .ui-modal-body dd{margin:0}
- .ui-page .filter-group>label{flex:0 0 auto;min-width:56px}
- .ui-page[data-ui-view="margin"] .panel{padding:12px 12px 0}
- .ui-page[data-ui-view="margin"] #ch{height:calc(100vh - 300px);min-height:440px}
- .ui-page .spark-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-@media(min-width:1100px){.ui-page .spark-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:699px){.ui-page .sec #st{flex-basis:100%}.ui-page .crumb{font-size:14px}.ui-page[data-ui-view="funds"] .t .cd,.ui-page[data-ui-view="funds"] .t .m1,.ui-page[data-ui-view="funds"] .lg{font-size:14px}.ui-page[data-ui-view="funds"] .t{min-height:132px}.ui-page .sec .side{font-size:14px}.ui-page .section-actions{width:100%}.ui-page .mrow{grid-template-columns:minmax(0,1fr);min-height:132px}.ui-page .mrow .b{grid-column:1;grid-row:auto;flex-direction:row;justify-content:space-between;max-width:none;width:100%;font-size:14px}.ui-page .mrow .tag,.ui-page .mrow .b span:last-child{font-size:14px!important}}
-@media(prefers-reduced-motion:reduce){.ui-page *{scroll-behavior:auto;transition:none!important}}
-/* ===== End unified dashboard UI ===== */
-</style></head><body data-ui-version="2" class="ui-page" data-ui-view="risk">
+@media(min-width:900px){.ui-page .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:700px){.ui-page .wrap{padding-left:24px;padding-right:24px}.ui-page .top .shell-head{grid-template-columns:minmax(0,1fr) auto}.ui-page .view-tab svg{display:block}.ui-page .ui-mask{padding:24px}.ui-page .ui-dialog{max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px)}.ui-page .ui-modal-body dl,.ui-page .ui-modal-body .mf{grid-template-columns:132px minmax(0,1fr);gap:12px 16px}.ui-page .ui-modal-body dd{margin:0}.ui-page .filter-group>label{flex-basis:auto}}
+@media(max-width:699px){.ui-page .section-actions{width:100%}.scroll-hint{display:block}.ui-page .sec #st{flex-basis:100%}}
+@media(prefers-reduced-motion:reduce){.ui-page *{scroll-behavior:auto!important;transition:none!important}}
+/* ===== End reviewed shared UI ===== */
+.ui-page .risk-chart-card{border:1px solid var(--line);border-radius:10px;background:#fff;padding:16px;margin-bottom:16px}.ui-page .curve-heading{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;margin:8px 0 12px}.ui-page .curve-heading span{font-size:14px}.ui-page .spark-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;width:100%;font-size:14px}.ui-page .spark-grid{display:grid;grid-template-columns:1fr;gap:12px;width:100%}.ui-page .spark-card{padding:16px;background:#fff;border:1px solid var(--line);border-radius:10px;min-width:0}.ui-page .spark-head{display:flex;gap:8px;justify-content:space-between;align-items:flex-start}.ui-page .spark-name{font-size:14px;min-width:0;overflow-wrap:anywhere}.ui-page .spark-value{font-size:26px;color:var(--ink);font-weight:600;margin-top:8px}.ui-page .spark-change{font-size:14px;color:var(--muted)}.ui-page .mrow{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;width:100%;padding:14px 16px;min-height:110px;white-space:normal;height:auto;border-radius:0;font:inherit;line-height:22px}.ui-page .mrow .n,.ui-page .mrow .v,.ui-page .mrow .b{font-size:14px;line-height:22px;overflow-wrap:anywhere;min-width:0}.ui-page .mrow .b{grid-column:1;grid-row:auto;display:flex;flex-direction:row;justify-content:space-between;align-items:center;white-space:normal}.ui-page .mrow .tag,.ui-page .mrow .b span:last-child{font-size:14px!important;line-height:22px}.ui-page #sparks[hidden]{display:none!important}
+@media(min-width:650px){.ui-page .spark-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(min-width:1200px){.ui-page .spark-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ui-page .tbx>table{min-width:900px}.ui-page .chart-help{padding:0 12px}.ui-page .data-notice[hidden]{display:none}
+/* Original four-tab density, no onboarding layer. */
+.ui-page main.wrap{padding-top:12px;padding-bottom:24px}
+.ui-page .sec{margin:18px 0 10px;min-height:36px;gap:8px}
+.ui-page .kpi{min-height:100px;padding:12px 16px}
+.ui-page .kpi .vl{font-size:25px;line-height:32px;margin:4px 0}
+.ui-page .kpi .ft{font-size:13px;line-height:20px;margin-top:4px}
+.ui-page .panel{margin-bottom:18px}.ui-page .foot,.ui-page .hold-note{font-size:13px;line-height:20px;padding:10px 16px}
+.ui-page .top .shell-head{padding-top:12px;padding-bottom:8px;gap:8px}
+.ui-page .view-tabs{border-radius:12px}.ui-page .view-tab[aria-current="page"]{box-shadow:0 1px 3px rgba(39,63,101,.08)}
+.ui-page .model-h{padding:12px 16px}.ui-page .model-meta{font-size:13px;line-height:20px}
+.ui-page .leg-row .leg{padding:12px 14px;gap:6px}.ui-page .blk .k{font-size:13px;line-height:18px}.ui-page .blk .s{font-size:13px;line-height:20px}
+.ui-page .chart-help{font-size:13px;line-height:20px;margin:6px 0}.ui-page .scroll-hint{padding:4px 12px;font-size:13px}
+.ui-page .account-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ui-page .account-tools small{font-size:13px;color:var(--muted)}
+@media(min-width:700px){.ui-page .top .shell-head{grid-template-columns:minmax(0,1fr) auto}.ui-page .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.ui-page .kpis:has(>.kpi:nth-child(2):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:699px){.ui-page .kpi .ft,.ui-page .blk .s,.ui-page .foot{font-size:14px}.ui-page .crumb{font-size:13px}}
+.ui-page #curveN,.ui-page #curveR{overflow:hidden;max-width:100%}.ui-page .spark-card>div:last-child{overflow:hidden;max-width:100%}.ui-page .mrow{min-height:88px;padding:12px 16px}.ui-page .spark-card{padding:14px}.ui-page .spark-head{min-height:0}.ui-page .spark-value{font-size:25px}.ui-page .spark-change{font-size:13px}
+</style></head><body data-ui-version="3" class="ui-page" data-ui-view="risk">
 <header class="top"><div class="wrap shell-head"><div class="brand"><span class="mark" aria-hidden="true"><img src="favicon.svg?v=ui-2" width="38" height="38" alt=""></span><div class="brand-copy"><h1>全球风险</h1><div class="crumb" title="利率条件与融资成本 · 读最新值与历史 · 不评级不构成建议">利率条件与融资成本 · 读最新值与历史 · 不评级不构成建议</div></div></div><div class="ctl"><button type="button" onclick="openRiskGuide()">口径说明</button><button id="rb" type="button" onclick="refresh()">刷新</button></div></div><div class="wrap nav-row"><nav class="view-tabs" aria-label="数据视图导航"><a class="view-tab" href="index.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 14V9m5 5V5m5 9V8m4 6V3"/></svg><span>资金观察</span></a><a class="view-tab" href="margin.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 6h14M3 10h10M3 14h14"/><circle cx="7" cy="6" r="2" fill="#fff"/><circle cx="13" cy="14" r="2" fill="#fff"/></svg><span>两融余额</span></a><a class="view-tab" href="futures-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 3h7l4 4v10H6z"/><path d="M13 3v4h4M9 11h5M9 14.5h5"/></svg><span>期指持仓</span></a><a class="view-tab" href="risk-preview.html" aria-current="page"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M3.5 10h13M10 3.5c-2.8 2.8-2.8 10.2 0 13 2.8-2.8 2.8-10.2 0-13Z"/></svg><span>全球风险</span></a></nav></div></header>
 
 <main class="wrap">
@@ -228,10 +186,10 @@ body.ui-page{margin:0;color:var(--ink-2);background:var(--page);font:14px/1.6 "P
 <div class="ui-mask" id="mask" hidden><div class="ui-backdrop" onclick="closeDrawer()"></div>
  <section class="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="dName"><div class="ui-modal-head"><div><h3 id="dName">—</h3><div id="dCat">—</div></div><button class="ui-close" type="button" aria-label="关闭" onclick="closeDrawer()">&#215;</button></div><div class="ui-modal-body"><dl id="dBody"></dl></div></section></div>
 
-<script src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js'"></script>
 <script>
 const $=id=>document.getElementById(id);
-const LAYERS=[['A_macro_rates','宏观利率'],['B_credit','信用'],['C_second_order_vol','二阶波动'],['D_mm_structure','做市结构'],['E_first_order_sentiment','一阶情绪'],['F_price_breadth','价格宽度']];
+const LAYERS=[['S_slow_variables','背景慢变量'],['A_macro_rates','宏观利率'],['B_credit','信用'],['C_second_order_vol','二阶波动'],['D_mm_structure','做市结构'],['E_first_order_sentiment','一阶情绪'],['F_price_breadth','价格宽度']];
 const GL={};LAYERS.forEach(l=>GL[l[0]]=l[1]);
 const CN={
  'A1_move':'MOVE 美债波动率','A2_move_vix_ratio':'MOVE/VIX 比','A3_yield_curve_nominal':'美债名义收益率曲线','A3b_yield_curve_real':'美债实际收益率曲线(TIPS)',
@@ -251,7 +209,7 @@ function closeDrawer(){uiPanel.close()}
 function openRiskGuide(){uiPanel.open('riskGuide')}
 function openLayerGuide(title,text){$('layerTitle').textContent=title+' · 口径说明';$('layerText').textContent=text||'暂无额外说明';uiPanel.open('layerGuide')}
 function safeUrl(u){if(!u||typeof u!=='string')return null;try{const url=new URL(u);if(!/^https?:$/.test(url.protocol))return null;return url.toString()}catch(e){return null}}
-function esc(s){return String(s==null?'—':s)}
+function esc(s){return uiEsc(s==null?'—':s)}
 function isLicensed(m){return m.status==='connected'||m.status==='connected_stale'}
  function shortValue(m){
  const staleMark=m.status==='connected_stale'?'<span style="color:#8a6d2f">陈旧·</span>':'';
@@ -260,9 +218,9 @@ function isLicensed(m){return m.status==='connected'||m.status==='connected_stal
    const keys=Object.keys(m.value);
    const tenKey=keys.find(k=>{const u=k.replace(/\s+/g,'').toUpperCase();return u==='10Y'||u==='10YR';});
    const ten=tenKey!=null?m.value[tenKey]:'—';
-   return staleMark+(m.id==='A3b_yield_curve_real'?'实际':'名义')+'曲线 '+keys.length+' 段 · 10Y '+ten+'%';
+   return staleMark+(m.id==='A3b_yield_curve_real'?'实际':'名义')+'曲线 '+keys.length+' 段 · 10Y '+esc(ten)+'%';
   }
-  return staleMark+m.value+(m.unit?' '+m.unit:'');
+  return staleMark+esc(typeof m.value==='number'?m.value.toLocaleString('zh-CN',{maximumFractionDigits:3}):m.value)+(m.unit?' '+esc(unitName(m.unit)):'');
  }
  if(m.status==='link_only')return '<span style="color:var(--muted)">跳源查看 · 不转录数值</span>';
  if(m.status==='restricted')return '<span style="color:#8a6d2f">ICE 版权受限 · 不转录</span>';
@@ -296,7 +254,7 @@ function drawCurveChart(el,m,color,title,yMinZero){
  if(!el||!xs.length)return null;
  const c=echarts.init(el);
  const yAxis={type:'value',axisLabel:{fontSize:10,color:'#868e9a',formatter:'{value}%'}};
- if(yMinZero)yAxis.min=0;
+ // Real yields can be negative. Do not clip below zero.
  c.setOption({backgroundColor:'transparent',animation:false,
   grid:{left:46,right:20,top:22,bottom:38},
   tooltip:{trigger:'axis',confine:true},
@@ -311,13 +269,13 @@ function drawCurveChart(el,m,color,title,yMinZero){
 function renderCurve(){
  const el=$('curve');if(!el||!window.echarts)return;
  const m=DATA.metrics.find(x=>x.id==='A3_yield_curve_nominal');
- if(!m||!isLicensed(m)||typeof m.value!=='object'){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">名义收益率曲线待官方快照加载</div>';return}
+ if(!m||!isLicensed(m)||!m.value||typeof m.value!=='object'){el.innerHTML='<div style="padding:20px;color:var(--muted);font-size:13px">名义收益率曲线待官方快照加载</div>';return}
  el.innerHTML='<div class="curve-heading"><h2>美债名义收益率曲线（%）</h2><span id="curveNDate"></span></div><div id="curveN" style="width:100%;height:260px;min-width:0"></div><div class="curve-heading"><h2>美债实际收益率曲线 TIPS（%）</h2><span id="curveRDate"></span></div><div id="curveR" style="width:100%;height:220px;min-width:0"></div>';$('curveNDate').textContent='数据日期 '+(m.as_of||'—');
  if(curveChart){try{curveChart.dispose()}catch(e){}}
  curveChart=drawCurveChart($('curveN'),m,'#3d6a9e','美债名义收益率曲线（%）· 数据日期 '+(m.as_of||'—'),false);
  const rm=DATA.metrics.find(x=>x.id==='A3b_yield_curve_real');
  const rel=$('curveR');
- if(rm&&isLicensed(rm)&&typeof rm.value==='object'){
+ if(rm&&isLicensed(rm)&&rm.value&&typeof rm.value==='object'){
   if(realChart){try{realChart.dispose()}catch(e){}}
   $('curveRDate').textContent='数据日期 '+(rm.as_of||'—');realChart=drawCurveChart(rel,rm,'#5a8fa8','美债实际收益率曲线 TIPS（%）· 数据日期 '+(rm.as_of||'—'),true);
  }else{
@@ -342,42 +300,44 @@ function fmtChange(m){
  if(u.includes('percent')||u==='%')u2='pp';
  else if(u.includes('bp')||u.includes('basis'))u2='bp';
  else if(u.includes('index')||u.includes('vix')||u.includes('corr'))u2='点';
- return sign+diff.toFixed(2)+u2+' ('+(last.date||'').slice(5)+')';
+ return sign+diff.toFixed(2)+(u2==='pp'?' 个百分点':u2==='bp'?' 基点':u2)+' ('+(last.date||'').slice(5)+')';
 }
 let sparkWindow=90;
 function renderSparks(){
  const holder=$('sparks');if(!holder)return;
- holder.innerHTML='';
- sparkCharts.forEach(c=>{try{c.dispose()}catch(e){}});sparkCharts=[];
+ holder.hidden=cur!=='全部'&&cur!=='背景慢变量';if(holder.hidden)return;
+ sparkCharts.forEach(c=>{try{c.dispose()}catch(e){}});sparkCharts=[];holder.innerHTML='';
  const connected=DATA.metrics.filter(m=>isLicensed(m)&&sortedHist(m).length>=2&&typeof m.value!=='object');
+ if(!window.echarts){holder.innerHTML='<div class="quick-read">图表组件未加载；指标数值与来源仍可在目录中查看</div>';return}
  if(!connected.length){holder.innerHTML='<div style="padding:14px;color:var(--muted);font-size:12.5px">政府真实历史系列待接入</div>';return}
  const ctl=document.createElement('div');ctl.className='spark-toolbar';
  ctl.appendChild(document.createTextNode('历史窗口：'));
- [30,90,252].forEach(w=>{const b=document.createElement('button');b.type='button';b.textContent=w+'日';b.className='chip'+(sparkWindow===w?' on':'');b.setAttribute('aria-pressed',String(sparkWindow===w));b.addEventListener('click',()=>{sparkWindow=w;renderSparks()});ctl.appendChild(b)});
+ [30,90,252].forEach(w=>{const b=document.createElement('button');b.type='button';b.textContent='近'+w+'条记录';b.className='chip'+(sparkWindow===w?' on':'');b.setAttribute('aria-pressed',String(sparkWindow===w));b.addEventListener('click',()=>{sparkWindow=w;renderSparks();[...document.querySelectorAll('.spark-toolbar button')].find(x=>x.textContent==='近'+w+'条记录')?.focus()});ctl.appendChild(b)});
  holder.appendChild(ctl);
  const grid=document.createElement('div');grid.className='spark-grid';
  holder.appendChild(grid);
  connected.forEach(m=>{
-  const hist=sortedHist(m).slice(-sparkWindow);
+  const hist=sortedHist(m).slice(-sparkWindow);if(m.as_of&&hist.at(-1)?.date!==m.as_of)return;
   const card=document.createElement('div');card.className='spark-card';
   const nm=document.createElement('div');nm.className='spark-name';nm.textContent=cnName(m);
   const val=document.createElement('div');val.className='spark-value';
   const unit=(m.unit||'').toLowerCase();const u=unit.includes('percent')||unit==='%'?'%':unit;
-  val.textContent=(typeof m.value==='number'?m.value.toFixed(2):m.value)+' '+u;
-  const ch=document.createElement('div');ch.className='spark-change';ch.textContent=fmtChange(m);
-  const help=document.createElement('button');help.type='button';help.textContent='指标说明';help.addEventListener('click',()=>openDetail(m.id));const head=document.createElement('div');head.className='spark-head';head.append(nm,help);
-  const chEl=document.createElement('div');chEl.style.cssText='width:100%;height:80px;margin-top:8px';
+  val.textContent=(typeof m.value==='number'?m.value.toFixed(2):m.value)+' '+unitName(m.unit)+(m.status==='connected_stale'?' · 陈旧':'');
+  const ch=document.createElement('div');ch.className='spark-change';ch.textContent=fmtChange(m)+' · 数据日 '+(m.as_of||'未知');
+  const help=document.createElement('button');help.type='button';help.textContent='说明';help.addEventListener('click',()=>openDetail(m.id));const head=document.createElement('div');head.className='spark-head';head.append(nm,help);
+  const chEl=document.createElement('div');chEl.style.cssText='width:100%;height:140px;margin-top:8px';
   card.appendChild(head);card.appendChild(val);card.appendChild(ch);card.appendChild(chEl);grid.appendChild(card);
   const c=echarts.init(chEl);sparkCharts.push(c);
   c.setOption({backgroundColor:'transparent',animation:false,
-   grid:{left:4,right:4,top:6,bottom:4},
-   xAxis:{type:'category',data:hist.map(h=>(h.date||'').slice(5)),show:false},
+   tooltip:{trigger:'axis',confine:true,valueFormatter:v=>Number(v).toLocaleString('zh-CN',{maximumFractionDigits:3})+' '+unitName(m.unit)},grid:{left:8,right:8,top:8,bottom:28},
+   xAxis:{type:'category',data:hist.map(h=>h.date),axisLabel:{fontSize:12,color:'#606c7c',hideOverlap:true}},
    yAxis:{type:'value',scale:true,axisLabel:{show:false},splitLine:{lineStyle:{color:'#eef1f5'}}},
-   series:[{type:'line',data:hist.map(h=>h.value),symbol:'none',lineStyle:{color:'#3d6a9e',width:1.5},areaStyle:{color:'rgba(61,106,158,.08)'}}]
+   series:[{type:'line',data:hist.map(h=>h.value),showSymbol:hist.length===1,connectNulls:false,lineStyle:{color:'#3d6a9e',width:1.5},areaStyle:{color:'rgba(61,106,158,.08)'}}]
   });
  });
 }
 const CN_FOCUS={
+ A1b_vxtlt:'美债10年期波动率（VXTLT）',A4_fomc_path:'美联储政策路径',A3b_yield_curve_real:'美债实际收益率曲线（TIPS）',
  S3_real_10y:'10Y 实际利率（TIPS）',
  S4_term_premium:'持有长债所需模型补偿（ACM，NY Fed 估计）',
  S9_sofr_level:'隔夜担保融资成本（SOFR）',
@@ -385,6 +345,7 @@ const CN_FOCUS={
  E4_margin_debt_yoy:'FINRA 保证金余额同比（自律组织数据）'
 };
 function cnName(m){return CN_FOCUS[m.id]||CN[m.id]||m.name}
+function unitName(unit){return ({percent:'%',daily:'每日',weekly:'每周',monthly:'每月',quarterly:'每季',annual:'每年','index points':'指数点','basis points':'基点'})[unit]||unit||'—'}
 const SPARK_Q={
  S3_real_10y:'真实资金成本，与名义曲线比较看通胀预期。',
  S4_term_premium:'NY Fed ACM 模型估计值，非市场交易值。',
@@ -403,11 +364,11 @@ const PANEL_Q={
 };
 function render(){
  if(!DATA)return;
- renderCurve();
- const main=DATA.metrics.filter(m=>m.layer!=='S_slow_variables');
+ const curveBox=$('curve').parentElement;curveBox.hidden=cur!=='全部'&&cur!=='宏观利率';if(!curveBox.hidden)renderCurve();renderSparks();
+ const main=DATA.metrics;
  const list=cur==='全部'?main:main.filter(m=>m.layer===LAYERS.find(l=>GL[l[0]]===cur)[0]);
  const grid=$('grid');grid.innerHTML='';
- LAYERS.filter(l=>cur==='全部'||GL[l[0]]===cur).forEach(l=>{
+ LAYERS.filter(l=>(cur!=='全部'||l[0]!=='S_slow_variables')&&(cur==='全部'||GL[l[0]]===cur)).forEach(l=>{
   const items=list.filter(m=>m.layer===l[0]);if(!items.length)return;
   const sec=document.createElement('section');sec.className='panel';
   sec.innerHTML='<div class="panel-head"><span class="t"></span><span class="c"></span></div><div style="padding:6px 14px;font-size:11.5px;color:var(--muted);border-bottom:1px solid var(--line-2)"></div>';
@@ -430,40 +391,40 @@ function render(){
  grid.querySelectorAll('.mrow').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.id)));
 }
 function renderGroups(){
- const counts={};DATA.metrics.forEach(m=>{if(m.layer!=='S_slow_variables')counts[m.layer]=(counts[m.layer]||0)+1});
+ const counts={};DATA.metrics.forEach(m=>{counts[m.layer]=(counts[m.layer]||0)+1});
  $('groups').innerHTML='';
  ['全部'].concat(LAYERS.map(l=>GL[l[0]])).forEach(g=>{
   const layer=LAYERS.find(l=>GL[l[0]]===g);
   const c=g==='全部'?DATA.metrics.length:(counts[layer[0]]||0);
   const b=document.createElement('button');b.type='button';b.className='gchip'+(g===cur?' on':'');b.textContent=g+' ('+c+')';
-  b.addEventListener('click',()=>{cur=g;renderGroups();render()});
+  b.setAttribute('aria-pressed',String(g===cur));b.addEventListener('click',()=>{cur=g;renderGroups();render();document.querySelectorAll('#groups button').forEach(x=>{if(x.textContent.startsWith(g+' ('))x.focus()});const u=new URL(location.href);u.searchParams.set('group',g);history.replaceState(null,'',u)});
   $('groups').appendChild(b);
  });
 }
 function openDetail(id){
  const m=DATA.metrics.find(x=>x.id===id);if(!m)return;
  $('dName').textContent=cnName(m);
- $('dCat').textContent=(GL[m.layer]||'背景慢变量')+' · '+m.id+' · status='+m.status;
+ $('dCat').textContent=(GL[m.layer]||'背景慢变量')+' · '+(ST_TXT[m.status]||'状态未知');
  const body=$('dBody');body.innerHTML='';
  const add=(k,v,isLink)=>{
   const dt=document.createElement('dt');dt.textContent=k;
   const dd=document.createElement('dd');
   if(isLink&&safeUrl(v)){const a=document.createElement('a');a.href=safeUrl(v);a.target='_blank';a.rel='noopener noreferrer';a.textContent=v;dd.appendChild(a)}
-  else dd.textContent=esc(v);
+  else dd.textContent=v==null?'—':String(v);
   body.appendChild(dt);body.appendChild(dd);
  };
  add('状态',ST_TXT[m.status]+' ('+m.status+')');
- add('数值',isLicensed(m)&&m.value!=null?JSON.stringify(m.value):(m.status==='restricted'?'受限不转录':'—'));
- add('单位',m.unit);
+ add('数值',isLicensed(m)&&m.value!=null?(typeof m.value==='object'?Object.entries(m.value).map(([k,v])=>k+'：'+v).join('；'):String(m.value)):(m.status==='restricted'?'受限不转录':'未接入，不能据此判断风险'));
+ add('单位',unitName(m.unit));
  add('数据日期',m.as_of);
  add('采集时间',m.collected_at);
- add('更新频率',m.update_frequency||m.frequency);
- add('怎么观察',SPARK_Q[m.id]);add('怎么解读',m.interpretation_cn);
+ add('更新频率',unitName(m.update_frequency||m.frequency));
+ add('怎么观察',SPARK_Q[m.id]||m.interpretation_cn||'此项暂无独立观察说明，请查看来源与口径，不作为自动交易依据');add('怎么解读',m.interpretation_cn);
  add('说明',m.note);
  add('归属',m.attribution);
  add('源链接',m.source_url,true);
  add('跳源链接',m.link_url,true);
- add('license',m.license);
+ add('授权',m.license);
  add('license 条款',m.license_url,true);
  add('版权声明',m.copyright_notice);
  add('免责',m.disclaimer);
@@ -474,12 +435,13 @@ function openDetail(id){
 async function refresh(){
  if(busy)return;busy=true;const rb=$('rb');rb.disabled=true;rb.textContent='读取中…';
  try{
-  let d=null;try{const r=await fetch('preview-data/global.json?t='+Date.now(),{cache:'no-store'});if(r.ok)d=await r.json()}catch(e){}
-  if(!d||!Array.isArray(d.metrics)){$('banner').style.display='block';$('banner').textContent='未读取到本地快照 preview-data/global.json';$('st').textContent='快照未加载';$('grid').innerHTML='';$('groups').innerHTML='';return}
-  DATA=d;$('banner').style.display='none';
-  let lastRun='—';try{const sr=await fetch('preview-data/status.json?t='+Date.now(),{cache:'no-store'});if(sr.ok){const sj=await sr.json();const t=sj.last_run||sj.generated_at;if(t)lastRun=t.slice(0,16).replace('T',' ')}}catch(e){}
+  let d=null;try{d=await readJSON('preview-data/global.json?t='+Date.now())}catch(e){}
+  if(!d||!Array.isArray(d.metrics)){$('banner').style.display='block';$('banner').textContent='本次快照读取失败；保留上次可用结果，未更新成功。点击刷新重试';$('st').textContent='快照未加载';if(!DATA){$('grid').innerHTML='';$('groups').innerHTML='';$('curve').parentElement.hidden=true;$('sparks').hidden=true}return}
+  DATA=d;$('banner').style.display='none';const query=new URLSearchParams(location.search).get('group');if(query==='全部'||LAYERS.some(l=>l[1]===query))cur=query;
+  let lastRun='—';try{const sj=await readJSON('preview-data/status.json?t='+Date.now());{const t=sj.last_run||sj.generated_at;if(t)lastRun=t.slice(0,16).replace('T',' ')}}catch(e){}
   $('st').textContent='最近采集 '+lastRun+' · 已可观察 '+d.metrics.filter(m=>m.status==='connected').length+' 项 · 完整目录 '+d.metrics.length+' 项';
-  renderGroups();renderCurve();renderSparks();render();
+  $('riskFoot').textContent='这是公开数据快照目录，当前已接入 '+d.metrics.filter(isLicensed).length+' 项 / 共 '+d.metrics.length+' 项。已接入不等于实时，逐项核对数据日期；跳源、受限、待接入、缺数据不能当成零。仅阅读来源许可范围内的数据，不评级，不生成交易建议。';
+  renderGroups();render();
  }finally{busy=false;rb.disabled=false;rb.textContent='刷新'}
 }
 refresh();
@@ -491,7 +453,7 @@ window.uiPanel=(()=>{
  function close(){
   if(!active)return;const state=active;active=null;
   state.node.hidden=true;document.body.style.overflow=state.overflow;
-  state.inert.forEach(item=>{item.el.inert=item.was});
+  state.inert.forEach(item=>{item.el.inert=item.was;if(item.aria==null)item.el.removeAttribute('aria-hidden');else item.el.setAttribute('aria-hidden',item.aria)});
   if(state.focus&&state.focus.isConnected)state.focus.focus();
  }
  function open(id){
@@ -499,7 +461,7 @@ window.uiPanel=(()=>{
   if(active&&active.node===node)return;if(active)close();
   active={node,focus:document.activeElement,overflow:document.body.style.overflow,inert:[]};
   for(const el of [document.querySelector('header.top'),document.querySelector('main')].filter(Boolean)){
-   active.inert.push({el,was:el.inert});el.inert=true;
+   active.inert.push({el,was:el.inert,aria:el.getAttribute('aria-hidden')});el.inert=true;el.setAttribute('aria-hidden','true');
   }
   node.hidden=false;document.body.style.overflow='hidden';
   const body=node.querySelector('.ui-modal-body');if(body)body.scrollTop=0;
@@ -523,5 +485,17 @@ window.uiPanel=(()=>{
  });
  return {open,close};
 })();
+/* Remember only display preferences within this browser tab. */
+(()=>{const key='dashboard-view:'+location.pathname.split('/').at(-1);const allowed=['date','product','window','metric','signal','group','range','index'];const save=()=>{const q=new URLSearchParams(location.search),out=new URLSearchParams();allowed.forEach(k=>{if(q.has(k))out.set(k,q.get(k))});try{sessionStorage.setItem(key,out.toString())}catch(e){}};addEventListener('pagehide',save);document.querySelectorAll('.view-tab').forEach(a=>a.addEventListener('click',()=>{save();const u=new URL(a.href);try{const saved=new URLSearchParams(sessionStorage.getItem('dashboard-view:'+u.pathname.split('/').at(-1))||'');allowed.forEach(k=>{if(saved.has(k))u.searchParams.set(k,saved.get(k))})}catch(e){}a.href=u.href}));})();
 /* ===== End unified dashboard UI behavior ===== */
-</script></body></html>
+</script><script>/* Responsive table affordance, keyboard path and readable canvas labels. */
+(()=>{
+const main=document.querySelector('main');main.id=main.id||'mainContent';main.tabIndex=-1;
+const skip=document.createElement('a');skip.href='#'+main.id;skip.className='skip-link';skip.textContent='跳到主要内容';document.body.prepend(skip);
+const status=document.getElementById('st');if(status){status.setAttribute('role','status');status.setAttribute('aria-live','polite')}
+function update(){syncPressed();document.querySelectorAll('.tbx').forEach(el=>{el.tabIndex=0;el.setAttribute('role','region');el.setAttribute('aria-label','数据明细，可横向滚动');if(!el.previousElementSibling?.classList.contains('scroll-hint')){const hint=document.createElement('div');hint.className='scroll-hint';hint.textContent='左右滑动查看全部列';el.before(hint)}});document.querySelectorAll('.ch').forEach(el=>{el.setAttribute('role','img');el.setAttribute('aria-label','数据走势图；精确值请使用日期选择与明细')})}
+const observedCharts=new WeakSet();const chartResize=new ResizeObserver(entries=>{for(const {target} of entries){const c=window.echarts?.getInstanceByDom(target);if(c&&target.clientWidth>0)requestAnimationFrame(()=>c.resize({width:target.clientWidth,height:target.clientHeight}));}});
+function observeCharts(){document.querySelectorAll('.ch,#curveN,#curveR,.spark-card>div:last-child').forEach(el=>{if(!observedCharts.has(el)){observedCharts.add(el);chartResize.observe(el)}})}
+update();observeCharts();new MutationObserver(()=>{update();observeCharts()}).observe(main,{childList:true,subtree:true});
+if(!window.echarts)pageNotice('图表组件未加载，图形暂不可用；文字和表格仍可阅读。请联网刷新。');
+})();</script></body></html>

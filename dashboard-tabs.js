@@ -1,0 +1,65 @@
+/* Original four-page runtime: top-level links enter the cached dashboard;
+   embedded pages continue to use the original live JSON endpoints. */
+(() => {
+  'use strict';
+  const names = ['index.html','margin.html','futures-preview.html','risk-preview.html'];
+  const page = location.pathname.split('/').pop() || 'index.html';
+  if (!names.includes(page)) return;
+  const embedded = new URLSearchParams(location.search).get('view') === 'embedded';
+  if (window === window.top && !embedded) {
+    const target = new URL('dashboard.html', location.href);
+    target.search = location.search;
+    target.hash = page;
+    document.documentElement.style.visibility = 'hidden';
+    location.replace(target.href);
+    return;
+  }
+  if (window === window.top || !embedded) return;
+  let ready = false;
+  const origin = location.origin;
+  const post = data => parent.postMessage(data, origin);
+  function sizeCharts() {
+    document.querySelectorAll('canvas').forEach(canvas => {
+      const el = canvas.parentElement?.parentElement;
+      const chart = el && window.echarts?.getInstanceByDom(el);
+      if (!chart || el.clientWidth <= 0) return;
+      if (Math.abs(chart.getWidth()-el.clientWidth)>1 || Math.abs(chart.getHeight()-el.clientHeight)>1)
+        chart.resize({width:el.clientWidth,height:el.clientHeight});
+      chart.getZr().flush();
+    });
+  }
+  function complete() {
+    if (document.querySelector('#rb')?.disabled) return false;
+    if (page === 'index.html') return !!document.querySelector('#tb tr') && document.querySelector('#ds')?.options.length>0;
+    if (page === 'margin.html') return !!document.querySelector('#marginKpis .kpi') && document.querySelector('#marginDate')?.options.length>0;
+    if (page === 'futures-preview.html') return !!document.querySelector('#icDynamic .model') && document.querySelector('#icDate')?.options.length>0;
+    return !!document.querySelector('#grid .mrow');
+  }
+  function report() {
+    if (ready || !complete()) return;
+    ready = true;
+    setTimeout(() => { sizeCharts();post({kind:'view-ready',page,width:innerWidth,height:innerHeight}); },0);
+  }
+  document.addEventListener('click', event => {
+    const a = event.target.closest('a.view-tab');
+    if (!a) return;
+    const target = new URL(a.href);
+    const name = target.pathname.split('/').pop();
+    if (target.origin !== origin || !names.includes(name)) return;
+    event.preventDefault();event.stopImmediatePropagation();
+    post({kind:'navigate',page:name,sentAt:Date.now()});
+  }, true);
+  addEventListener('message',event => {
+    if(event.source!==parent || event.origin!==origin) return;
+    if(event.data?.kind==='prepare-view') {
+      sizeCharts();post({kind:'view-sized',page,width:innerWidth,height:innerHeight});
+    }
+  });
+  document.addEventListener('DOMContentLoaded',() => {
+    new MutationObserver(report).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
+    report();
+    // Errors stay on the original page. Never leave a requested tab waiting forever.
+    setTimeout(() => {if(!ready){ready=true;sizeCharts();post({kind:'view-ready',page,width:innerWidth,height:innerHeight});}},14000);
+  });
+  addEventListener('load',report);
+})();
