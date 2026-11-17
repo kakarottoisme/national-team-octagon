@@ -1,0 +1,21 @@
+{
+  "as_of": "2026-11-17",
+  "d_live_start": "2026-11-17",
+  "account_balance": 1450000,
+  "balance_as_of": "2026-11-17",
+  "positions": [
+    {
+      "contract": "IC2703",
+      "direction": "多",
+      "lots": 4,
+      "entry_date": "2026-11-17",
+      "entry_price": 6051.0,
+      "entry_price_kind": "收盘",
+      "entry_source": "中金所 quote_IC.txt 字段 lastprice 为 6051.00；新浪 hq.sinajs.cn/list=nf_IC2703 在 2026-11-17 15:00:00 的最新价同为 6051.0。中金所日行情 CSV 尚未发布，此数是收盘时点最新价，不是结算价。",
+      "last_price": 6051.0,
+      "last_date": "2026-11-17",
+      "last_price_kind": "收盘",
+      "last_source": "中金所 quote_IC.txt 字段 lastprice，与开仓价同一笔"
+    }
+  ]
+}
