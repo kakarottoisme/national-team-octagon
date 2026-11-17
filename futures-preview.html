@@ -214,25 +214,41 @@ body.ui-page{margin:0;color:var(--ink-2);background:var(--page);font:14px/1.6 "P
 .ui-page[data-ui-view="futures"] .legs{grid-template-columns:repeat(4,minmax(0,1fr))}
 .ui-page .hold-note{font-size:13px;line-height:22px;padding:10px 16px 12px;color:var(--muted)}
 .ui-page tr.suggest td{background:#f4f6f9}
-.sum-row{display:grid;grid-template-columns:1fr;gap:8px 24px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 12px}
-.sum-row .lb{font-size:14px;line-height:22px;color:var(--muted)}
-.sum-row .vl{font-size:40px;line-height:48px;font-weight:600;color:var(--ink)}
-.sum-row .vl small{font-size:16px;font-weight:400;color:var(--muted);margin-left:4px}
-.sum-row .formula{font-size:22px;line-height:30px;font-weight:600;color:var(--ink)}
-.sum-row .ft{margin-top:4px;font-size:14px;line-height:22px;color:var(--ink-2)}
-.leg-row{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 24px}
-.leg-card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:8px}
-.leg-card .nm{font-size:14px;line-height:22px;color:var(--muted)}
-.leg-card .lots{font-size:32px;line-height:40px;font-weight:600;color:var(--ink)}
-.leg-card .lots small{font-size:14px;font-weight:400;color:var(--muted);margin-left:4px}
-.leg-card .rule,.leg-card .st,.leg-card .nx{font-size:13px;line-height:20px;color:var(--ink-2)}
-.leg-card .k{color:var(--muted)}
-@media(min-width:700px){
- .sum-row{grid-template-columns:minmax(160px,.7fr) minmax(0,1.6fr);align-items:center}
- .leg-row{grid-template-columns:1fr 1fr}
-}
-@media(min-width:1100px){.leg-row{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(min-width:700px){.ui-page[data-ui-view="futures"] .kpis.signal-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.model{background:#fff;border:1px solid var(--line);border-radius:10px;margin:0 0 24px;overflow:hidden}
+.model-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 18px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.model-total{display:flex;align-items:baseline;gap:8px}
+.model-total .k{font-size:14px;color:var(--muted)}
+.model-total b{font-size:36px;line-height:40px;font-weight:600;color:var(--ink)}
+.model-total small{font-size:14px;color:var(--muted)}
+.model-formula{font-size:20px;line-height:28px;font-weight:600;color:var(--ink)}
+.model-meta{font-size:13px;line-height:20px;color:var(--ink-2)}
+.lotbar{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line-2)}
+.lotbar .track{flex:1;display:flex;height:10px;border-radius:5px;overflow:hidden;background:#eef1f4;min-width:0}
+.lotbar .track i{display:block;height:100%}
+.lotbar .a{background:#3d6a9e}.lotbar .b{background:#6b8aae}.lotbar .c{background:#8fa3b8}.lotbar .d{background:#c5d0dc}
+.lotbar .key{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;line-height:18px;color:var(--muted)}
+.lotbar .key b{font-weight:600;color:var(--ink-2)}
+.leg-row{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line-2)}
+.leg{padding:14px 16px;min-width:0;background:#fff;display:flex;flex-direction:column;gap:8px}
+.leg-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.leg-top span{font-size:14px;color:var(--muted)}
+.leg-top b{font-size:28px;line-height:32px;font-weight:600;color:var(--ink)}
+.leg-top small{font-size:13px;font-weight:400;color:var(--muted);margin-left:2px}
+.blk{background:#f4f6f9;border-radius:8px;padding:8px 10px}
+.blk .k{font-size:12px;line-height:16px;color:var(--muted)}
+.blk .v{margin-top:2px;font-size:15px;line-height:22px;font-weight:600;color:var(--ink)}
+.blk .s{margin-top:2px;font-size:13px;line-height:18px;color:var(--ink-2)}
+.lv{width:100%;border-collapse:collapse;font-size:12px;line-height:18px}
+.lv td{padding:1px 0;color:var(--ink-2)}
+.lv td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.lv tr.on td{color:#3f6baf;font-weight:600}
+.rail{position:relative;height:28px;margin-top:6px}
+.rail .line{position:absolute;left:0;right:0;top:8px;height:4px;border-radius:2px;background:#e6e8ec}
+.rail .mk{position:absolute;top:0;transform:translateX(-50%);text-align:center;font-size:10px;line-height:12px;color:var(--muted);white-space:nowrap}
+.rail .mk i{display:block;width:8px;height:8px;margin:2px auto 0;border-radius:50%;background:#3d6a9e}
+.meter{height:8px;border-radius:4px;background:#e6e8ec;overflow:hidden;margin-top:6px}
+.meter i{display:block;height:100%;background:#3d6a9e}
+@media(min-width:800px){.leg-row{grid-template-columns:1.25fr .9fr 1.05fr 1.3fr}}
 @media(max-width:699px){.ui-page[data-ui-view="futures"] .legs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body data-ui-version="2" class="ui-page" data-ui-view="futures">
 <header class="top"><div class="wrap shell-head"><div class="brand"><span class="mark" aria-hidden="true"><img src="favicon.svg?v=ui-2" width="38" height="38" alt=""></span><div class="brand-copy"><h1>期指持仓</h1><div class="crumb" title="中信期货(代客) · CFFEX 前20会员 · 选中日多空/净空 · 换月跳变不解读为观点突变">中信期货(代客) · CFFEX 前20会员 · 选中日多空/净空 · 换月跳变不解读为观点突变</div></div></div><div class="ctl">
@@ -763,14 +779,40 @@ window.uiPanel=(()=>{
   const dStateLine=shownModel.live
    ?('自 '+(shownModel.start?esc(shownModel.start):'开仓日')+' 浮盈 '+wan2(shownModel.pnl)+'，'+dState)
    :('回测累计 '+wan2(shownModel.pnl)+'，'+dState);
-  function card(name, lotsHtml, rule, state, next){
-   return '<article class="leg-card"><div class="nm">'+name+'</div><div class="lots">'+lotsHtml+'<small>手</small></div><div class="rule">'+rule+'</div><div class="st"><span class="k">现况 </span>'+state+'</div><div class="nx"><span class="k">触发 </span>'+next+'</div></article>';
+  const bands=[[6500,2],[6000,4],[5500,6],[5250,8],[5000,10]];
+  let activeLv=null;
+  if(day.index_close<=6500){activeLv=6500; bands.forEach(function(b){if(day.index_close<=b[0]) activeLv=b[0];});}
+  const aTable='<table class="lv"><tbody>'+bands.map(function(b){
+   return '<tr class="'+(b[0]===activeLv?'on':'')+'"><td>≤'+b[0]+'</td><td>'+b[1]+' 手</td></tr>';
+  }).join('')+'<tr class="'+(activeLv==null?'on':'')+'"><td>&gt;6500</td><td>0 手</td></tr></tbody></table>';
+  let rail='';
+  if(day.index_close<day.ma_lower) rail='<div class="s">指数在下轨下方</div>';
+  else if(day.index_close>day.ma_upper) rail='<div class="s">指数在上轨上方</div>';
+  else {
+   const p=(day.index_close-day.ma_lower)/(day.ma_upper-day.ma_lower||1)*100;
+   rail='<div class="rail"><div class="line"></div><span class="mk" style="left:'+p.toFixed(1)+'%"><i></i>指数</span></div>';
   }
+  const dGoal=(shownModel.pnl>0?shownModel.pnl:0)+(shownModel.need>0?shownModel.need:0);
+  const dPct=shownModel.need==null?100:(dGoal>0?Math.max(0,Math.min(100,(shownModel.pnl>0?shownModel.pnl:0)/dGoal*100)):0);
+  const dMeter='<div class="meter"><i style="width:'+dPct.toFixed(1)+'%"></i></div>';
+  function blk(k,v,s){return '<div class="blk"><div class="k">'+k+'</div>'+(v?'<div class="v">'+v+'</div>':'')+(s?'<div class="s">'+s+'</div>':'')+'</div>';}
+  function leg(cls, name, lotsHtml, body){
+   return '<article class="leg '+cls+'"><div class="leg-top"><span>'+name+'</span><div><b>'+lotsHtml+'</b><small>手</small></div></div>'+body+'</article>';
+  }
+  const aNext=aBits.length?aBits.map(function(t){return '<div>'+t+'</div>';}).join(''):'—';
+  const seg=function(n,cls){return n>0?'<i class="'+cls+'" style="width:'+(n/10*100)+'%"></i>':'';};
+  const posLots=[
+   ['A',Math.max(0,+day.leg_a||0),'a'],
+   ['B',Math.max(0,+day.leg_b||0),'b'],
+   ['C',Math.max(0,+day.leg_c||0),'c'],
+   ['D',Math.max(0,+legD||0),'d']
+  ];
+  const lotbar='<div class="lotbar"><div class="track" aria-hidden="true">'+posLots.map(function(p){return seg(p[1],p[2]);}).join('')+'</div><div class="key">'+posLots.map(function(p){return '<span>'+p[0]+' <b>'+p[1]+'</b></span>';}).join('')+'<span>上限 <b>10</b></span></div></div>';
   const legRow='<div class="leg-row">'
-   +card('A 网格', esc(day.leg_a), '≤6500→2，≤6000→4，≤5500→6，≤5250→8，≤5000→10', '中证500收盘 '+num(day.index_close,3)+' → '+esc(day.leg_a)+' 手', aBits.join(' / ')||'—')
-   +card('B 趋势', esc(day.leg_b), '收盘&gt;MA250×1.01 加 2 手，&lt;MA250×0.99 撤', 'MA250 '+num(day.ma250,2)+'，上轨 '+num(day.ma_upper,2)+'，下轨 '+num(day.ma_lower,2)+'，趋势'+(day.b_open?'打开':'关闭'), bTrig)
-   +card('C 贴水', esc(cTile(day.leg_c)), '换月日看新近月年化贴水 ≥10% 加 2 手，&lt;3% 减 2 手，其余保持，每月判定一次', cState, (day.next_roll?esc(day.next_roll):'—')+' 判定')
-   +card('D 盈利加仓', esc(legD), '自 '+(liveStart()?esc(liveStart()):'开仓日')+' 账户盈利的 50% 够付 1 手 12% 保证金即加 1 手，最多 4 手，跌破 MA250×0.99 或底仓归零全撤', dStateLine, dTrig)
+   +leg('a','A 网格', esc(day.leg_a), blk('规则','',aTable)+blk('现状', num(day.index_close,3), '中证500收盘')+blk('下次变化','',aNext))
+   +leg('b','B 趋势', esc(day.leg_b), blk('规则','','&gt;MA250×1.01 加 2 手<br>&lt;MA250×0.99 撤')+blk('现状', num(day.ma250,2), '上轨 '+num(day.ma_upper,2)+' · 下轨 '+num(day.ma_lower,2)+' · 趋势'+(day.b_open?'打开':'关闭')+rail)+blk('下次变化', bTrig, ''))
+   +leg('c','C 贴水', esc(cTile(day.leg_c)), blk('规则','','≥10% 加 2 手<br>&lt;3% 减 2 手<br>其余保持，每月一次')+blk('现状', pct(day.c_basis), '来自 '+(day.c_set_on?String(day.c_set_on).slice(5):'—')+' '+(day.c_contract||'')+(nxt&&nxt.basis!=null?' · 今日 '+nxt.code+' '+pct(nxt.basis):''))+blk('下次变化', (day.next_roll?String(day.next_roll).slice(5):'—')+' 判定', ''))
+   +leg('d','D 盈利加仓', esc(legD), blk('规则','','盈利 50% 够 1 手 12% 保证金即加 1 手，最多 4 手<br>跌破 MA250×0.99 或底仓归零全撤')+blk('现状', wan2(shownModel.pnl), dState+(shownModel.live?' · 自 '+(shownModel.start||''):' · 回测'))+blk('下次变化', shownModel.need==null?'已达上限':('再赚 '+wan2(shownModel.need)), (shownModel.live&&snap.px!=null?'按持仓 '+(snap.code||'')+' '+num(snap.px,1):dPrice)+dMeter+'撤出线 '+num(day.ma_lower,2)))
    +'</div>';
   const known={grid_down:1,grid_up:1,trend_on:1,trend_off:1,basis:1};
   const extra=(day.triggers||[]).filter(r=>!known[r.kind]);
@@ -788,9 +830,8 @@ window.uiPanel=(()=>{
   const pickFt=shownModel.pick?(esc(shownModel.pick)+(day.entry_roll?' · '+esc(day.entry_roll)+' 收盘强制换月':'')):'—';
   const latestModel=modelView(latest, snap);
   host.innerHTML=
-   '<section class="sum-row" aria-label="模型建议"><div><div class="lb">模型建议</div><div class="vl">'+esc(total)+'<small>手</small></div><div class="ft">按信号日 '+esc(day.date)+' 收盘</div></div>'
-   +'<div><div class="formula">'+esc(abcdText(day, legD))+'</div><div class="ft">建议合约 '+pickFt+'</div></div></section>'
-   +legRow
+   '<section class="model" aria-label="模型建议"><header class="model-h"><div class="model-total"><span class="k">模型建议</span><b>'+esc(total)+'</b><small>手</small></div><div class="model-formula">'+esc(abcdText(day, legD))+'</div><div class="model-meta">建议合约 '+pickFt+' · 按信号日 '+esc(day.date)+'</div></header>'
+   +lotbar+legRow+'</section>'
    +extraHtml
    +holdingsBlock(latest, latestModel)
    +'<div class="sec"><h2>IC 挂牌合约</h2><span class="side">信号日 '+esc(day.date)+' 收盘</span></div>'
