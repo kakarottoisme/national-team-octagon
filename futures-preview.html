@@ -214,6 +214,24 @@ body.ui-page{margin:0;color:var(--ink-2);background:var(--page);font:14px/1.6 "P
 .ui-page[data-ui-view="futures"] .legs{grid-template-columns:repeat(4,minmax(0,1fr))}
 .ui-page .hold-note{font-size:13px;line-height:22px;padding:10px 16px 12px;color:var(--muted)}
 .ui-page tr.suggest td{background:#f4f6f9}
+.sum-row{display:grid;grid-template-columns:1fr;gap:8px 24px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 12px}
+.sum-row .lb{font-size:14px;line-height:22px;color:var(--muted)}
+.sum-row .vl{font-size:40px;line-height:48px;font-weight:600;color:var(--ink)}
+.sum-row .vl small{font-size:16px;font-weight:400;color:var(--muted);margin-left:4px}
+.sum-row .formula{font-size:22px;line-height:30px;font-weight:600;color:var(--ink)}
+.sum-row .ft{margin-top:4px;font-size:14px;line-height:22px;color:var(--ink-2)}
+.leg-row{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 24px}
+.leg-card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.leg-card .nm{font-size:14px;line-height:22px;color:var(--muted)}
+.leg-card .lots{font-size:32px;line-height:40px;font-weight:600;color:var(--ink)}
+.leg-card .lots small{font-size:14px;font-weight:400;color:var(--muted);margin-left:4px}
+.leg-card .rule,.leg-card .st,.leg-card .nx{font-size:13px;line-height:20px;color:var(--ink-2)}
+.leg-card .k{color:var(--muted)}
+@media(min-width:700px){
+ .sum-row{grid-template-columns:minmax(160px,.7fr) minmax(0,1.6fr);align-items:center}
+ .leg-row{grid-template-columns:1fr 1fr}
+}
+@media(min-width:1100px){.leg-row{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(min-width:700px){.ui-page[data-ui-view="futures"] .kpis.signal-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:699px){.ui-page[data-ui-view="futures"] .legs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body data-ui-version="2" class="ui-page" data-ui-view="futures">
@@ -272,13 +290,13 @@ body.ui-page{margin:0;color:var(--ink-2);background:var(--page);font:14px/1.6 "P
   <dt>盈利覆盖加仓 D</dt><dd>D 腿（盈利覆盖加仓）：自上次 D 撤出以来累计盈利的 50% 够付 1 手保证金（按 12%）即加 1 手，最多 4 手，总手数不超过 10；收盘跌破 MA250×0.99 或底仓归零时 D 全撤。</dd>
   <dt>合计</dt><dd>底仓 = A + B + C，限制在 0 到 10 手。建议手数 = 底仓 + D，不超过 10 手。</dd>
   <dt>年化贴水</dt><dd>(指数收盘 − 期货收盘) / 指数收盘 × 365 / 距最后交易日的日历天数。</dd>
-  <dt>选约</dt><dd>只在当月、次月、当季里比较，下季不参与。距最后交易日不足 10 个日历日的合约不参与比较。开仓以及强制移仓当日，若某张合约的年化贴水比基准近月高出不少于 3 个百分点，就用贴水最高的那张，否则用近月；近月若已不足 10 日，基准改为最近的一张可比较合约。持有期间，若另一张可比较合约比持仓高出不少于 2 个百分点，整仓换过去。全部手数在同一个合约。页面「模型建议」按新开仓规则选合约。回测路径上记着的旧合约不是当前账户持仓。</dd>
-  <dt>页面上的两套持仓</dt><dd>模型建议是信号日的 A、B、C，加上从开仓日起按账户浮盈算出的 D。实际持仓只读 data/holdings.json。两边不同就写明合约和手数差。信号日会写在数字旁边；信号日不是当天时，不当成当天的官方收盘。</dd>
+  <dt>选约</dt><dd>只在当月、次月、当季里比较，下季不参与。距最后交易日不足 10 个日历日的合约不参与比较。开仓以及强制移仓当日，若某张合约的年化贴水比基准近月高出不少于 3 个百分点，就用贴水最高的那张，否则用近月；近月若已不足 10 日，基准改为最近的一张可比较合约。持有期间，若另一张可比较合约比持仓高出不少于 2 个百分点，整仓换过去。全部手数在同一个合约。页面「模型建议」按新开仓规则选合约。</dd>
+  <dt>页面上的两套持仓</dt><dd>模型建议是信号日的 A、B、C，加上从开仓日起按账户浮盈算出的 D。实际持仓只读 data/holdings.json。两边不同就写明合约和手数差。信号日写在建议手数旁边。</dd>
   <dt>强制移仓</dt><dd>最后交易日是合约月份的第三个星期五，遇休市顺延。持仓合约最后交易日的前一交易日收盘必须移仓，并按开仓的 3 个百分点规则重选。</dd>
   <dt>资金</dt><dd>这条规则的回测里，按交易所保证金 12% 估算，峰值大约 129 万。建议账户至少准备 400 万。页面上的保证金只出现在「当前持仓」，按实际手数、最新价和 12% 估算，不是这段峰值。</dd>
   <dt>资金管理</dt><dd>可选：账户留下保证金，再加名义本金的 15%。名义本金 = 手数 × 期货价 × 200。</dd>
  </dl>
- <p class="rules-note">当前账户的 D 盈亏从 data/holdings.json 的开仓日算起，用账户浮盈，不沿用回测累计。回测重放只在查看更早的信号日时出现，并标明不是这笔账户。</p>
+ <p class="rules-note">当前账户的 D 盈亏从 data/holdings.json 的开仓日算起，用账户浮盈，不沿用回测累计。回测重放只在查看更早的信号日时出现。</p>
  <p class="rules-note">页面盈利按指数点估算，实盘以期货账户实际盈亏为准；D 在场期间不要提走盈利，否则急跌时 400 万不够（9031→4018 压力测试需约 603 万）。</p>
  <p class="rules-note">回测参考：400万池 全样本年化 43.96%（基线 35.26%），样本外 2022–26 35.64%（基线 26.55%），夏普 0.981，最大回撤 48.80%。</p>
  <p class="rules-note">这是用户自己的回测规则，不是投资建议，也不保证将来重复。</p></div></section></div>
@@ -612,15 +630,17 @@ window.uiPanel=(()=>{
   const pick=day&&day.entry_pick||'';
   const row=day&&(day.contracts||[]).find(c=>c.code===pick);
   const pickPx=row&&row.price!=null?+row.price:(day&&day.index_close!=null?+day.index_close:null);
+  const holdPx=snap&&snap.px!=null?+snap.px:null;
+  const holdCode=snap&&snap.code||'';
   const start=liveStart();
   const live=!!(day&&start);
   if(live){
-   const addon=liveAddon(base, snap&&snap.pnl!=null?snap.pnl:0, pickPx);
+   const addon=liveAddon(base, snap&&snap.pnl!=null?snap.pnl:0, holdPx);
    const d=addon.d;
-   return {live:true, base, d, total:Math.max(0,Math.min(10,base+d)), pnl:snap&&snap.pnl!=null?snap.pnl:0, need:addon.need, pick, pickPx, start};
+   return {live:true, base, d, total:Math.max(0,Math.min(10,base+d)), pnl:snap&&snap.pnl!=null?snap.pnl:0, need:addon.need, pick, pickPx, holdPx, holdCode, start};
   }
   const d=day&&day.leg_d!=null?+day.leg_d:0;
-  return {live:false, base, d, total:Math.max(0,Math.min(10,base+d)), pnl:day?day.d_pnl:null, need:day?day.d_next_yuan:null, pick, pickPx, start};
+  return {live:false, base, d, total:Math.max(0,Math.min(10,base+d)), pnl:day?day.d_pnl:null, need:day?day.d_next_yuan:null, pick, pickPx, holdPx:null, holdCode, start};
  }
  function diffSentence(pick, modelLots, pos){
   if(!pos||pos.lots==null) return '';
@@ -714,10 +734,47 @@ window.uiPanel=(()=>{
   const legD=shownModel.d;
   const total=shownModel.total;
   const dState=legD>0?'在场':'未在场';
-  const nextTxt=shownModel.need==null?(shownModel.live||day.leg_d!=null?'已达上限':'—'):wan2(shownModel.need);
-  const cSet=day.c_basis==null?'':('。贴水腿于 '+esc(day.c_set_on||'')+' 按当时新近月 '+esc(day.c_contract||'')+' 的 '+pct(day.c_basis)+' 定为 '+sgn(day.leg_c));
-  const trig=(day.triggers||[]).map(r=>'<tr><td>'+esc(r.cond)+'：'+esc(r.effect)+'</td></tr>').join('')
-   ||'<tr><td>这一天没有可列出的触发线。</td></tr>';
+  const nxt=(day.contracts||[]).find(c=>c.role==='next');
+  function aAt(px){
+   if(px<=5000) return 10;
+   if(px<=5250) return 8;
+   if(px<=5500) return 6;
+   if(px<=6000) return 4;
+   if(px<=6500) return 2;
+   return 0;
+  }
+  const grid=[6500,6000,5500,5250,5000];
+  const below=grid.filter(lv=>lv<day.index_close);
+  const above=grid.filter(lv=>lv>=day.index_close);
+  const aBits=[];
+  if(below.length){const lv=Math.max.apply(null,below); if(aAt(lv)!==+day.leg_a) aBits.push('跌破 '+lv+' → '+aAt(lv)+' 手');}
+  if(above.length){const lv=Math.min.apply(null,above); if(aAt(lv+1e-6)!==+day.leg_a) aBits.push('站上 '+lv+' → '+aAt(lv+1e-6)+' 手');}
+  const bTrig=!day.b_open&&day.trend_on_above!=null
+   ?('下一收盘站上 '+num(day.trend_on_above,2)+' → 2 手')
+   :(day.b_open&&day.trend_off_below!=null?('下一收盘跌破 '+num(day.trend_off_below,2)+' → 0'):'—');
+  const cState='当前来自 '+(day.c_set_on?esc(day.c_set_on):'—')+' '+(day.c_contract?esc(day.c_contract):'')+(day.c_basis==null?'':' '+pct(day.c_basis))
+   +'，下次判定 '+(day.next_roll?esc(day.next_roll):'—')
+   +(nxt&&nxt.basis!=null?'，今日 '+esc(nxt.code)+' 年化 '+pct(nxt.basis):'');
+  const dOrd=legD+1;
+  const dPrice=shownModel.live&&snap.px!=null?('按持仓 '+(snap.code?esc(snap.code):'')+' 最新价 '+num(snap.px,1)+' 的 12% 保证金'):(shownModel.live?'持仓最新价暂无':'回测估算');
+  const dTrig=(shownModel.live&&snap.px==null)?'持仓最新价暂无'
+   :(shownModel.need==null?'已达上限':('再赚 '+wan2(shownModel.need)+' 加第 '+dOrd+' 手，'+dPrice))
+   +' · 撤出线 '+num(day.ma_lower,2);
+  const dStateLine=shownModel.live
+   ?('自 '+(shownModel.start?esc(shownModel.start):'开仓日')+' 浮盈 '+wan2(shownModel.pnl)+'，'+dState)
+   :('回测累计 '+wan2(shownModel.pnl)+'，'+dState);
+  function card(name, lotsHtml, rule, state, next){
+   return '<article class="leg-card"><div class="nm">'+name+'</div><div class="lots">'+lotsHtml+'<small>手</small></div><div class="rule">'+rule+'</div><div class="st"><span class="k">现况 </span>'+state+'</div><div class="nx"><span class="k">触发 </span>'+next+'</div></article>';
+  }
+  const legRow='<div class="leg-row">'
+   +card('A 网格', esc(day.leg_a), '≤6500→2，≤6000→4，≤5500→6，≤5250→8，≤5000→10', '中证500收盘 '+num(day.index_close,3)+' → '+esc(day.leg_a)+' 手', aBits.join(' / ')||'—')
+   +card('B 趋势', esc(day.leg_b), '收盘&gt;MA250×1.01 加 2 手，&lt;MA250×0.99 撤', 'MA250 '+num(day.ma250,2)+'，上轨 '+num(day.ma_upper,2)+'，下轨 '+num(day.ma_lower,2)+'，趋势'+(day.b_open?'打开':'关闭'), bTrig)
+   +card('C 贴水', esc(cTile(day.leg_c)), '换月日看新近月年化贴水 ≥10% 加 2 手，&lt;3% 减 2 手，其余保持，每月判定一次', cState, (day.next_roll?esc(day.next_roll):'—')+' 判定')
+   +card('D 盈利加仓', esc(legD), '自 '+(liveStart()?esc(liveStart()):'开仓日')+' 账户盈利的 50% 够付 1 手 12% 保证金即加 1 手，最多 4 手，跌破 MA250×0.99 或底仓归零全撤', dStateLine, dTrig)
+   +'</div>';
+  const known={grid_down:1,grid_up:1,trend_on:1,trend_off:1,basis:1};
+  const extra=(day.triggers||[]).filter(r=>!known[r.kind]);
+  const extraHtml=extra.length?('<div class="sec"><h2>其余触发</h2></div><section class="panel"><div class="tbx"><table class="wrap-cells"><tbody>'+extra.map(r=>'<tr><td>'+esc(r.cond)+'：'+esc(r.effect)+'</td></tr>').join('')+'</tbody></table></div></section>'):'';
   const actualCode=snap.code;
   const cons=(day.contracts||[]).map(c=>{
    let status=String(c.status||'').replace(/持仓中\s*·\s*/g,'').replace(/持仓中/g,'').replace(/^\s*·\s*/,'').trim();
@@ -728,32 +785,14 @@ window.uiPanel=(()=>{
    const cls=(c.code===actualCode?'held':'')+(c.code===shownModel.pick&&c.code!==actualCode?' suggest':'');
    return '<tr class="'+cls+'"><td>'+esc(c.code)+'</td><td>'+esc(c.label)+'</td><td>'+num(c.price,1)+'</td><td>'+esc(c.expiry)+'</td><td>'+esc(c.days)+'</td><td>'+pct(c.basis)+'</td><td>'+esc(bits.join(' · ')||'—')+'</td></tr>';
   }).join('')||'<tr><td colspan="7">这一天没有挂牌合约。</td></tr>';
-  const pickFt=shownModel.pick?('新开仓 '+esc(shownModel.pick)+(day.entry_roll?' · 该合约 '+esc(day.entry_roll)+' 收盘强制换月':'')+'。这是模型要开的合约，不是账户持仓'):'这一天没有算出新开仓合约';
-  const dTitle=shownModel.live?'D 腿 · 自 '+esc(shownModel.start)+' 账户起':'D 腿 · 回测重放';
-  const dSide=shownModel.live?(dState+' · 不沿用回测累计'):'不是当前账户';
-  const dPnlFt=shownModel.live?('账户浮盈，自 '+esc(shownModel.start)+' 开仓起'):'回测自上次 D 撤出的指数点盈亏，不是这笔账户';
-  const dNextFt=shownModel.live?'50% 账户浮盈覆盖 1 手 12% 保证金（按建议合约收盘）':'回测口径：50% 指数点盈利覆盖 1 手 12% 保证金';
-  const dNote=shownModel.live
-    ?('D 从 '+esc(shownModel.start)+' 的账户浮盈起算，当前 '+wan2(shownModel.pnl)+'，不沿用回测累计。50% 够付 1 手保证金（按 12%）即加 1 手，最多 4 手，建议手数不超过 10。收盘跌破撤出线或底仓归零时，已经加上的 D 会全部撤出。')
-    :('上面是信号日 '+esc(day.date)+' 的回测重放，不是当前账户。当前账户自 '+esc(liveStart()||'开仓日')+' 起浮盈 '+wan2(snap.pnl)+'，实盘 D 按这笔浮盈另算。');
+  const pickFt=shownModel.pick?(esc(shownModel.pick)+(day.entry_roll?' · '+esc(day.entry_roll)+' 收盘强制换月':'')):'—';
   const latestModel=modelView(latest, snap);
   host.innerHTML=
-   '<section class="hero" aria-label="模型建议"><div class="hero-main"><div class="lb">模型建议 · 信号日 '+esc(day.date)+'</div><div class="vl">'+esc(total)+'<small>手</small></div><div class="ft">'+pickFt+'</div></div>'
-   +'<div class="hero-side"><div class="legs"><div class="leg"><span>A 网格</span><b>'+esc(day.leg_a)+'</b></div><div class="leg"><span>B 趋势</span><b>'+esc(sgn(day.leg_b))+'</b></div><div class="leg"><span>C 贴水</span><b>'+esc(cTile(day.leg_c))+'</b></div><div class="leg"><span>D 盈利</span><b>'+esc(legD)+'</b></div></div>'
-   +'<div class="ft">'+esc(abcdText(day, legD))+'</div></div></section>'
-   +'<div class="kpis signal-kpis"><div class="kpi"><div class="lb">中证500收盘</div><div class="vl">'+num(day.index_close,3)+'</div><div class="ft">信号日 '+esc(day.date)+' 收盘</div></div>'
-   +'<div class="kpi"><div class="lb">MA250</div><div class="vl">'+num(day.ma250,2)+'</div><div class="ft">上轨 '+num(day.ma_upper,2)+' · 下轨 '+num(day.ma_lower,2)+' · 趋势'+(day.b_open?'打开':'关闭')+'</div></div>'
-   +'<div class="kpi"><div class="lb">贴水腿定价</div><div class="vl">'+(day.next_roll?esc(day.next_roll):'—')+'</div><div class="ft">这一天重定贴水腿，不是账户换月'+cSet+'</div></div></div>'
-   +'<div class="sec"><h2>'+dTitle+'</h2><span class="side">'+dSide+'</span></div>'
-   +'<div class="kpis"><div class="kpi"><div class="lb">D 手数</div><div class="vl">'+esc(legD)+'<small>手</small></div><div class="ft">'+dState+'</div></div>'
-   +'<div class="kpi"><div class="lb">'+(shownModel.live?'自开仓日起浮盈':'回测累计盈亏')+'</div><div class="vl">'+wan2(shownModel.pnl)+'</div><div class="ft">'+dPnlFt+'</div></div>'
-   +'<div class="kpi"><div class="lb">下一手还需盈利</div><div class="vl">'+nextTxt+'</div><div class="ft">'+dNextFt+'</div></div>'
-   +'<div class="kpi"><div class="lb">撤出线</div><div class="vl">'+num(day.ma_lower,2)+'</div><div class="ft">信号日的 MA250×0.99，收盘跌破则已加的 D 全撤</div></div></div>'
-   +'<section class="panel"><div class="hold-note">'+dNote+'</div></section>'
+   '<section class="sum-row" aria-label="模型建议"><div><div class="lb">模型建议</div><div class="vl">'+esc(total)+'<small>手</small></div><div class="ft">按信号日 '+esc(day.date)+' 收盘</div></div>'
+   +'<div><div class="formula">'+esc(abcdText(day, legD))+'</div><div class="ft">建议合约 '+pickFt+'</div></div></section>'
+   +legRow
+   +extraHtml
    +holdingsBlock(latest, latestModel)
-   +'<div class="sec"><h2>下一交易日触发价</h2><span class="side">按信号日 '+esc(day.date)+' 收盘 · 趋势腿当前'+(day.b_open?'打开':'关闭')+'</span></div>'
-   +'<section class="panel"><div class="tbx"><table class="wrap-cells"><tbody>'+trig+'</tbody></table></div>'
-   +'<div class="foot">这些价位按信号日 '+esc(day.date)+' 的收盘计算，对应的是该信号日的下一交易日，不是账户里现在的合约。约 14:50 用实时价对照，14:57 前下单。若距某条线约 0.15% 以内，收盘后再核对一次。趋势价位已把下一交易日收盘滚入 MA250；只看信号日 MA250 则上轨 '+num(day.ma_upper,2)+'、下轨 '+num(day.ma_lower,2)+'。每行写明 A/B/C/D。这是用户自己的回测规则，不是投资建议。</div></section>'
    +'<div class="sec"><h2>IC 挂牌合约</h2><span class="side">信号日 '+esc(day.date)+' 收盘</span></div>'
    +'<section class="panel"><div class="tbx"><table><colgroup><col style="width:12%"><col style="width:10%"><col style="width:14%"><col style="width:16%"><col style="width:12%"><col style="width:14%"><col style="width:22%"></colgroup><thead><tr><th>合约</th><th>角色</th><th>收盘</th><th>到期</th><th>日历天</th><th>年化贴水</th><th>比较</th></tr></thead><tbody>'+cons+'</tbody></table></div>'
    +'<div class="foot">指数用新浪中证500收盘。期货用收盘价，并与中金所日行情「今收盘」核对；日行情未出时用 15:00 的最新价，不是结算价。1 点 = 200 元。年化贴水 = (指数 − 期货) / 指数 × 365 / 日历天数。「实际持仓」来自 data/holdings.json，「建议新开仓」是模型按新开仓规则选出的合约。</div></section>';
