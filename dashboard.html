@@ -2,7 +2,7 @@
 'use strict';
 const names=['index.html','margin.html','futures-preview.html','risk-preview.html'];
 const frames=Object.create(null),switchStats=[];let active='',desired='',clickStarted=0;
-const version='hover-20261118-2';
+const version='status-20261118-1';
 function mount(name){
  if(frames[name])return frames[name];
  const frame=document.createElement('iframe');frame.className='page-frame';frame.title='投资观察看板';frame.dataset.page=name;frame.setAttribute('aria-hidden','true');frame.inert=true;

@@ -272,6 +272,11 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 .ui-page .account-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ui-page .account-tools small{font-size:13px;color:var(--muted)}
 @media(min-width:700px){.ui-page .top .shell-head{grid-template-columns:minmax(0,1fr) auto}.ui-page .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.ui-page .kpis:has(>.kpi:nth-child(2):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:699px){.ui-page .kpi .ft,.ui-page .blk .s,.ui-page .foot{font-size:14px}.ui-page .crumb{font-size:13px}}
+/* Only market state and data freshness belong in the overview status. */
+.ui-page[data-ui-view="funds"] #st{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;flex-basis:100%;font-size:13px;line-height:22px}
+.ui-page[data-ui-view="funds"] #st>span{white-space:nowrap}
+.ui-page[data-ui-view="funds"] #st>span+span{border-left:1px solid #d8dfe8;padding-left:12px}
+.ui-page[data-ui-view="funds"] #st .market-state{color:var(--ink);font-weight:600}
 /* Compact tooltip rows; appended to body, not clipped by chart/card overflow. */
 .chart-hover-head{font-size:13px;font-weight:600;margin-bottom:6px;color:#1f2733}
 .chart-hover-row{display:flex;justify-content:space-between;align-items:baseline;gap:20px;line-height:24px;font-size:13px}
@@ -386,7 +391,38 @@ E.concat([["大额分钟成交额估算（近N日）","sum"]]).forEach((e,i)=>{c
 addEventListener("resize",()=>charts.forEach(c=>c&&c.resize()));
 const ema=(a,n)=>{const k=2/(n+1),o=[];a.forEach((v,i)=>o.push(i?v*k+o[i-1]*(1-k):v));return o};
 const bj=()=>new Date(Date.now()+(new Date().getTimezoneOffset()+480)*6e4);
-function trading(){const d=bj(),w=d.getDay(),m=d.getHours()*60+d.getMinutes();return w>0&&w<6&&((m>=570&&m<=690)||(m>=780&&m<=900))}
+/* Display calendar only; does not change any collector schedule or strategy.
+   SSE 2026 closures: http://www.sse.com.cn/disclosure/dealinstruc/closed/?eqid=98a0030c00041448000000066427c594 */
+const MARKET_HOLIDAYS_2026=[['01-01','01-03'],['02-15','02-23'],['04-04','04-06'],['05-01','05-05'],['06-19','06-21'],['09-25','09-27'],['10-01','10-07']];
+function marketState(now=bj()){
+ const year=now.getFullYear(),day=now.getDay(),md=String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'),minute=now.getHours()*60+now.getMinutes();
+ if(day===0||day===6)return '休市';
+ if(year!==2026)return '市场状态待确认';
+ if(MARKET_HOLIDAYS_2026.some(([start,end])=>md>=start&&md<=end))return '休市';
+ if(minute<555)return '未开盘';
+ if(minute<565)return '集合竞价';
+ if(minute<570)return '未开盘';
+ if(minute<690)return '交易中';
+ if(minute<780)return '休市（午休）';
+ if(minute<897)return '交易中';
+ if(minute<900)return '集合竞价';
+ return '休市（已收盘）';
+}
+function chartUpdatedText(updated,today){
+ const value=String(updated||''),match=value.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}(?::\d{2})?)/);
+ if(!match)return '图表更新时间未知';
+ return '图表更新 '+(match[1]===today?'':match[1]+' ')+match[2];
+}
+let chartStatusSnapshot=null;
+function renderMarketStatus(now=bj()){
+ const el=document.getElementById('st');if(!el||!chartStatusSnapshot)return;
+ const today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'),state=marketState(now),snap=chartStatusSnapshot;
+ const parts=[state];
+ if(snap.view==='live')parts.push(chartUpdatedText(snap.updated,today),'盘中约5分钟更新');
+ else parts.push('历史图表 '+snap.view,'不自动更新');
+ if(snap.failed)parts.push('本次更新失败');
+ el.innerHTML=parts.map((text,i)=>'<span'+(i===0?' class="market-state"':'')+'>'+uiEsc(text)+'</span>').join('');
+}
 async function j(u){return readJSON(u)}
 async function loadLive(){try{LIVE=await j("./data/live.json?t="+Date.now());LIVE.src="站点"}catch(e){LIVE=null;try{const ms=await Promise.all(E.map(x=>liveEtfTx(x[1])));LIVE={src:"腾讯直连",updated:bj().toLocaleString("zh-CN",{hour12:false}),etfs:Object.fromEntries(E.map((x,i)=>[x[1],ms[i]])),date:ms[0].date}}catch(e2){throw new Error("站点实时数据 live.json 读取失败（"+e.message+"），请稍后刷新")}}return LIVE}
 async function liveEtfTx(code){const raw=(await j("https://web.ifzq.gtimg.cn/appstock/app/minute/query?code="+code)).data[code];const d=raw.data;let pa=0;const t=[],p=[],a=[];
@@ -528,25 +564,27 @@ async function refresh(){
    o['合计']=count?+sum.toFixed(2):null;
    const ix=rows.findIndex(x=>x[0]===TODAY);if(ix>=0&&uiNumber(rows[ix][2])!=null){o['上证收盘']=+rows[ix][2];if(ix>0&&rows[ix-1][2]>0)o['上证涨跌幅']=+((rows[ix][2]/rows[ix-1][2]-1)*100).toFixed(2)}
    H[TODAY]={...H[TODAY],...o};fillSel();drawSum(rows,TODAY);table(TODAY);
-   const cuts=ms.filter(x=>x?.t?.length).map(x=>x.t[x.t.length-1]).sort();const bar=cuts[0]||'';const cut=bar?(bar.slice(0,2)+':'+bar.slice(2,4)):'';
    const localToday=bj().toISOString().slice(0,10);const stale=TODAY!==localToday;
    sel.options[0].textContent=stale?'最新快照 · '+TODAY:'最新行情 · '+TODAY;
-   st.textContent='快照 '+(LIVE.updated||'时间未知')+' · 行情日 '+TODAY+(cut?' · 最早截止 '+cut:'')+' · '+(trading()?'工作日交易时段（非节假日校验）':'非交易时段')+' · 云端约5分钟更新';
+   chartStatusSnapshot={view:'live',updated:LIVE.updated};renderMarketStatus();
    bn.style.display=stale||count<7?'block':'none';bn.textContent=(stale?'当前为最近可用行情，不是今天实时数据。 ':'')+(count<7?'仅 '+count+'/7 只有分时数据；合计为已观测部分，不代表七只完整总量。':'');
   }else{
    const d=requestView,h=H[d]||{};let m=null;try{m=await j('./data/minutes/'+d+'.json')}catch(e){}
    if(view!==requestView)return;
    E.forEach((e,i)=>{const x=m?.etfs?.[e[1]];x?drawEtf(i,x):noMin(i,h[e[0]])});
    bn.style.display=!m?'block':'none';bn.textContent=d+'：分时未存档，仅显示当日汇总，缺失曲线不补造。';
-   drawSum(Object.keys(H).sort().map(x=>[x,0,H[x]['上证收盘']]),d);table(d);st.textContent='查看存档 '+d+' · 历史日不提供未存档的方向和同时点指标';
+   drawSum(Object.keys(H).sort().map(x=>[x,0,H[x]['上证收盘']]),d);table(d);chartStatusSnapshot={view:d};renderMarketStatus();
   }
- }catch(e){st.textContent='刷新失败：'+e.message+'；保留上次结果，未更新成功';pageNotice('本次读取失败。日期选择将回到上次已显示日期，点击刷新重试。');sel.value=displayedView||'live';view=sel.value}
+ }catch(e){if(chartStatusSnapshot){chartStatusSnapshot.failed=true;renderMarketStatus()}else st.textContent=marketState()+' · 图表加载失败';pageNotice('本次读取失败。日期选择将回到上次已显示日期，点击刷新重试。');sel.value=displayedView||'live';view=sel.value}
  finally{if(requestView===view)displayedView=view;busy=false;rb.disabled=false;rb.textContent='刷新';document.getElementById('dashboard').setAttribute('aria-busy','false');if(refreshQueued){refreshQueued=false;refresh()}}
 }
 let displayedView='live';
 function onSel(){view=sel.value;const u=new URL(location.href);u.searchParams.set('date',view);history.replaceState(null,'',u);refresh()}
 sel.onchange=onSel;
 (async()=>{await loadHist();await loadBaseline();fillSel();const q=new URLSearchParams(location.search).get('date');if(q&&[...sel.options].some(o=>o.value===q)){sel.value=q;view=q}await refresh();setInterval(()=>{if(view==='live'&&!document.hidden)refresh()},60000)})();
+// State can change at lunch/close without a new market snapshot.
+setInterval(()=>{if(!document.hidden)renderMarketStatus()},15000);
+addEventListener('pageshow',()=>renderMarketStatus());document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderMarketStatus()});
 </script><script>
 /* ===== Unified dashboard dialogs and route continuity ===== */
 window.uiPanel=(()=>{
