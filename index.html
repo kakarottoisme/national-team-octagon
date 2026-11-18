@@ -272,17 +272,10 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 .ui-page .account-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ui-page .account-tools small{font-size:13px;color:var(--muted)}
 @media(min-width:700px){.ui-page .top .shell-head{grid-template-columns:minmax(0,1fr) auto}.ui-page .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.ui-page .kpis:has(>.kpi:nth-child(2):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:699px){.ui-page .kpi .ft,.ui-page .blk .s,.ui-page .foot{font-size:14px}.ui-page .crumb{font-size:13px}}
-/* Point readout lives outside the plotting rectangle: never cover curves. */
-.ui-page .point-readout{container-type:inline-size;margin:0 14px 12px;padding-top:8px;border-top:1px solid var(--line-2);min-width:0;font-size:13px;line-height:20px;color:var(--muted)}
-.ui-page .point-readout-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;font-variant-numeric:tabular-nums}
-.ui-page .point-readout-head time{color:var(--ink);font-weight:600}
-.ui-page .point-readout-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px}
-.ui-page .point-readout-value{display:flex;align-items:baseline;justify-content:space-between;gap:6px;min-width:0}
-.ui-page .point-readout-value span{overflow-wrap:anywhere;min-width:0}
-.ui-page .point-readout-value b{font-weight:500;white-space:nowrap;color:var(--ink-2);font-variant-numeric:tabular-nums}
-.ui-page .point-readout[hidden]{display:none}
-@container(max-width:280px){.ui-page .point-readout-values{grid-template-columns:1fr}}
-@media(max-width:699px){.ui-page .point-readout{font-size:14px;line-height:22px}.ui-page .point-readout-values{gap:4px 10px}}
+/* Compact tooltip rows; appended to body, not clipped by chart/card overflow. */
+.chart-hover-head{font-size:13px;font-weight:600;margin-bottom:6px;color:#1f2733}
+.chart-hover-row{display:flex;justify-content:space-between;align-items:baseline;gap:20px;line-height:24px;font-size:13px}
+.chart-hover-row span{color:#606c7c}.chart-hover-row b{font-weight:500;color:#1f2733;font-variant-numeric:tabular-nums}
 </style></head><body data-ui-version="3" class="ui-page" data-ui-view="funds">
 <!-- ===== 顶栏 ===== -->
 <header class="top"><div class="wrap shell-head"><div class="brand"><span class="mark" aria-hidden="true"><img src="favicon.svg?v=ui-2" width="38" height="38" alt=""></span><div class="brand-copy"><h1>资金观察</h1><div class="crumb" title="宽基 ETF · 盘中活跃度与主动买卖方向">宽基 ETF · 盘中活跃度与主动买卖方向</div></div></div><div class="ctl">
@@ -362,24 +355,32 @@ const KEY="nt-octagon-history";
 const COL=["#2f4f75","#43668f","#5b7ea6","#7695ba","#93acca","#b1c4da","#cfdbe8"];
 const V={axis:"#9aa1ab",grid:"#f0f1f4",base:"#e1e4e9",line:"#334155",zero:"#c9ced6",
  barHi:"#3d6a9e",barLo:"#e3e6eb",thr:"#9fb4cc",macP:"#c3cad3",macN:"#e1e4e9",dif:"#8c949f",dea:"#c3cad3",sse:"#334155"};
-/* Same-point readout: one timestamp for all linked grids, no floating panel. */
+/* Compact floating readout: one timestamp, allowed outside the chart/card. */
+const INDEX_CODES=['sh000016','sh000300','sh000510','sh000905','sh000852','sz399006','sh000688'];
 function pointIndex(value,times){if(typeof value==='string'){const found=times.indexOf(value);if(found>=0)return found}return Number.isInteger(value)&&value>=0&&value<times.length?value:null}
 function pointNumber(value,digits,suffix=''){const v=uiNumber(value);return v==null?'—':v.toFixed(digits)+suffix}
-function bindPointReadout(chart,times,fields){
- const plot=chart.getDom();let box=plot.parentElement.querySelector('.point-readout');
- if(!box){box=document.createElement('div');box.className='point-readout';box.setAttribute('role','group');plot.parentElement.append(box)}
- box.hidden=!times.length;box.innerHTML='<div class="point-readout-head"><time></time><span></span></div><div class="point-readout-values">'+fields.map(f=>'<div class="point-readout-value"><span>'+uiEsc(f.name)+'</span><b>—</b></div>').join('')+'</div>';
- const time=box.querySelector('time'),state=box.querySelector('.point-readout-head>span'),values=[...box.querySelectorAll('b')];let current=null,hover=false;
- function show(index,selected=false){if(index==null||index<0||index>=times.length)return;if(current===index&&hover===selected)return;current=index;hover=selected;time.textContent=times[index];state.textContent=selected?'所选时点':'最新时点';fields.forEach((f,k)=>values[k].textContent=f.format(f.data[index]));box.setAttribute('aria-label',times[index]+' '+fields.map((f,k)=>f.name+' '+values[k].textContent).join('，'))}
- const latest=()=>show(times.length-1);latest();
- chart.off('updateAxisPointer');chart.on('updateAxisPointer',event=>{for(const axis of event.axesInfo||[]){if(axis.axisDim!=='x')continue;const index=pointIndex(axis.value,times);if(index!=null){show(index,true);break}}});
- const zr=chart.getZr();if(plot._readoutLeave)zr.off('globalout',plot._readoutLeave);plot._readoutLeave=latest;zr.on('globalout',latest);
- plot.tabIndex=0;plot.setAttribute('aria-describedby',box.id||(box.id='readout-'+plot.id));plot.dataset.pointReadout='true';
- plot.onkeydown=event=>{if(!['ArrowLeft','ArrowRight','Home','End','Escape'].includes(event.key))return;event.preventDefault();if(event.key==='Escape'){latest();chart.dispatchAction({type:'hideTip'});return}const index=event.key==='Home'?0:event.key==='End'?times.length-1:Math.max(0,Math.min(times.length-1,(current??times.length-1)+(event.key==='ArrowLeft'?-1:1)));show(index,true);chart.dispatchAction({type:'showTip',seriesIndex:0,dataIndex:index})};
- plot.onblur=latest;
+function matchedIndexValues(i,m,times){const source=(view==='live'?LIVE?.index_minutes:m.index_minutes)?.[INDEX_CODES[i]];if(!source||String(source.date).replace(/-/g,'')!==String(m.date||LIVE?.date||'').replace(/-/g,''))return times.map(()=>null);const byTime=new Map((source.t||[]).map((t,k)=>[String(t).replace(/\D/g,''),uiNumber(source.p?.[k])]));return times.map(t=>byTime.get(t.replace(/\D/g,''))??null)}
+function hoverPosition(plot,point,size){
+ const r=plot.getBoundingClientRect(),width=size.contentSize[0],height=size.contentSize[1],gap=14,pad=8;
+ const vw=document.documentElement.clientWidth||innerWidth,vh=innerHeight,px=r.left+point[0],py=r.top+point[1];
+ // Prefer the outside edge of the chart, opposite the pointer. Fallback above/below.
+ let x=point[0]<r.width/2?r.right+gap:r.left-width-gap,y=py-height/2;
+ if(x<pad||x+width>vw-pad){const other=point[0]<r.width/2?r.left-width-gap:r.right+gap;if(other>=pad&&other+width<=vw-pad)x=other;else{x=Math.max(pad,Math.min(px-width/2,vw-width-pad));y=r.top-height-gap;if(y<pad)y=r.bottom+gap;if(y+height>vh-pad)y=py+gap;if(y+height>vh-pad)y=py-height-gap}}
+ x=Math.max(pad,Math.min(x,vw-width-pad));y=Math.max(pad,Math.min(y,vh-height-pad));
+ return [x-r.left,y-r.top];
 }
-const POINT_TIP={trigger:'axis',triggerOn:'mousemove|click',showContent:false,axisPointer:{type:'line',snap:true,lineStyle:{color:'#c3cad3',width:1}}};
-/* End same-point readout. */
+function compactHover(chart,times,fields){
+ const plot=chart.getDom();let selected=times.length-1;
+ plot.tabIndex=0;plot.dataset.compactHover='true';
+ plot.onkeydown=event=>{if(!['ArrowLeft','ArrowRight','Home','End','Escape'].includes(event.key))return;event.preventDefault();if(event.key==='Escape'){chart.dispatchAction({type:'hideTip'});return}selected=event.key==='Home'?0:event.key==='End'?times.length-1:Math.max(0,Math.min(times.length-1,selected+(event.key==='ArrowLeft'?-1:1)));chart.dispatchAction({type:'showTip',seriesIndex:0,dataIndex:selected})};
+ plot.onblur=()=>chart.dispatchAction({type:'hideTip'});
+ return {trigger:'axis',triggerOn:'mousemove|click',renderMode:'html',appendToBody:true,confine:false,enterable:false,transitionDuration:0,hideDelay:60,
+  backgroundColor:'#fff',borderColor:'#e0e5ed',borderWidth:1,padding:[9,12],textStyle:{fontFamily:'PingFang SC,Microsoft YaHei,system-ui,sans-serif',fontSize:13,color:'#1f2733'},extraCssText:'z-index:70;pointer-events:none;border-radius:9px;box-shadow:0 5px 20px rgba(31,39,51,.12);max-width:calc(100vw - 16px);',axisPointer:{type:'line',snap:true,lineStyle:{color:'#aebbc9',width:1}},
+  position:(point,params,dom,rect,size)=>hoverPosition(plot,point,size),
+  formatter:params=>{const p=Array.isArray(params)?params[0]:params;const index=pointIndex(p?.dataIndex,times);if(index==null)return '';selected=index;return '<div class="chart-hover-head">'+uiEsc(times[index])+'</div>'+fields.map(f=>'<div class="chart-hover-row"><span>'+uiEsc(f.name)+'</span><b>'+uiEsc(f.format(f.data[index]))+'</b></div>').join('')}
+ };
+}
+/* End compact floating readout. */
 const g=document.getElementById("g"),charts=[],sel=document.getElementById("ds");let H={},view="live",busy=false,SSEK=null,LIVE=null;
 E.concat([["大额分钟成交额估算（近N日）","sum"]]).forEach((e,i)=>{const isSum=e[1]=="sum";g.insertAdjacentHTML("beforeend",'<div class="c'+(isSum?' sum':'')+'"><div class="t" id="t'+i+'"><span class="nm">'+e[0]+'</span>'+(isSum?'<span class="cd">每日成交额与上证背景（上下图）</span>':'<span class="cd">'+e[1].slice(2)+'</span>')+'</div><div class="ch" id="c'+i+'"></div>'+(isSum?'':'<div class="lg"><span><i style="background:#334155"></i>涨跌幅</span><span><i style="background:#3d6a9e"></i>分钟成交额 &gt; 1 亿</span><span><i style="background:#c3cad3"></i>MACD</span></div>')+'<div class="na" id="n'+i+'" style="display:none"></div></div>');charts.push(window.echarts?echarts.init(document.getElementById("c"+i)):null)});
 addEventListener("resize",()=>charts.forEach(c=>c&&c.resize()));
@@ -429,7 +430,8 @@ function drawEtf(i,m){const [n,code]=E[i];if(!m||!Array.isArray(m.t)||!Array.isA
  const ax=k=>({type:"category",data:t,gridIndex:k,axisLabel:{show:k==2,fontSize:10,color:V.axis,margin:6,hideOverlap:true},axisTick:{show:false},axisLine:{show:k==2,lineStyle:{color:V.base}}});
  const ya=(k,extra)=>Object.assign({gridIndex:k,splitNumber:2,splitLine:{show:false},axisLabel:{fontSize:10,color:V.axis},axisLine:{show:false},axisTick:{show:false}},extra);
  if(!charts[i]){document.getElementById("n"+i).style.display="flex";document.getElementById("n"+i).textContent="图表组件未加载";return est}
- charts[i].setOption({backgroundColor:"transparent",animation:false,tooltip:POINT_TIP,axisPointer:{link:[{xAxisIndex:"all"}]},
+ const tooltip=compactHover(charts[i],t,[{name:n+'指数',data:matchedIndexValues(i,m,t),format:v=>pointNumber(v,2,' 点')},{name:'ETF价格',data:p,format:v=>pointNumber(v,3)},{name:'ETF涨跌幅',data:pct,format:v=>pointNumber(v,2,'%')},{name:'分钟成交额',data:a,format:v=>pointNumber(v,4,' 亿')}]);
+ charts[i].setOption({backgroundColor:"transparent",animation:false,tooltip,axisPointer:{link:[{xAxisIndex:"all"}]},
   grid:[{top:6,height:"52%",left:44,right:8},{top:"62%",height:"16%",left:44,right:8},{top:"82%",height:"9%",left:44,right:8}],
   xAxis:[ax(0),ax(1),ax(2)],yAxis:[
    ya(0,{scale:true,splitNumber:3,splitLine:{lineStyle:{color:V.grid}},axisLabel:{fontSize:10,color:V.axis,showMinLabel:false,formatter:v=>v.toFixed(2)+"%"}}),
@@ -443,19 +445,19 @@ function drawEtf(i,m){const [n,code]=E[i];if(!m||!Array.isArray(m.t)||!Array.isA
   {name:"DIF",type:"line",xAxisIndex:2,yAxisIndex:2,data:dif.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:V.dif,width:1}},
   {name:"DEA",type:"line",xAxisIndex:2,yAxisIndex:2,data:dea.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:V.dea,width:1}},
   {name:"价格",type:"line",data:p,showSymbol:false,lineStyle:{width:0},itemStyle:{opacity:0},tooltip:{valueFormatter:v=>v}}]},true);
- bindPointReadout(charts[i],t,[{name:'价格',data:p,format:v=>pointNumber(v,3)},{name:'涨跌幅',data:pct,format:v=>pointNumber(v,2,'%')},{name:'分钟成交额',data:a,format:v=>pointNumber(v,4,' 亿')},{name:'MACD',data:mac,format:v=>pointNumber(v,5)},{name:'DIF',data:dif,format:v=>pointNumber(v,5)},{name:'DEA',data:dea,format:v=>pointNumber(v,5)}]);return est}
-function noMin(i,est){const [n,code]=E[i];if(charts[i])charts[i].clear();const readout=document.getElementById('c'+i).parentElement.querySelector('.point-readout');if(readout)readout.hidden=true;document.getElementById("t"+i).innerHTML=head(n,code.slice(2),est!=null?est:null,null,null,null);const x=document.getElementById("n"+i);x.style.display="flex";x.textContent="该日分时未存档，仅显示汇总"}
+ return est}
+function noMin(i,est){const [n,code]=E[i];if(charts[i])charts[i].clear();document.getElementById("t"+i).innerHTML=head(n,code.slice(2),est!=null?est:null,null,null,null);const x=document.getElementById("n"+i);x.style.display="flex";x.textContent="该日分时未存档，仅显示汇总"}
 async function sseRows(){if(view=="live"&&LIVE&&LIVE.sse){SSEK=LIVE.sse;return SSEK}if(!SSEK||view=="live"){const k=(await j("https://proxy.finance.qq.com/ifzqgtimg/appstock/app/newfqkline/get?param=sh000001,day,,,60,qfq")).data.sh000001;SSEK=(k.day||k.qfqday)}return SSEK}
 function drawSum(rows,cur){
  const ds=Object.keys(H).sort(),tot=H[cur]?.['合计'];
  document.getElementById('t7').innerHTML='<span class="nm">每日大额分钟成交额</span><span class="cd">上下图日期一致；上证指数仅作背景</span><div class="es"><span class="k">'+uiEsc(cur)+' 合计</span><span class="v">'+(tot!=null?(+tot).toFixed(2):'—')+'</span><span class="u">亿</span></div>';
  if(!charts[7])return;
  const ax=gridIndex=>({type:'category',gridIndex,data:ds,axisLabel:{fontSize:12,color:V.axis,hideOverlap:true},axisTick:{show:false}});
- charts[7].setOption({animation:false,tooltip:POINT_TIP,axisPointer:{link:[{xAxisIndex:'all'}]},legend:{type:'scroll',top:2,left:4,right:4,textStyle:{fontSize:12,color:'#606c7c'}},
+ const tooltip=compactHover(charts[7],ds,[{name:'合计',data:ds.map(d=>H[d]?.['合计']),format:v=>pointNumber(v,2,' 亿')},...E.map(e=>({name:e[0],data:ds.map(d=>H[d]?.[e[0]]),format:v=>pointNumber(v,2,' 亿')})),{name:'上证指数',data:ds.map(d=>H[d]?.['上证收盘']),format:v=>pointNumber(v,2,' 点')}]);
+ charts[7].setOption({animation:false,tooltip,axisPointer:{link:[{xAxisIndex:'all'}]},legend:{type:'scroll',top:2,left:4,right:4,textStyle:{fontSize:12,color:'#606c7c'}},
  grid:[{left:52,right:16,top:52,height:'30%'},{left:52,right:16,top:'61%',bottom:30}],
  xAxis:[{...ax(0),axisLabel:{show:false}},ax(1)],yAxis:[{type:'value',gridIndex:0,min:0,name:'亿',axisLabel:{fontSize:12},splitLine:{lineStyle:{color:V.grid}}},{type:'value',gridIndex:1,scale:true,name:'指数点位',axisLabel:{fontSize:12},splitLine:{lineStyle:{color:V.grid}}}],
  series:E.map((e,i)=>({name:e[0],type:'bar',stack:'r',barMaxWidth:18,itemStyle:{color:COL[i]},data:ds.map(d=>uiNumber(H[d]?.[e[0]]))})).concat([{name:'上证指数',type:'line',xAxisIndex:1,yAxisIndex:1,showSymbol:false,connectNulls:false,lineStyle:{color:V.sse,width:1.5},data:ds.map(d=>uiNumber(H[d]?.['上证收盘']))}])},true);
- bindPointReadout(charts[7],ds,[{name:'合计',data:ds.map(d=>H[d]?.['合计']),format:v=>pointNumber(v,2,' 亿')},...E.map(e=>({name:e[0],data:ds.map(d=>H[d]?.[e[0]]),format:v=>pointNumber(v,2,' 亿')})),{name:'上证指数',data:ds.map(d=>H[d]?.['上证收盘']),format:v=>pointNumber(v,2)}]);
  charts[7].off('click');charts[7].on('click',event=>{if(ds[event.dataIndex]){sel.value=ds[event.dataIndex]===TODAY?'live':ds[event.dataIndex];onSel()}})
 }
 /* 概览指标：只读取已在 H 中的数字，不另取数据 */
@@ -592,7 +594,7 @@ window.uiPanel=(()=>{
 const main=document.querySelector('main');main.id=main.id||'mainContent';main.tabIndex=-1;
 const skip=document.createElement('a');skip.href='#'+main.id;skip.className='skip-link';skip.textContent='跳到主要内容';document.body.prepend(skip);
 const status=document.getElementById('st');if(status){status.setAttribute('role','status');status.setAttribute('aria-live','polite')}
-function update(){syncPressed();document.querySelectorAll('.tbx').forEach(el=>{el.tabIndex=0;el.setAttribute('role','region');el.setAttribute('aria-label','数据明细，可横向滚动');if(!el.previousElementSibling?.classList.contains('scroll-hint')){const hint=document.createElement('div');hint.className='scroll-hint';hint.textContent='左右滑动查看全部列';el.before(hint)}});document.querySelectorAll('.ch').forEach(el=>{el.setAttribute('role',el.dataset.pointReadout?'group':'img');el.setAttribute('aria-label',el.dataset.pointReadout?'数据走势图；左右方向键选择时点，Home和End跳转首尾，Escape返回最新':'数据走势图；精确值请使用日期选择与明细')})}
+function update(){syncPressed();document.querySelectorAll('.tbx').forEach(el=>{el.tabIndex=0;el.setAttribute('role','region');el.setAttribute('aria-label','数据明细，可横向滚动');if(!el.previousElementSibling?.classList.contains('scroll-hint')){const hint=document.createElement('div');hint.className='scroll-hint';hint.textContent='左右滑动查看全部列';el.before(hint)}});document.querySelectorAll('.ch').forEach(el=>{el.setAttribute('role',el.dataset.compactHover?'group':'img');el.setAttribute('aria-label',el.dataset.compactHover?'数据走势图；左右方向键选择时点，Home和End跳转首尾，Escape关闭悬浮':'数据走势图；精确值请使用日期选择与明细')})}
 const observedCharts=new WeakSet();const chartResize=new ResizeObserver(entries=>{for(const {target} of entries){const c=window.echarts?.getInstanceByDom(target);if(c&&target.clientWidth>0)requestAnimationFrame(()=>c.resize({width:target.clientWidth,height:target.clientHeight}));}});
 function observeCharts(){document.querySelectorAll('.ch,#curveN,#curveR,.spark-card>div:last-child').forEach(el=>{if(!observedCharts.has(el)){observedCharts.add(el);chartResize.observe(el)}})}
 update();observeCharts();new MutationObserver(()=>{update();observeCharts()}).observe(main,{childList:true,subtree:true});

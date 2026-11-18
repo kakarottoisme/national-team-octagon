@@ -76,8 +76,11 @@ def build_payload(fetch=None, now=None):
             "estimates": estimates, "sse": sse, "turnover": overview}
 
 
-def main(output=None, fetch=None, now=None):
+def main(output=None, fetch=None, now=None, include_indices=True):
     payload = build_payload(fetch=fetch, now=now)
+    if include_indices:
+        from index_quotes import fetch_index_minutes
+        payload["index_minutes"] = fetch_index_minutes(payload["date"], fetch=fetch)
     write_json_atomic(output or ROOT / "data" / "live.json", payload, ensure_ascii=False, separators=(",", ":"))
     print(payload["updated"], payload["date"], payload["estimates"])
     return 0

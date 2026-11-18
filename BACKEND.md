@@ -6,6 +6,7 @@
 ### 资金观察
 `index.html` 读 `data/live.json`、`data/history.json`、`data/minutes/YYYY-MM-DD.json`，以及 `preview-data/turnover-baseline.json` / `turnover-history.json`。ETF 列表固定为上证50、沪深300、中证A500、中证500、中证1000、创业板、科创50。
 - `fetch_live.py`：腾讯七 ETF 分时和上证日线；腾讯上证失败时东财兜底；只生成 live
+- `index_quotes.py`：仅供悬浮展示的七个对应指数分时。`fetch_live.main` 可选附加 `index_minutes`，8秒超时并行、单源失败不阻断ETF。既有 `build_payload` 和策略输入不变；前端严格同日同分钟匹配，历史缺档显示“—”，不反推指数
 - `archive.py`：收盘后抓取当天分时，追加 history 并写当天 minutes；不能补抓错过日期的腾讯分时
 - `preview-tools/turnover_baseline.py`：20 完整交易日、48 个同时点均值，供盘中成交额比较
 - `preview-tools/turnover_history.py`：新浪60分钟K按日累加、配合本地 live 进行一致性检查
@@ -28,7 +29,7 @@
 ## 本轮整理后的模块
 - `backend_common.py`：ETF 常量、分时累计额差分、方向估算及旧日期转换；纯函数，无抓取与写入
 - `backend_io.py`：原子文本/JSON 替换，先序列化，再写同目录临时文件、flush/fsync、rename；异常不覆盖旧文件，清理临时文件
-- `fetch_live.py`：`build_payload(fetch=None, now=None)` 构建；`main(output=None, fetch=None, now=None)` 写入
+- `fetch_live.py`：`build_payload(fetch=None, now=None)` 构建；`main(output=None, fetch=None, now=None, include_indices=True)` 写入，可选附加指数分时；关闭附加时保留原字节输出
 - `archive.py`：`build_archive(fetch=None)` 构建；`main(data_dir=None, fetch=None)` 更新归档
 - `margin.py` / `ic_strategy.py`：数值逻辑保留，只复用完整文件写入
 - preview 模块未迁包、未统一请求策略；`futures_history` 只关闭读取句柄，保持 published 才写的语义
