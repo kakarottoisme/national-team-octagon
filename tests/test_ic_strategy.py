@@ -252,6 +252,10 @@ class TestPageCopy(unittest.TestCase):
         self.assertEqual(pos["lots"], 4)
         self.assertEqual(pos["entry_price"], 6126)
         self.assertEqual(pos["entry_date"], "2026-11-18")
+        self.assertEqual(pos["last_price"], 6194)
+        self.assertEqual(pos["last_date"], "2026-11-18")
+        self.assertEqual(pos["last_price_kind"], "收盘")
+        self.assertNotEqual(pos["last_price"], pos["entry_price"])
         self.assertEqual(holdings["d_live_start"], "2026-11-17")
         self.assertEqual(holdings["d_realized_net_pnl"], -64000)
         roll = holdings["rolls"][0]

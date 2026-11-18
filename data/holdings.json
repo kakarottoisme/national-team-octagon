@@ -13,10 +13,10 @@
       "entry_price": 6126,
       "entry_price_kind": "成交均价",
       "entry_source": "2026-11-18 盘中开仓成交均价 6126，用户记录。",
-      "last_price": 6126,
+      "last_price": 6194,
       "last_date": "2026-11-18",
-      "last_price_kind": "成交均价",
-      "last_source": "与开仓均价同一笔，尚无更晚收盘"
+      "last_price_kind": "收盘",
+      "last_source": "中金所日行情 20261118_1.csv 今收盘 6194；新浪日K字段 c 与 nf_IC2612 2026-11-18 15:00:00 最新价同为 6194.0。今结算为 6201.2，页面用收盘。"
     }
   ],
   "rolls": [
