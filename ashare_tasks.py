@@ -58,7 +58,7 @@ def commit_files(paths, title):
                 raise ValueError('推送失败，保留本地提交；禁止空提交或强推')
             git('fetch','origin','main')
             try:
-                git('rebase','origin/main')
+                git('-c','user.name=A-share Data Assistant','-c','user.email=ashare-assistant@users.noreply.github.com','rebase','origin/main')
             except subprocess.CalledProcessError:
                 with contextlib.suppress(subprocess.CalledProcessError):
                     git('rebase','--abort')
