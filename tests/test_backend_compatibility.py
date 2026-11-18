@@ -49,7 +49,7 @@ class TestLegacyOutputs(unittest.TestCase):
                     (data / "history.json").write_text(json.dumps({"2026-11-14": {"合计": 7.0}}))
                     with contextlib.redirect_stdout(io.StringIO()):
                         if script == "fetch_live.py":
-                            fetch_live.main(data / "live.json", fetch=fixture_fetch(case), now=now)
+                            fetch_live.main(data / "live.json", fetch=fixture_fetch(case), now=now, include_indices=False)
                         else:
                             archive.main(data, fetch=fixture_fetch(case))
                     for path, legacy in expected.items():
