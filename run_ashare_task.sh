@@ -24,6 +24,6 @@ PYTHON=python3
 if [[ "$TASK" == margin ]]; then
   python3 -m venv "$STATE/margin-env"
   PYTHON="$STATE/margin-env/bin/python"
-  "$PYTHON" -c 'import akshare,pandas' 2>/dev/null || "$PYTHON" -m pip install --quiet 'akshare>=1.17,<2' pandas
+  "$PYTHON" -c 'import akshare,pandas; assert akshare.__version__ == "1.18.97"' 2>/dev/null || "$PYTHON" -m pip install --quiet 'akshare==1.18.97' pandas
 fi
 "$PYTHON" "$RUN/repo/ashare_tasks.py" "$TASK" --state-dir "$STATE"

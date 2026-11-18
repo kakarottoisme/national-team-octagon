@@ -216,12 +216,25 @@ def margin(now, state):
     import margin as producer
     path=ROOT/'data/margin_balance.json'
     old=json.loads(path.read_text())
+    old_latest=max(old.get('margin',{}),default='')
     with contextlib.redirect_stdout(io.StringIO()):
-        rows=producer.margin()
+        # Macro feeds can lag for weeks. Retain stored history, supplement the
+        # recent SSE dates with same-date SZSE official values (亿元).
+        rows=dict(old.get('margin',{}))
+        start=(dt.date.fromisoformat(old_latest)-dt.timedelta(days=7)).strftime('%Y%m%d') if old_latest else (now.date()-dt.timedelta(days=14)).strftime('%Y%m%d')
+        recent=producer.ak.stock_margin_sse(start_date=start,end_date=now.strftime('%Y%m%d'))
+        for record in recent.to_dict('records'):
+            day=dt.datetime.strptime(str(record['信用交易日期']),'%Y%m%d').date().isoformat()
+            if day <= old_latest or day > now.date().isoformat():
+                continue
+            sz=producer.ak.stock_margin_szse(date=day.replace('-',''))
+            if sz is None or len(sz)==0:
+                continue
+            rows[day]=round(number(record['融资融券余额'])/1e8+number(sz['融资融券余额'].iloc[0]),2)
+    rows=dict(sorted(rows.items()))
     if not rows:
         raise ValueError('沪深两融余额来源为空')
     latest=max(rows)
-    old_latest=max(old.get('margin',{}),default='')
     if latest<=old_latest:
         return {'notify':False,'reason':'交易所尚无更新交易日'}
     if latest>now.date().isoformat() or not is_trading_day(dt.date.fromisoformat(latest)):

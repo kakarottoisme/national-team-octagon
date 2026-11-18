@@ -43,7 +43,8 @@ class AutomationTests(unittest.TestCase):
         with self.assertRaises(ValueError): a.quotes(text.replace('14:43:50','14:00:00'),now,['IC2612'])
     def test_old_margin_silent_before_indices(self):
         import types
-        fake=types.SimpleNamespace(margin=lambda:{'2026-11-17':100},IDX={})
+        empty=types.SimpleNamespace(to_dict=lambda orient:[])
+        fake=types.SimpleNamespace(margin=lambda:{'2026-11-17':100},IDX={},ak=types.SimpleNamespace(stock_margin_sse=lambda **kw:empty))
         with tempfile.TemporaryDirectory() as t:
             root=Path(t);(root/'data').mkdir();(root/'data/margin_balance.json').write_text(json.dumps({'margin':{'2026-11-17':100}}))
             with patch.object(a,'ROOT',root),patch.dict(sys.modules,{'margin':fake}),patch.object(a,'commit_files') as push:
