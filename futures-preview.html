@@ -618,6 +618,11 @@ function validateLocalAccount(h){
   if(d<cap&&unit>0) need=Math.max(0,(d+1)*unit/0.5-(+accountPnl));
   return {d, need};
  }
+ function marketLast(pos){
+  const kind=String(pos.last_price_kind||'');
+  if((kind!=='收盘'&&kind!=='结算')||pos.last_price==null||pos.last_price==='') return null;
+  return {px:+pos.last_price, date:pos.last_date||'', kind};
+ }
  function accountSnap(signalDay){
   const pos=pos0();
   const code=pos.contract||'';
@@ -629,7 +634,8 @@ function validateLocalAccount(h){
    const row=(signalDay.contracts||[]).find(c=>c.code===code);
    if(row&&row.price!=null&&(!pos.entry_date||signalDay.date>=pos.entry_date)){px=+row.price;pxDate=signalDay.date;pxVia='signal';}
   }
-  if(px==null&&pos.last_price!=null&&pos.last_price!==''){px=+pos.last_price;pxDate=pos.last_date||pos.entry_date||'';pxVia='quote';}
+  const quote=marketLast(pos);
+  if(px==null&&quote){px=quote.px;pxDate=quote.date;pxVia='quote';}
   let pnl=null;
   if(entry!=null&&px!=null&&lots!=null)pnl=(dir==='空'?-1:1)*lots*(px-entry)*200;
   return {pos,code,lots,dir,entry,px,pxDate,pxVia,pnl};
@@ -681,7 +687,8 @@ function validateLocalAccount(h){
    const row=(latest.contracts||[]).find(c=>c.code===code);
    if(row&&row.price!=null&&(!pos.entry_date||latest.date>=pos.entry_date)){px=+row.price;pxDate=latest.date;pxVia='signal';}
   }
-  if(px==null&&pos.last_price!=null&&pos.last_price!==''){px=+pos.last_price;pxDate=pos.last_date||pos.entry_date||'';pxVia='quote';}
+  const quote=marketLast(pos);
+  if(px==null&&quote){px=quote.px;pxDate=quote.date;pxVia='quote';}
   let pnl=null;
   if(entry!=null&&px!=null&&lots!=null)pnl=(dir==='空'?-1:1)*lots*(px-entry)*200;
   const equity=HOLD.balance_kind==='equity'?bal:HOLD.balance_kind==='cash_excludes_pnl'&&bal!=null&&pnl!=null?bal+pnl:null;
@@ -703,11 +710,11 @@ function validateLocalAccount(h){
    if(meta.basis!=null) life+=' · 年化贴水 '+pct(meta.basis)+(latest&&latest.date&&pos.entry_date&&latest.date<pos.entry_date?'（信号 '+esc(latest.date)+'）':'');
   }
   const src='';const multi=Array.isArray(HOLD.positions)&&HOLD.positions.length>1?'配置含多笔持仓，当前仅展示首笔；本页不支持完整多笔汇总。 ':'';
-  const pxKind=pos.last_price_kind||(pxVia==='signal'?'信号合约收盘':'最新价');
-  const pxFt=px==null?'信号里还没有不早于开仓日的收盘':(esc(pxDate)+' · '+esc(pxKind));
+  const pxKind=pxVia==='signal'?'信号合约收盘':(pos.last_price_kind||'收盘');
+  const pxFt=px==null?'暂无':(esc(pxDate)+' · '+esc(pxKind));
   const entryKind=pos.entry_price_kind||'收盘';
   const rollNote=(HOLD.rolls||[]).map(r=>'已实现 '+esc(r.date)+' 平 '+esc(r.from)+' '+esc(r.lots)+' 手 @ '+num(r.close_price,1)+'，开 '+esc(r.to)+' @ '+num(r.open_price,1)+'，盈亏 '+(r.realized_pnl<0?'−':'')+num(Math.abs(r.realized_pnl),0)+' 元。').join('');
-  return '<div class="sec"><h2>当前持仓</h2><span class="side">截至 '+asof+(latest?' · 对照信号 '+esc(latest.date):'')+'</span></div>'
+  return '<div class="sec"><h2>当前持仓</h2><span class="side">持仓 '+asof+' · 最新价 '+(pxDate?esc(pxDate):'暂无')+(latest?' · 信号 '+esc(latest.date):'')+'</span></div>'
    +'<div class="kpis">'
    +'<div class="kpi"><div class="lb">合约</div><div class="vl">'+esc(code||'—')+'</div><div class="ft">'+esc(dir)+' · '+(lots==null?'—':esc(lots))+' 手'+life+'</div></div>'
    +'<div class="kpi"><div class="lb">开仓价</div><div class="vl">'+(entry==null?'未填':num(entry,1))+'</div><div class="ft">'+(entry==null?'开仓价：未填':esc(pos.entry_date||'')+' '+esc(entryKind))+'</div></div>'
