@@ -550,7 +550,15 @@ function validateLocalAccount(h){
  if(h.balance_kind!=null&&!['equity','cash_excludes_pnl'].includes(h.balance_kind))throw new Error('余额口径无效');
  if(p.last_price!=null&&!(finite(p.last_price)>0))throw new Error('最新价无效');
  if(p.last_date&&!validAccountDate(p.last_date))throw new Error('价格日期无效');
- return {as_of:h.as_of||p.entry_date,balance_as_of:h.balance_as_of||h.as_of||p.entry_date,account_balance:finite(h.account_balance),balance_kind:h.balance_kind||null,d_live_start:h.d_live_start||null,d_pnl_as_of:h.d_pnl_as_of||null,d_realized_net_pnl:finite(h.d_realized_net_pnl),d_unrealized_net_pnl:finite(h.d_unrealized_net_pnl),positions:[{contract:p.contract,direction:p.direction,lots:p.lots,entry_price:p.entry_price,entry_date:p.entry_date,last_price:finite(p.last_price),last_date:p.last_date||''}]};
+ const rolls=[];
+ if(h.rolls!=null){
+  if(!Array.isArray(h.rolls))throw new Error('换月记录无效');
+  for(const r of h.rolls){
+   if(!r||!/^IC\d{2}(0[1-9]|1[0-2])$/.test(r.from)||!/^IC\d{2}(0[1-9]|1[0-2])$/.test(r.to)||!validAccountDate(r.date)||!(finite(r.close_price)>0)||!(finite(r.open_price)>0)||!Number.isInteger(r.lots)||finite(r.realized_pnl)==null)throw new Error('换月记录无效');
+   rolls.push({date:r.date,from:r.from,to:r.to,lots:r.lots,direction:r.direction||'多',close_price:r.close_price,open_price:r.open_price,realized_pnl:r.realized_pnl});
+  }
+ }
+ return {as_of:h.as_of||p.entry_date,balance_as_of:h.balance_as_of||h.as_of||p.entry_date,account_balance:finite(h.account_balance),balance_kind:h.balance_kind||null,d_live_start:h.d_live_start||null,d_pnl_as_of:h.d_pnl_as_of||null,d_realized_net_pnl:finite(h.d_realized_net_pnl),d_unrealized_net_pnl:finite(h.d_unrealized_net_pnl),rolls,positions:[{contract:p.contract,direction:p.direction,lots:p.lots,entry_price:p.entry_price,entry_date:p.entry_date,entry_price_kind:p.entry_price_kind||'',last_price:finite(p.last_price),last_date:p.last_date||'',last_price_kind:p.last_price_kind||''}]};
 }
 
 /* IC 收盘信号。数字来自 data/ic_strategy.json，页面只负责排版。 */
@@ -685,20 +693,31 @@ function validateLocalAccount(h){
    const row=(latest.contracts||[]).find(c=>c.code===code);
    if(!(row&&(row.role==='near'||row.role==='next'||row.role==='quarter')))uni=esc(code)+' 不在模型当月、次月、当季范围内。';
   }
-  const asof=esc(HOLD.balance_as_of||HOLD.as_of||pos.entry_date||'');
+  const asof=esc(HOLD.as_of||pos.entry_date||'');
+  const meta=latest&&code?(latest.contracts||[]).find(c=>c.code===code):null;
+  let life='';
+  if(meta&&meta.expiry){
+   const asOfDay=HOLD.as_of||pos.entry_date;
+   const span=asOfDay?Math.round((Date.parse(meta.expiry+'T00:00:00Z')-Date.parse(asOfDay+'T00:00:00Z'))/86400000):meta.days;
+   life=' · 到期 '+esc(meta.expiry)+(span==null?'':' · '+span+' 日');
+   if(meta.basis!=null) life+=' · 年化贴水 '+pct(meta.basis)+(latest&&latest.date&&pos.entry_date&&latest.date<pos.entry_date?'（信号 '+esc(latest.date)+'）':'');
+  }
   const src='';const multi=Array.isArray(HOLD.positions)&&HOLD.positions.length>1?'配置含多笔持仓，当前仅展示首笔；本页不支持完整多笔汇总。 ':'';
-  const pxFt=px==null?'信号里还没有不早于开仓日的收盘':(esc(pxDate)+(pxVia==='signal'?' · 信号合约收盘':' · 收盘时点最新价'));
+  const pxKind=pos.last_price_kind||(pxVia==='signal'?'信号合约收盘':'最新价');
+  const pxFt=px==null?'信号里还没有不早于开仓日的收盘':(esc(pxDate)+' · '+esc(pxKind));
+  const entryKind=pos.entry_price_kind||'收盘';
+  const rollNote=(HOLD.rolls||[]).map(r=>'已实现 '+esc(r.date)+' 平 '+esc(r.from)+' '+esc(r.lots)+' 手 @ '+num(r.close_price,1)+'，开 '+esc(r.to)+' @ '+num(r.open_price,1)+'，盈亏 '+(r.realized_pnl<0?'−':'')+num(Math.abs(r.realized_pnl),0)+' 元。').join('');
   return '<div class="sec"><h2>当前持仓</h2><span class="side">截至 '+asof+(latest?' · 对照信号 '+esc(latest.date):'')+'</span></div>'
    +'<div class="kpis">'
-   +'<div class="kpi"><div class="lb">合约</div><div class="vl">'+esc(code||'—')+'</div><div class="ft">'+esc(dir)+' · '+(lots==null?'—':esc(lots))+' 手</div></div>'
-   +'<div class="kpi"><div class="lb">开仓价</div><div class="vl">'+(entry==null?'未填':num(entry,1))+'</div><div class="ft">'+(entry==null?'开仓价：未填':esc(pos.entry_date||'')+' 收盘')+'</div></div>'
+   +'<div class="kpi"><div class="lb">合约</div><div class="vl">'+esc(code||'—')+'</div><div class="ft">'+esc(dir)+' · '+(lots==null?'—':esc(lots))+' 手'+life+'</div></div>'
+   +'<div class="kpi"><div class="lb">开仓价</div><div class="vl">'+(entry==null?'未填':num(entry,1))+'</div><div class="ft">'+(entry==null?'开仓价：未填':esc(pos.entry_date||'')+' '+esc(entryKind))+'</div></div>'
    +'<div class="kpi"><div class="lb">最新价</div><div class="vl">'+(px==null?'—':num(px,1))+'</div><div class="ft">'+pxFt+'</div></div>'
    +'<div class="kpi"><div class="lb">账户余额</div><div class="vl">'+money(bal)+'</div><div class="ft">'+(bal==null?'—':num(bal,0)+' 元')+'</div></div>'
    +'<div class="kpi"><div class="lb">浮动盈亏</div><div class="vl">'+wan2(pnl)+'</div><div class="ft">手数 ×（最新价 − 开仓价）× 200</div></div>'
    +'<div class="kpi"><div class="lb">估算权益</div><div class="vl">'+money(equity)+'</div><div class="ft">'+(equity==null?'余额口径待补':HOLD.balance_kind==='equity'?'配置已为权益，不重复加浮盈':'不含浮盈余额 + 当前浮盈估算')+'</div></div>'
    +'<div class="kpi"><div class="lb">保证金 · 12%</div><div class="vl">'+money(margin)+'</div><div class="ft">实际手数 × 最新价 × 200 × 12%</div></div>'
    +'<div class="kpi"><div class="lb">保证金 / 估算权益</div><div class="vl">'+pct(ratio)+'</div><div class="ft">12% 估算，非券商风控</div></div>'
-   +'</div><section class="panel"><div class="hold-note">'+multi+(cmp||'')+(uni?uni:'')+(src?' 开仓价来源：'+src:'')+'</div></section>';
+   +'</div><section class="panel"><div class="hold-note">'+multi+rollNote+(cmp||'')+(uni?uni:'')+(src?' 开仓价来源：'+src:'')+'</div></section>';
  }
  function render(){
   const days=(IC&&Array.isArray(IC.days))?IC.days:[];
