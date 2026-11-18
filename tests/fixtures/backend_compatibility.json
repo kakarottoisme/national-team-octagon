@@ -2592,11 +2592,11 @@
     "load_old": "4e25078e39a4964755ace1ee9eb0a35ffb970bdcc32a8ade04df142a6b44f863"
   },
   "frontend_sha256": {
-    "index.html": "2919e4b87a1a376ff992761923c9759d20c1da489b6d4b79f8b7f8e96bc50d08",
+    "index.html": "f5a0a8ded6b4334038ad107be3e15af7165c6cce94da3700f7755495769a8b17",
     "margin.html": "311ed62a848f9d4178eb535e3cde4bda754884e7dfe0fcc1a9858dd01aa178e2",
     "futures-preview.html": "ff26cbfe82d77735ab2acf9ccef6b6c0fd529056cc4642ba94dd4a2d10923a81",
     "risk-preview.html": "077b9f30621d4aa9c6a48935c8cd07bb5c5baadb25f46a364b894775d38fbcad",
-    "dashboard.html": "dd922fea9c912cede981f414d95f6255700b22a13283820f9ddf9be9b862ced6",
+    "dashboard.html": "fc2af9fea059d2bf38fdce0a7de22c9b80d33463ad2174f2530f4b689255aed2",
     "dashboard-tabs.js": "7048a9773f5c6c673f3bbbaabbb3e6b9fbc910e31fcb1bbc287f8e703e6c279c"
   }
 }
