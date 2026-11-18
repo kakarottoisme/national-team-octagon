@@ -35,12 +35,13 @@ jobs:
         run: |
           python3 - << 'PY'
           import datetime, os
-          now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
-          minute = now.hour * 60 + now.minute
-          in_session = now.weekday() < 5 and (
-              (9 * 60 + 15 <= minute <= 11 * 60 + 35)
-              or (12 * 60 + 55 <= minute <= 15 * 60 + 5)
-          )
+          from market_calendar import in_live_session, TZ
+          now = datetime.datetime.now(TZ)
+          try:
+              in_session = in_live_session(now)
+          except Exception as exc:
+              in_session = False
+              print(f"calendar unavailable; skip collection: {type(exc).__name__}")
           flag = "true" if in_session else "false"
           print(f"shanghai={now.strftime('%Y-%m-%d %H:%M:%S')} in_session={flag}")
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
