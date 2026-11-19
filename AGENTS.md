@@ -1,48 +1,100 @@
-# AI 接手规则
+# 接手说明
 
-## 先读什么
-1. `BACKEND.md`：页面→JSON→采集脚本的地图、运行命令、字段口径与失败语义
-2. 用户这次实际要改的文件和相关测试，不能只按文档猜实现
-3. `.github/workflows/*.yml`：正式执行路径与允许提交的数据范围
-4. 按本次变更风险选择检查范围；后台、数据契约、策略、共享切页或跨页改动跑 `python3 check_backend.py` 建立基线，局部小改不默认跑整套回归
+给后续任何 AI。先读这一页，再按任务打开下面两份，不要凭文件名猜。
 
-## 小改快速交付原则
-- 文案、局部样式、单处展示及规则文档修改，默认走最短可验证路径；检查和发布成本与改动风险匹配
-- 只改目标位置及必要依赖，不顺带重构、加说明架子或扩大需求
-- 文案/样式只查相关语法、目标展示和受影响断点；规则文档只核对内容、差异和冲突；不默认整套回归、四 Tab 全量走查、跨环境重复验证
-- 只有涉及数据口径、策略计算、共享导航/缓存或跨页依赖时，才扩大测试范围；局部问题优先复用现成的针对性测试
-- 所有相关改动准备好后尽量一次提交、一次发布；规则文档确认远端内容即可，不额外等待 Pages 或走查页面
-- 能直接做就直接做，不为已经明确的小改反复提问；少过程汇报，只在真实阻塞时说明，完成后简短给结果
-- 快不等于跳过必要检查：不改账户、行情或策略，不掩盖失败，不重复执行结果未确认的写入；发现高风险依赖再升级流程
+- 视觉：[docs/DESIGN.md](docs/DESIGN.md)。字号和页眉只改 `dashboard-shell.css`。
+- 豆包定时任务：[AUTOMATION.md](AUTOMATION.md)。只引用，不改其中的规则、窗口和输出。
+- 脚本与字段：[BACKEND.md](BACKEND.md)。
 
-## 这个项目是什么
-GitHub Pages 投资观察看板，四个正式 Tab：资金观察、两融余额、期指持仓、全球风险。后台是 Python/Shell 抓取公开源、计算并写 JSON，不存在独立 Web 后台或数据库。文件名带 preview 的期指/风险页也已被正式页面使用，不是可随意删掉的废稿。
+## 这是什么
 
-## 兼容边界
-- 默认直接调整既有页面和脚本，不加外层产品架子、大段教学、变化总览或分享层
-- 保留四页路径、导航、缓存切页；不要把真实 JSON 改成内嵌的旧行情
-- 默认不改 JSON 字段名、类型、单位、精度、日期、null/stale/未上榜语义；变更要单独说明并同时升级消费者和测试
-- 指标关联不等于有策略证据。未经用户另行明确授权，不往 IC 计算加入新因子，不改 A/B/C/D、选约、换仓和历史合并
-- `data/holdings.json` 是本人账户，当前是自动展示。不要改、删、模拟覆盖或混进测试；新测试用临时合成账户
-- 不把单笔浮盈当完整 D 净盈利，也不补造缺少的账户余额口径
-- 工作流路径和 cron 是接口；仅做代码整理时不得改抓取时间、重试、数据源或推送范围
-- 避免同时运行真实采集和测试。正式采集会产生真实文件，离线检查不得触网或改生产数据
+GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读这些文件。没有下单、没有数据库、没有登录。主人在工位上看，界面保持白底蓝灰，不要做成红绿交易软件。
 
-## 怎样改
-- `fetch_live.build_payload()` / `archive.build_archive()`：注入固定响应，纯构建
-- `main()`：真实抓取与写入入口；import 不应触发网络或写入
-- `backend_common.py`：只放已有共享解析和 ETF 常量，不放来源策略或新因子
-- `backend_io.py`：原子替换。JSON 排版参数由各调用者保留；不是多文件事务、不是并发锁
-- 连字符目录 `preview-tools` 保持现有脚本方式执行，不随意迁移成包；它有自己的注入接口与序列化方式
-- `ic_strategy.py` 本轮保留所有非 I/O 函数。后续有明确策略授权再拆业务模块，不以“清理代码”为由重写算法
+线上地址：`https://kakarottoisme.github.io/national-team-octagon/`  
+`main` 一推，Pages 就重新发布。定时任务也只认 `main` 上的工作流。
 
-## 完成标准
-- 按变更范围完成必要检查；局部小改按上面的快速交付原则验收，后台/数据/策略或共享逻辑改动才要求 `python3 check_backend.py` 全过、网络被禁止、前端/生产 JSON/workflow 的测试前后哈希一致
-- 非前端任务：六个核心前端文件不变；非数据任务：`git diff -- data preview-data` 为空
-- 非策略任务：IC 非 I/O 函数的 AST 基线不变；新旧固定输入输出通过字节比较
-- 不宽泛 `git add .`，不上传 `_backup`、`_review-assets`、本地快照、账户样本、缓存或凭证
-- 发布先核对源文件，再提交并确认远端内容；界面小改只验收目标页面，跨页改动再看 Pages 部署与线上四 Tab；纯规则文档修改不走页面验收
-- 发布不触发额外全量抓取，不修改账户，不清理历史；不 force push
+## 页面
 
-## 基线更新注意
-`tests/fixtures/backend_compatibility.json` 是从整理前脚本录制的 11 组固定源响应、输出与 IC/前端哈希。不要为了测试通过自动重录。仅当用户已批准对应行为改变、代码差异已审查时，才定向更新该部分，并说明变化原因。
+`dashboard.html` 把下面四页放进全屏 iframe，地址用 hash，例如 `dashboard.html#margin.html`。`dashboard-tabs.js` 负责切页；单独打开某一页会跳回看板。
+
+| 文件 | 名称 | 读什么 |
+|---|---|---|
+| `index.html` | 资金观察 | `data/live.json`、`data/history.json`、`data/minutes/YYYY-MM-DD.json`，以及 `preview-data/turnover-baseline.json`、`turnover-history.json` |
+| `margin.html` | 两融余额 | `data/margin_balance.json` |
+| `futures-preview.html` | 期指持仓 | `data/ic_strategy.json`、`data/holdings.json`、`preview-data/official/` |
+| `risk-preview.html` | 全球风险 | `preview-data/global.json` |
+
+文件名带 preview 的期指页和风险页就是正式 Tab，不是草稿。
+
+不在看板里、仍可打开的旧页：`preview.html`、`margin-preview.html`、`flows-preview.html`。没有工作流引用。先不要删，见文末候选。
+
+## 谁写数据
+
+| 文件 | 谁写 | 不要做什么 |
+|---|---|---|
+| `data/live.json` | `.github/workflows/live.yml` 里的 `live_runner.py`，内部调用 `fetch_live.py` | 不要停用这个工作流，也不要再做一个写 live 的定时任务 |
+| `data/history.json`、`data/minutes/` | `archive.py`；云端入口见 AUTOMATION.md 的八宫格归档 | 腾讯分时补不了错过的日期 |
+| `data/margin_balance.json` | `margin.py`；云端窗口见 AUTOMATION.md | 不要用各自最近日期拼成同一天 |
+| `data/ic_strategy.json` | `ic_strategy.py`；工作流 `ic-strategy.yml`（北京 17:40 和 20:10） | 未获授权不改 A/B/C/D、选约、换仓 |
+| `data/holdings.json` | 只按主人明确给出的成交改 | 不改、不删、不模拟。缺成交价就留空，不要用开仓价冒充最新价 |
+| `preview-data/official/`、`preview-data/status.json` | `preview-tools/collect_preview.py`；工作流 `preview-data.yml`（北京 23:30） | 不写 `data/` |
+| `preview-data/global.json` | 同上采集里的全球风险更新 | 受限源不要填造数值 |
+| `preview-data/turnover-*.json` | `preview-tools/turnover_baseline.py`、`turnover_history.py` | |
+
+工作流文件：
+
+- `live.yml`：名称 Refresh live.json。北京 08:53 / 12:43 预热，`*/5 1-7 * * 1-5`（UTC）是重启机会。真正采集只在 09:15–11:35 和 12:55–15:05。
+- `ic-strategy.yml`：只提交 `data/ic_strategy.json`。
+- `preview-data.yml`：只提交 `preview-data/official` 和 `status.json`。
+
+`live_daemon.sh` 是电脑醒着时的可选补充，不是云端定时。`run_ashare_task.sh` 配 `ashare_tasks.py`，给 AUTOMATION.md 里的豆包任务用。
+
+## 本地与发布
+
+仓库根目录：
+
+```sh
+python3 -m http.server 8765
+# 打开 http://127.0.0.1:8765/dashboard.html
+```
+
+单独打开某个 Tab 会跳回看板。要看单页本身，加 `?view=embedded`。
+
+离线检查（不抓数、不改生产 JSON）：
+
+```sh
+python3 check_backend.py
+python3 -m unittest tests.test_dashboard_ui tests.test_ic_strategy
+```
+
+真实采集会写文件，不要当成测试跑：`fetch_live.py`、`archive.py`、`margin.py`、`ic_strategy.py`、`preview-tools/collect_preview.py`。
+
+发布就是把核对过的提交推到 `main`。Pages 随后构建。不要 force push，不要为了发布再跑一遍全量抓取。
+
+## 硬规则
+
+- 不编造数字、日期、价格或成交。
+- 不空提交。
+- 不下单。持仓只按主人明确给出的成交修改 `data/holdings.json`。
+- 不关闭、不改写 `Refresh live.json` 的采集窗口和写入范围。只改文档时，工作流 YAML 保持原样。
+- 不把单笔浮盈当成完整 D 净盈利，也不补造账户余额。
+- 界面改动先看 [docs/DESIGN.md](docs/DESIGN.md)。1440 和 390 都要看四页分隔线是否还对齐。
+- `tests/fixtures/backend_compatibility.json` 不要为了让测试通过就重录。
+
+## 期指页两句待主人决定
+
+`futures-preview.html` 里还有两句，这次不要删：
+
+- 口径说明里的「换月跳变不等于观点突变」
+- 走势脚注里的「换月跳变不解读为观点突变。」
+
+## 旧文件，先留着
+
+没有被四页或工作流引用，但是公开地址或数据快照，这次没有移动：
+
+- `preview.html`、`margin-preview.html`、`flows-preview.html`（旧预览，互相链接）
+- `preview-data/domestic.json`（文档写明的旧快照路径）
+- `preview-data/official/futures/_quarantine_wrong_index.json`
+- `favicon.ico`（浏览器会直接请求这个路径）
+
+`logo.png` 没有任何引用，已放到 `archive/`。
