@@ -174,7 +174,7 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
  <div class="ui-backdrop" onclick="uiPanel.close()"></div>
  <section class="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="riskGuideTitle">
   <div class="ui-modal-head"><div><h3 id="riskGuideTitle">全球风险 · 口径说明</h3></div><button class="ui-close" type="button" aria-label="关闭" onclick="uiPanel.close()">&#215;</button></div>
-  <div class="ui-modal-body"><div class="foot" id="riskFoot">schema 2.0-safe：仅 Treasury 名义曲线为 connected 直取；其余按 link_only（跳源）/restricted（版权受限不转录）/pending（待公开源接入）/missing（缺数据）陈列，不渲染受限数值、不补造、不评级、不继承 L0–L4。独立自动任务每日运行，数据为本地快照，源发布时间不保证。</div></div>
+  <div class="ui-modal-body"><div class="foot" id="riskFoot">查看各指标的数据日期、更新频率及来源。</div></div>
  </section>
 </div>
 
@@ -435,7 +435,7 @@ async function refresh(){
   DATA=d;$('banner').style.display='none';const query=new URLSearchParams(location.search).get('group');if(query==='全部'||LAYERS.some(l=>l[1]===query))cur=query;
   let lastRun='—';try{const sj=await readJSON('preview-data/status.json?t='+Date.now());{const t=sj.last_run||sj.generated_at;if(t)lastRun=t.slice(0,16).replace('T',' ')}}catch(e){}
   $('st').textContent='最近采集 '+lastRun+' · 已可观察 '+d.metrics.filter(m=>m.status==='connected').length+' 项 · 完整目录 '+d.metrics.length+' 项';
-  $('riskFoot').textContent='这是公开数据快照目录，当前已接入 '+d.metrics.filter(isLicensed).length+' 项 / 共 '+d.metrics.length+' 项。已接入不等于实时，逐项核对数据日期；跳源、受限、待接入、缺数据不能当成零。仅阅读来源许可范围内的数据，不评级，不生成交易建议。';
+  $('riskFoot').textContent='已接入 '+d.metrics.filter(isLicensed).length+' / '+d.metrics.length+' 项。数据日期、更新频率和来源见各指标详情。';
   renderGroups();render();
  }finally{busy=false;rb.disabled=false;rb.textContent='刷新'}
 }

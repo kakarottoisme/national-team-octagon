@@ -121,12 +121,25 @@ class DashboardContract(unittest.TestCase):
         crumb = re.search(r"header\.top \.crumb\{[^}]+\}", css).group()
         self.assertNotIn("ellipsis", crumb)
         self.assertNotIn("nowrap", crumb)
+        expected = {
+            "index.html": "宽基 ETF · 盘中活跃度与主动买卖方向",
+            "margin.html": "沪深两市 · 日度数据",
+            "futures-preview.html": "中信期货(代客) · CFFEX 前20会员",
+            "risk-preview.html": "利率条件与融资成本 · 读最新值与历史",
+        }
         for name, text in self.sources.items():
             with self.subTest(page=name):
                 self.assertIn('href="dashboard-shell.css"', text)
                 tail = text.split("/* ===== End reviewed shared UI ===== */", 1)[1]
                 self.assertNotIn(".ui-page .top .shell-head{", tail)
                 self.assertNotIn(".ui-page .crumb{font-size:13px}", tail)
+                header = re.search(r"<header\b[^>]*>(.*?)</header>", text, re.S).group(1)
+                self.assertIn("<h1>", header)
+                self.assertIn('title="' + expected[name] + '"', header)
+                self.assertIn(">" + expected[name] + "<", header)
+        self.assertNotIn("不评级不构成建议", self.sources["risk-preview.html"])
+        self.assertNotIn("这是用户自己的回测规则，不是投资建议，也不保证将来重复。", self.sources["futures-preview.html"])
+        self.assertNotIn("schema 2.0-safe：", self.sources["risk-preview.html"])
 
     def test_inline_javascript_parses(self):
         for name, p in self.parsed.items():
