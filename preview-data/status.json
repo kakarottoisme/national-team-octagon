@@ -1,49 +1,50 @@
 {
- "as_of": "2026-11-18",
- "calendar_days": 36,
+ "as_of": "2026-11-19",
+ "calendar_days": 37,
  "domestic": "ok",
  "errors": [],
  "futures_history": {
-  "as_of": "2026-11-18",
+  "as_of": "2026-11-19",
   "errors": [],
-  "last_attempt": "2026-11-19T06:40:02+08:00",
+  "last_attempt": "2026-11-20T06:43:54+08:00",
   "products": {
    "IC": {
-    "date": "2026-11-18",
+    "date": "2026-11-19",
     "product": "IC",
-    "published_before": 227,
-    "records_after": 228,
+    "published_before": 228,
+    "records_after": 229,
     "source_status": "published"
    },
    "IF": {
-    "date": "2026-11-18",
+    "date": "2026-11-19",
     "product": "IF",
-    "published_before": 227,
-    "records_after": 228,
+    "published_before": 228,
+    "records_after": 229,
     "source_status": "published"
    },
    "IH": {
-    "date": "2026-11-18",
+    "date": "2026-11-19",
     "product": "IH",
-    "published_before": 227,
-    "records_after": 228,
+    "published_before": 228,
+    "records_after": 229,
     "source_status": "published"
    },
    "IM": {
-    "date": "2026-11-18",
+    "date": "2026-11-19",
     "product": "IM",
-    "published_before": 227,
-    "records_after": 228,
+    "published_before": 228,
+    "records_after": 229,
     "source_status": "published"
    }
   }
  },
- "generated_at": "2026-11-19T06:40:02+08:00",
+ "generated_at": "2026-11-20T06:43:54+08:00",
  "global": "ok",
  "global_detail": {
-  "connected": 6,
+  "connected": 5,
   "connected_stale": 0,
   "errors": [
+   "sofr: Expecting value: line 1 column 1 (char 0)",
    "iorb: The read operation timed out",
    "nfci: The read operation timed out",
    "sahm: The read operation timed out"
@@ -53,33 +54,33 @@
   "missing": 2,
   "module_state": "ok",
   "path": "/home/runner/work/national-team-octagon/national-team-octagon/preview-data/global.json",
-  "pending": 5,
+  "pending": 6,
   "restricted": 2
  },
  "run_status": "ok",
  "schema_version": "1.0.0",
  "sources": [
   {
-   "date": "2026-11-19",
+   "date": "2026-11-20",
    "http": 200,
    "name": "SSE",
    "rows": 0,
    "status": "unpublished"
   },
   {
-   "date": "2026-11-18",
+   "date": "2026-11-19",
    "http": 200,
    "name": "SSE",
-   "rows": 925,
+   "rows": 926,
    "status": "ok"
   },
   {
-   "date": "2026-11-19",
+   "date": "2026-11-20",
    "name": "CFFEX",
    "status": "no_published"
   },
   {
-   "date": "2026-11-18",
+   "date": "2026-11-19",
    "name": "CFFEX",
    "status": "ok"
   },
