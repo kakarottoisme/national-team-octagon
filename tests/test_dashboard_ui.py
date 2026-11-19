@@ -110,6 +110,16 @@ class DashboardContract(unittest.TestCase):
         self.assertIn("m.status==='connected'||m.status==='connected_stale'", risk)
         self.assertIn("m.status==='restricted'?'受限不转录':'未接入，不能据此判断风险'", risk)
 
+    def test_headers_show_titles_without_explanatory_subtitles(self):
+        for name, text in self.sources.items():
+            with self.subTest(page=name):
+                header = re.search(r'<header\b[^>]*>(.*?)</header>', text, re.S).group(1)
+                self.assertNotIn('class="crumb"', header)
+                self.assertIn('<h1>', header)
+                self.assertIn('aria-label="数据视图导航"', header)
+        self.assertNotIn('这是用户自己的回测规则，不是投资建议，也不保证将来重复。', self.sources['futures-preview.html'])
+        self.assertNotIn('schema 2.0-safe：', self.sources['risk-preview.html'])
+
     def test_inline_javascript_parses(self):
         for name, p in self.parsed.items():
             for i, script in enumerate(p.scripts):
