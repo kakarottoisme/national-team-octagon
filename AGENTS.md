@@ -81,13 +81,6 @@ python3 -m unittest tests.test_dashboard_ui tests.test_ic_strategy
 - 界面改动先看 [docs/DESIGN.md](docs/DESIGN.md)。1440 和 390 都要看四页分隔线是否还对齐。
 - `tests/fixtures/backend_compatibility.json` 不要为了让测试通过就重录。
 
-## 期指页两句待主人决定
-
-`futures-preview.html` 里还有两句，这次不要删：
-
-- 口径说明里的「换月跳变不等于观点突变」
-- 走势脚注里的「换月跳变不解读为观点突变。」
-
 ## 旧文件，先留着
 
 没有被四页或工作流引用，但是公开地址或数据快照，这次没有移动：

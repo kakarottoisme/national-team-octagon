@@ -275,12 +275,12 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
  <div class="ui-backdrop" onclick="uiPanel.close()"></div>
  <section class="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="maskTitle">
   <div class="ui-modal-head"><div><h3 id="maskTitle">期指持仓 · 来源与口径</h3></div><button class="ui-close" type="button" aria-label="关闭" onclick="uiPanel.close()">&#215;</button></div>
-  <div class="ui-modal-body"><div class="foot" id="lineFoot">净空折线：仅可观测日连线，未上榜/单边数据为 null 不补 0 不连线。</div><div class="foot">选中某一交易日，看 IH/IF/IC/IM 前20会员上榜汇总的多头、空头和净空，再用折线看 30/90 日趋势。可观测净空 = 空 − 多（仅上榜可观测，未上榜合约不补 0）。换月向远月迁移时，单日跳变不等于真实观点突变。</div><div class="foot">仅统计选中日上榜前20合约；中信期货在某合约跌出前20时该合约被剔除，未上榜不代表为 0。</div><dl>
+  <div class="ui-modal-body"><div class="foot" id="lineFoot">净空折线：仅可观测日连线，未上榜/单边数据为 null 不补 0 不连线。</div><div class="foot">选中某一交易日，看 IH/IF/IC/IM 前20会员上榜汇总的多头、空头和净空，再用折线看 30/90 日趋势。可观测净空 = 空 − 多（仅上榜可观测，未上榜合约不补 0）。</div><div class="foot">仅统计选中日上榜前20合约；中信期货在某合约跌出前20时该合约被剔除，未上榜不代表为 0。</div><dl>
   <dt>数据来源</dt><dd>CFFEX 每日约16:30公布分品种分合约前20会员多空持仓（GBK CSV）。</dd>
   <dt>主体</dt><dd id="dMember">—</dd>
   <dt>选中日</dt><dd id="dAsOf">—</dd>
   <dt>历史范围</dt><dd id="dRange">—</dd>
-  <dt>边界</dt><dd>中信期货=该会员全部客户(代客)合计，非自营；未上榜合约不补 0；换月跳变不等于观点突变；观测差仅为上榜合约空头减多头，不等于该会员全量真实净空。</dd>
+  <dt>边界</dt><dd>中信期货=该会员全部客户(代客)合计，非自营；未上榜合约不补 0；观测差仅为上榜合约空头减多头，不等于该会员全量真实净空。</dd>
   <dt>更新方式</dt><dd>独立自动任务每日运行，读取 preview-data/official/futures/{IH,IF,IC,IM}.json；源发布时间不保证。</dd>
  </dl></div>
  </section>
@@ -450,7 +450,7 @@ function renderLine(products,dates,selInWindow){
   net:'可观测净空=空−多（仅上榜可观测；未上榜为 null 不补 0 不连线）。',
   obsl:'可观察多头=当日前20上榜合约多头汇总（非全市场）。',
   obss:'可观察空头=当日前20上榜合约空头汇总（非全市场）。'
- }[selMetric]+' 换月跳变不解读为观点突变。';
+ }[selMetric];
 }
 
 let chartBar=null;
