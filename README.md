@@ -1,4 +1,8 @@
 # 国家队·分时八宫格
+
+接手先读 [AGENTS.md](AGENTS.md)。视觉规范在 [docs/DESIGN.md](docs/DESIGN.md)，豆包定时任务在 [AUTOMATION.md](AUTOMATION.md)。
+
+
 七只宽基 ETF 分时 + 分钟成交额>1亿合计估算。「今日实时」可按日期切换存档，页面大约每 60 秒重读 `data/live.json`。成交额阈值代理，非官方国家队认定。数据：腾讯行情。
 
 ## 维护与 AI 交接

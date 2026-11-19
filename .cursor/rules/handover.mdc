@@ -1,0 +1,6 @@
+---
+description: 接手本仓库时先读交接文档
+alwaysApply: true
+---
+
+先读仓库根目录的 AGENTS.md。视觉规范在 docs/DESIGN.md。豆包自动化规则在 AUTOMATION.md，只引用，不改规则。
