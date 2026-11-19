@@ -53,7 +53,7 @@ python3 preview-tools/turnover_history.py
 ```
 `fetch_live/archive/ic_strategy` 用标准库；`margin` 需 akshare/pandas；preview 依赖按 `preview-tools/requirements.txt` 安装。本轮不改现有依赖版本或调度。
 
-现有调度：live 的 UTC `*/5 1-7 * * 1-5`，实际执行窗口北京09:15–11:35、12:55–15:05；IC 北京17:40及20:10；preview 北京23:30。`archive/margin` 仍是手动维护，`live_daemon.sh` 是机器醒着时的可选补充，不属于云端定时。
+现有调度：live 保留 UTC `*/5 1-7 * * 1-5` 作为重启机会，另于北京08:53/12:43预热；同一concurrency组仅一个`live_runner.py`实例运行，每300秒复用原采集器，仅北京09:15–11:35、12:55–15:05采集，午休/收盘结束，周末/未确认日历关闭。首次GitHub启动仍可能排队延迟。IC 北京17:40及20:10；preview 北京23:30。`archive/margin`云端任务与去重见`AUTOMATION.md`；`live_daemon.sh` 是机器醒着时的可选补充，不属于云端定时。
 
 ## 关键数据契约
 ### live / archive
