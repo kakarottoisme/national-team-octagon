@@ -366,13 +366,25 @@ function pointIndex(value,times){if(typeof value==='string'){const found=times.i
 function pointNumber(value,digits,suffix=''){const v=uiNumber(value);return v==null?'—':v.toFixed(digits)+suffix}
 function matchedIndexValues(i,m,times){const source=(view==='live'?LIVE?.index_minutes:m.index_minutes)?.[INDEX_CODES[i]];if(!source||String(source.date).replace(/-/g,'')!==String(m.date||LIVE?.date||'').replace(/-/g,''))return times.map(()=>null);const byTime=new Map((source.t||[]).map((t,k)=>[String(t).replace(/\D/g,''),uiNumber(source.p?.[k])]));return times.map(t=>byTime.get(t.replace(/\D/g,''))??null)}
 function hoverPosition(plot,point,size){
- const r=plot.getBoundingClientRect(),width=size.contentSize[0],height=size.contentSize[1],gap=14,pad=8;
+ const r=plot.getBoundingClientRect(),width=size.contentSize[0],height=size.contentSize[1],gap=12,pad=8;
  const vw=document.documentElement.clientWidth||innerWidth,vh=innerHeight,px=r.left+point[0],py=r.top+point[1];
- // Prefer the outside edge of the chart, opposite the pointer. Fallback above/below.
- let x=point[0]<r.width/2?r.right+gap:r.left-width-gap,y=py-height/2;
- if(x<pad||x+width>vw-pad){const other=point[0]<r.width/2?r.left-width-gap:r.right+gap;if(other>=pad&&other+width<=vw-pad)x=other;else{x=Math.max(pad,Math.min(px-width/2,vw-width-pad));y=r.top-height-gap;if(y<pad)y=r.bottom+gap;if(y+height>vh-pad)y=py+gap;if(y+height>vh-pad)y=py-height-gap}}
- x=Math.max(pad,Math.min(x,vw-width-pad));y=Math.max(pad,Math.min(y,vh-height-pad));
- return [x-r.left,y-r.top];
+ const clamp=(v,lo,hi)=>Math.max(lo,Math.min(v,hi));
+ const left=Math.max(pad,r.left+pad),right=Math.min(vw-pad,r.right-pad),top=Math.max(pad,r.top+pad),bottom=Math.min(vh-pad,r.bottom-pad);
+ const fits=(x,y,l,t,rr,b)=>x>=l&&y>=t&&x+width<=rr&&y+height<=b;
+ // Stay close to the pointer and inside this chart whenever there is room.
+ if(width<=right-left&&height<=bottom-top){
+  const y=clamp(py-height/2,top,bottom-height),x=clamp(px-width/2,left,right-width);
+  const inside=[[px+gap,y],[px-width-gap,y],[x,py-height-gap],[x,py+gap]];
+  const found=inside.find(([x,y])=>fits(x,y,left,top,right,bottom));
+  if(found)return [found[0]-r.left,found[1]-r.top];
+ }
+ // Only overflow the chart when needed; keep the same small pointer gap.
+ const y=clamp(py-height/2,pad,vh-height-pad),x=clamp(px-width/2,pad,vw-width-pad);
+ const outside=[[px+gap,y],[px-width-gap,y],[x,py-height-gap],[x,py+gap]];
+ const found=outside.find(([x,y])=>fits(x,y,pad,pad,vw-pad,vh-pad));
+ if(found)return [found[0]-r.left,found[1]-r.top];
+ const nearest=outside.map(([x,y])=>{const cx=clamp(x,pad,vw-width-pad),cy=clamp(y,pad,vh-height-pad);return {x:cx,y:cy,shift:(cx-x)**2+(cy-y)**2}}).sort((a,b)=>a.shift-b.shift)[0];
+ return [nearest.x-r.left,nearest.y-r.top];
 }
 function compactHover(chart,times,fields){
  const plot=chart.getDom();let selected=times.length-1;
