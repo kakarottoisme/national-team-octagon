@@ -45,7 +45,7 @@
  --space-note-row:20px;
  --space-to-content:12px;
  --space-section:24px;
- --space-actions-row:0px;
+ --space-actions-row:44px;
  --shell-title-size:18px;
  --shell-title-lh:26px;
  --shell-crumb-size:14px;
@@ -109,7 +109,7 @@
  display:grid;
  grid-template-columns:minmax(0,1fr) auto;
  grid-template-areas:"title actions" "meta actions";
- grid-template-rows:var(--type-sec-title-lh) var(--space-note-row) var(--space-actions-row);
+ grid-template-rows:var(--type-sec-title-lh) var(--space-note-row);
  align-items:start;
  column-gap:16px;
  row-gap:var(--space-title-note);
@@ -130,8 +130,16 @@
 }
 .ui-page .sec>.section-actions{grid-area:actions;justify-self:end;align-self:center;width:auto;margin-left:0}
 @media(max-width:699px){
- :root{--space-note-row:40px;--space-actions-row:44px}
- .ui-page .sec{grid-template-columns:minmax(0,1fr);grid-template-areas:"title" "meta" "actions"}
+ :root{--space-note-row:40px}
+ .ui-page .sec:has(>.section-actions){
+  grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"title" "meta" "actions";
+  grid-template-rows:var(--type-sec-title-lh) var(--space-note-row) var(--space-actions-row);
+ }
+ .ui-page .sec:not(:has(>.section-actions)){
+  grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"title" "meta";
+ }
  .ui-page .sec>.section-actions{justify-self:stretch;align-self:center;width:100%}
 }
 .ui-page .foot,.ui-page .hold-note,.ui-page .chart-help,.ui-page .window-note{
