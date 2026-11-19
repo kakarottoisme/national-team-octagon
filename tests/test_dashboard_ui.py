@@ -145,6 +145,30 @@ class DashboardContract(unittest.TestCase):
         self.assertIn("--type-sec-meta:13px", css)
         self.assertIn("--type-ctrl-h:36px", css)
 
+    def test_funds_history_collapses_to_latest_thirty(self):
+        source = self.sources['index.html']
+        self.assertIn('<h2>今日分时走势</h2>', source)
+        self.assertNotIn('历史只含已归档日期（data/history.json），不补造。', source)
+        code = source.split('let historyExpanded=false,historyCurrentDate=null;', 1)[1].split('let TODAY=null;', 1)[0]
+        stub = r'''
+const assert=require('assert');
+const elements={tb:{rows:[],set innerHTML(v){this.rows=[]},appendChild(r){this.rows.push(r)}},historyMore:{hidden:true},historyToggle:{attrs:{},setAttribute(k,v){this.attrs[k]=v},scrollIntoView(){}}};
+const document={getElementById:id=>elements[id],createElement:()=>({})};
+let H={},historyExpanded=false,historyCurrentDate=null,sel={value:'live'},selected=null;
+const todayStr=()=>null,onSel=()=>{selected=sel.value},kpi=()=>{};
+for(let i=1;i<=40;i++)H[new Date(Date.UTC(2026,0,i)).toISOString().slice(0,10)]={'合计':i,'上证收盘':3000+i,'上证涨跌幅':0};
+'''
+        checks = r'''
+const original=JSON.stringify(H),dates=Object.keys(H).sort().reverse(),cur=dates[2];
+table(cur);assert.equal(elements.tb.rows.length,30);assert(elements.tb.rows[0].innerHTML.includes(dates[0]));assert.equal(elements.tb.rows[2].className,'sel');assert.equal(elements.historyToggle.attrs['aria-expanded'],'false');assert.equal(elements.historyMore.hidden,false);
+elements.historyToggle.onclick();assert.equal(elements.tb.rows.length,40);assert.equal(elements.historyToggle.textContent,'收起');assert.equal(elements.historyToggle.attrs['aria-expanded'],'true');table(cur);assert.equal(elements.tb.rows.length,40);
+elements.tb.rows[35].onclick();assert.equal(selected,dates[35]);
+elements.historyToggle.onclick();assert.equal(elements.tb.rows.length,30);assert.equal(elements.historyToggle.textContent,'展开全部');assert.equal(JSON.stringify(H),original);
+H=Object.fromEntries(Object.entries(H).slice(0,5));table(cur);assert.equal(elements.tb.rows.length,5);assert.equal(elements.historyMore.hidden,true);
+'''
+        result = subprocess.run(['node','-'],input=stub+code+checks,text=True,capture_output=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+
     def test_inline_javascript_parses(self):
         for name, p in self.parsed.items():
             for i, script in enumerate(p.scripts):

@@ -272,6 +272,7 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 .ui-page[data-ui-view="funds"] #st>span{white-space:nowrap}
 .ui-page[data-ui-view="funds"] #st>span+span{border-left:1px solid #d8dfe8;padding-left:12px}
 .ui-page[data-ui-view="funds"] #st .market-state{color:var(--ink);font-weight:600}
+.history-more{text-align:center}.history-more[hidden]{display:none}.history-more button{min-height:44px;padding:8px 20px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--muted);font:inherit;cursor:pointer}.history-more button:hover{background:#f4f6f9}.history-more button:focus-visible{outline:2px solid #325b90;outline-offset:3px}
 /* Compact tooltip rows; appended to body, not clipped by chart/card overflow. */
 .chart-hover-head{font-size:13px;font-weight:600;margin-bottom:6px;color:#1f2733}
 .chart-hover-row{display:flex;justify-content:space-between;align-items:baseline;gap:20px;line-height:24px;font-size:13px}
@@ -295,7 +296,7 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 <div id="banner"></div>
 
 <!-- ===== 八宫格 ===== -->
-<div class="sec"><h2>分时走势（盘中活跃度）</h2></div>
+<div class="sec"><h2>今日分时走势</h2></div>
 <div class="g" id="g"></div>
 
 <!-- ===== 日度汇总 ===== -->
@@ -303,7 +304,7 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 <section class="panel">
  <div class="tbx"><table><colgroup><col style="width:22%"><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:18%"></colgroup>
  <thead><tr><th>日期</th><th>大额分钟成交额(亿)</th><th>上证收盘</th><th>上证涨跌幅</th><th>简评</th></tr></thead><tbody id="tb"></tbody></table></div>
- <div class="foot">历史只含已归档日期（data/history.json），不补造。</div>
+ <div class="foot history-more" id="historyMore" hidden><button type="button" id="historyToggle" aria-expanded="false" aria-controls="tb">展开全部</button></div>
 </section>
 
 </main>
@@ -548,9 +549,11 @@ function kpi(cur){const h=H[cur]||{},f=v=>v==null?"—":(+v).toFixed(2);
  }else{kC.textContent="—";kCf.textContent="逐笔方向需行情外盘/内盘字段"}
  const c=h["上证涨跌幅"];document.getElementById("k1").innerHTML=h["合计"]!=null?f(h["合计"])+"<small>亿</small>":"—";
  const ks=Object.keys(H).filter(d=>d!==TODAY||ARCHIVED.has(d)).sort();document.getElementById("k4").innerHTML=ks.length+"<small>天</small>";document.getElementById("k4f").textContent=ks.length?ks[0]+" 起":"data/history.json"}
-function table(cur){const tb=document.getElementById("tb");tb.innerHTML="";Object.keys(H).sort().reverse().forEach(d=>{const h=H[d],c=h["上证涨跌幅"],tr=document.createElement("tr");if(d==cur)tr.className="sel";
+let historyExpanded=false,historyCurrentDate=null;
+function table(cur){historyCurrentDate=cur;const tb=document.getElementById("tb"),dates=Object.keys(H).sort().reverse();tb.innerHTML="";(historyExpanded?dates:dates.slice(0,30)).forEach(d=>{const h=H[d],c=h["上证涨跌幅"],tr=document.createElement("tr");if(d==cur)tr.className="sel";
  tr.tabIndex=0;tr.innerHTML="<td>"+d+"</td><td>"+(h["合计"]!=null?(+h["合计"]).toFixed(2):"-")+"</td><td>"+(h["上证收盘"]!=null?(+h["上证收盘"]).toFixed(2):"-")+"</td><td>"+(c!=null?(c>0?"+":"")+(+c).toFixed(2)+"%":"-")+"</td><td><span class='tag "+(c>0?"up":"")+"'>"+(c==null?"-":c>0?"涨":c<0?"跌":"平")+"</span></td>";
- tr.onclick=()=>{const live=todayStr();sel.value=d==live?"live":d;onSel()};tr.onkeydown=ev=>{if(ev.key=="Enter"||ev.key==" "){ev.preventDefault();tr.onclick()}};tb.appendChild(tr)});kpi(cur)}
+ tr.onclick=()=>{const live=todayStr();sel.value=d==live?"live":d;onSel()};tr.onkeydown=ev=>{if(ev.key=="Enter"||ev.key==" "){ev.preventDefault();tr.onclick()}};tb.appendChild(tr)});const more=document.getElementById('historyMore'),toggle=document.getElementById('historyToggle');more.hidden=dates.length<=30;toggle.textContent=historyExpanded?'收起':'展开全部';toggle.setAttribute('aria-expanded',String(historyExpanded));kpi(cur)}
+document.getElementById('historyToggle').onclick=()=>{historyExpanded=!historyExpanded;table(historyCurrentDate);if(!historyExpanded)document.getElementById('historyToggle').scrollIntoView({block:'nearest'})};
 let TODAY=null;const ARCHIVED=new Set();const todayStr=()=>TODAY;
 function fillSel(){const v=sel.value;sel.innerHTML='<option value="live">最新行情</option>'+Object.keys(H).sort().reverse().filter(d=>d!=TODAY).map(d=>'<option value="'+d+'">'+d+'</option>').join("");sel.value=[...sel.options].some(o=>o.value==v)?v:"live"}
 async function loadHist(){try{const r=await j("./data/history.json?t="+Date.now());pageNotice('');Object.keys(r).forEach(d=>ARCHIVED.add(d));H={...H,...r}}catch(e){pageNotice("历史存档读取失败，保留已加载数据，点击刷新重试")}}
