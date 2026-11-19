@@ -13,13 +13,15 @@
 
 ## 云端运行
 - GitHub推送需云端gh已登录且git有写权限，不复制token、Cookie或认证文件进仓库或任务指令。
-- `bash run_ashare_task.sh {ic|archive|margin|live-health} /home/user/Doubao/ashare-task-state` 在全新临时checkout执行；持久去重状态在仓库外，数据写入只显式stage授权路径。
+- `bash run_ashare_task.sh {ic|archive|margin|live-health|live-recover|ic-signal} /home/user/Doubao/ashare-task-state` 在全新临时checkout执行；持久去重状态在仓库外，数据写入只显式stage授权路径。
 - 回传标准JSON：notify=false时完全不发用户消息；notify=true时仅message，若含link经交付工具呈现，sources用于正文引用。运行失败不输出堆栈/凭证，只简短原因。
 - 同一归档/两融执行有锁；无空提交、无force push；推送失败保留本地提交，冲突不自动覆盖。后续执行先核对远端是否已有成功记录，不能重试状态未知写入。
 - 旧Refresh IC close signal与官方预览工作流不由本次任务替换；它们不写上述新任务的数据文件。原Refresh live.json继续负责实时刷新，不再建第二个写live的定时任务。
-- `run_ashare_task.sh`目前只接受ic、archive、margin、live-health。盘中刷新自恢复和IC策略信号变化提醒还没有对应子命令；本次只写规则，不在该脚本里实现。
+- `run_ashare_task.sh`接受ic、archive、margin、live-health、live-recover、ic-signal。后两项由`ashare_observers.py`实现；只读仓库数据，`live-recover`仅允许dispatch既有live.yml。首次09:20/12:55检查返回followup_at时，定时执行用Wait等15分钟后重新克隆main执行同入口复核；不在本地抓行情、不建第二个写live任务。半日启动预留状态在请求前持久化，结果不明不重发；运行/排队实例按所有分支检查。IC在20:30检查，当日文件未推进静默；首次仅建立当日基线，与上次通知值比较且同一信号日不重复提醒。仓库外状态分别为live-recover.json与ic-signal.json，正常notify=false不交付消息或链接。
 
 ## 验收
+`python3 -m unittest discover -s tests -p test_ashare_observers.py -v`覆盖18项新观察任务：排队/运行不重复启动、启动前持久预留、半日与每日去重、结果不明不重发、15分钟成功静默/失败提醒、交易窗口、首次基线、六字段变化、负C公式、持仓方向与手数差、无仓库写入。
+
 `python3 -m unittest discover -s tests -p test_ashare_tasks.py -v`
 8项离线测试覆盖假日/周末/未知日历、交易窗口、2pp边界、强制换月、最新价非结算价、旧行情拒绝、余额无新数据静默、停更去重、归档失败无写入。前端/账户/IC源与本次起点保持字节一致。
 既有check_backend基线在改动前已存在2项失败（Python版本AST差异、另一次期指页面修改未更新旧hash）；本次不篡改基线掩盖问题。
