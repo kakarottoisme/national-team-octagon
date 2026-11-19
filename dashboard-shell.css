@@ -1,7 +1,45 @@
-/* 四页共用的页眉母版。标题栏高度、图标、标题行高和左右页边距只在这里定义。
-   副标题完整显示，不单行省略。 */
+/* 四页共用母版。页眉几何沿用 PR #10，不在这里改高度。
+   字号表（全页同一套）：
+   | 角色 | 字号 | 行高 | 字重 |
+   | 页标题 h1 | 18px | 26px | 600 |
+   | 页副标题 | 14px | 22px | 400 |
+   | 节标题 h2 | 16px | 24px | 600 |
+   | 节说明 | 13px | 20px | 400 |
+   | 正文 | 14px | 22px | 400 |
+   | 表头 | 13px | 20px | 500 |
+   | 表体 | 14px | 22px | 400 |
+   | 指标数字 | 26px | 32px | 600 |
+   | 指标说明 | 13px | 20px | 400 |
+   | 筛选控件 | 14px | 22px | 500，高 36px，左右 12px，圆角 10px，边框 #ccd5df |
+   | 筛选选中 | 600，底 #edf3fc，边 #9db8db，字 #325b90 |
+   顶栏按钮保持 44px，避免带动页眉分隔线。
+   节标题在左，说明紧挨标题下方；右侧只放可点击控件。 */
 :root{
  --shell-icon:38px;
+ --type-page-title:18px;
+ --type-page-title-lh:26px;
+ --type-page-sub:14px;
+ --type-page-sub-lh:22px;
+ --type-sec-title:16px;
+ --type-sec-title-lh:24px;
+ --type-sec-meta:13px;
+ --type-sec-meta-lh:20px;
+ --type-body:14px;
+ --type-body-lh:22px;
+ --type-table-head:13px;
+ --type-table-head-lh:20px;
+ --type-table:14px;
+ --type-table-lh:22px;
+ --type-kpi:26px;
+ --type-kpi-lh:32px;
+ --type-kpi-label:13px;
+ --type-kpi-label-lh:20px;
+ --type-ctrl-h:36px;
+ --type-ctrl-size:14px;
+ --type-ctrl-lh:22px;
+ --type-ctrl-px:12px;
+ --type-ctrl-radius:10px;
+ --type-ctrl-border:#ccd5df;
  --shell-title-size:18px;
  --shell-title-lh:26px;
  --shell-crumb-size:14px;
@@ -49,7 +87,7 @@
 }
 .ui-page header.top .crumb{
  margin:0;font-size:var(--shell-crumb-size);line-height:var(--shell-crumb-lh);
- color:var(--muted);white-space:normal;overflow:visible;
+ font-weight:400;color:var(--muted);white-space:normal;overflow:visible;
 }
 .ui-page .top .ctl{min-width:0;height:var(--shell-ctl-h);flex-wrap:nowrap;align-items:center;overflow:hidden}
 .ui-page .top .nav-row{
@@ -58,3 +96,63 @@
 }
 .ui-page .view-tabs{height:54px;box-sizing:border-box}
 .ui-page .view-tab{height:44px;max-height:44px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.ui-page{font-size:var(--type-body);line-height:var(--type-body-lh)}
+.ui-page .sec{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto;
+ grid-template-areas:"title actions" "meta actions";
+ align-items:center;
+ column-gap:16px;
+ row-gap:2px;
+ margin:18px 0 10px;
+ min-height:0;
+}
+.ui-page .sec>h2{
+ grid-area:title;justify-self:start;margin:0;
+ font-size:var(--type-sec-title);line-height:var(--type-sec-title-lh);font-weight:600;color:var(--ink);
+}
+.ui-page .sec>.side{
+ grid-area:meta;justify-self:start;text-align:left;max-width:100%;margin:0;
+ font-size:var(--type-sec-meta);line-height:var(--type-sec-meta-lh);font-weight:400;color:var(--muted);
+}
+.ui-page .sec>.section-actions{grid-area:actions;justify-self:end;align-self:center;width:auto;margin-left:0}
+@media(max-width:699px){
+ .ui-page .sec{grid-template-columns:minmax(0,1fr);grid-template-areas:"title" "meta" "actions"}
+ .ui-page .sec>.section-actions{justify-self:stretch;width:100%}
+}
+.ui-page .foot,.ui-page .hold-note,.ui-page .chart-help,.ui-page .window-note{
+ font-size:var(--type-body);line-height:var(--type-body-lh);font-weight:400;
+}
+.ui-page table{font-size:var(--type-table)}
+.ui-page th,.ui-page td{line-height:var(--type-table-lh)}
+.ui-page th{font-size:var(--type-table-head);line-height:var(--type-table-head-lh);font-weight:500}
+.ui-page td{font-size:var(--type-table);font-weight:400}
+.ui-page .kpi .lb,.ui-page .kpi .ft{
+ font-size:var(--type-kpi-label);line-height:var(--type-kpi-label-lh);font-weight:400;
+}
+.ui-page .kpi .vl{font-size:var(--type-kpi);line-height:var(--type-kpi-lh);font-weight:600}
+.ui-page .kpi .vl small{font-size:var(--type-body);font-weight:400}
+.ui-page button.chip,
+.ui-page button.gchip,
+.ui-page .date-tools button,
+.ui-page .ctl-row button,
+.ui-page .section-actions button,
+.ui-page .filter-group button,
+.ui-page .section-actions select,
+.ui-page .ctl-row select,
+.ui-page .filter-group select{
+ height:var(--type-ctrl-h);min-height:var(--type-ctrl-h);padding:0 var(--type-ctrl-px);
+ border-radius:var(--type-ctrl-radius);border:1px solid var(--type-ctrl-border);
+ background:#fff;color:var(--ink-2);font-size:var(--type-ctrl-size);line-height:var(--type-ctrl-lh);
+ font-weight:500;box-shadow:none;
+}
+.ui-page button.chip.on,
+.ui-page button.gchip.on,
+.ui-page .date-tools button.on,
+.ui-page .ctl-row button.on,
+.ui-page button.chip[aria-pressed="true"],
+.ui-page button.gchip[aria-pressed="true"],
+.ui-page .date-tools button[aria-pressed="true"]{
+ background:var(--accent-bg);border-color:#9db8db;color:#325b90;font-weight:600;
+}

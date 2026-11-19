@@ -140,6 +140,10 @@ class DashboardContract(unittest.TestCase):
         self.assertNotIn("不评级不构成建议", self.sources["risk-preview.html"])
         self.assertNotIn("这是用户自己的回测规则，不是投资建议，也不保证将来重复。", self.sources["futures-preview.html"])
         self.assertNotIn("schema 2.0-safe：", self.sources["risk-preview.html"])
+        self.assertIn('grid-template-areas:"title actions" "meta actions"', css)
+        self.assertIn("--type-sec-title:16px", css)
+        self.assertIn("--type-sec-meta:13px", css)
+        self.assertIn("--type-ctrl-h:36px", css)
 
     def test_inline_javascript_parses(self):
         for name, p in self.parsed.items():
