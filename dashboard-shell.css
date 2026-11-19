@@ -40,6 +40,12 @@
  --type-ctrl-px:12px;
  --type-ctrl-radius:10px;
  --type-ctrl-border:#ccd5df;
+ --space-after-nav:16px;
+ --space-title-note:4px;
+ --space-note-row:20px;
+ --space-to-content:12px;
+ --space-section:24px;
+ --space-actions-row:0px;
  --shell-title-size:18px;
  --shell-title-lh:26px;
  --shell-crumb-size:14px;
@@ -98,28 +104,35 @@
 .ui-page .view-tab{height:44px;max-height:44px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 .ui-page{font-size:var(--type-body);line-height:var(--type-body-lh)}
+.ui-page main.wrap{padding-top:var(--space-after-nav)}
 .ui-page .sec{
  display:grid;
  grid-template-columns:minmax(0,1fr) auto;
  grid-template-areas:"title actions" "meta actions";
- align-items:center;
+ grid-template-rows:var(--type-sec-title-lh) var(--space-note-row) var(--space-actions-row);
+ align-items:start;
  column-gap:16px;
- row-gap:2px;
- margin:18px 0 10px;
+ row-gap:var(--space-title-note);
+ margin:var(--space-section) 0 var(--space-to-content);
  min-height:0;
 }
+.ui-page main.wrap>.sec.sec-first{margin-top:0}
 .ui-page .sec>h2{
- grid-area:title;justify-self:start;margin:0;
+ grid-area:title;justify-self:start;align-self:start;margin:0;height:var(--type-sec-title-lh);
  font-size:var(--type-sec-title);line-height:var(--type-sec-title-lh);font-weight:600;color:var(--ink);
 }
-.ui-page .sec>.side{
- grid-area:meta;justify-self:start;text-align:left;max-width:100%;margin:0;
+.ui-page .sec>.side,
+.ui-page .sec>#st,
+.ui-page[data-ui-view="funds"] #st,
+.ui-page[data-ui-view="funds"] #st .market-state{
+ grid-area:meta;justify-self:stretch;align-self:stretch;text-align:left;max-width:100%;margin:0;
  font-size:var(--type-sec-meta);line-height:var(--type-sec-meta-lh);font-weight:400;color:var(--muted);
 }
 .ui-page .sec>.section-actions{grid-area:actions;justify-self:end;align-self:center;width:auto;margin-left:0}
 @media(max-width:699px){
+ :root{--space-note-row:40px;--space-actions-row:44px}
  .ui-page .sec{grid-template-columns:minmax(0,1fr);grid-template-areas:"title" "meta" "actions"}
- .ui-page .sec>.section-actions{justify-self:stretch;width:100%}
+ .ui-page .sec>.section-actions{justify-self:stretch;align-self:center;width:100%}
 }
 .ui-page .foot,.ui-page .hold-note,.ui-page .chart-help,.ui-page .window-note{
  font-size:var(--type-body);line-height:var(--type-body-lh);font-weight:400;
