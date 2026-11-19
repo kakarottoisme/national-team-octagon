@@ -118,6 +118,9 @@ class DashboardContract(unittest.TestCase):
         self.assertIn("--shell-title-size:18px", css)
         self.assertIn("--shell-title-lh:26px", css)
         self.assertIn("text-overflow:ellipsis", css)
+        crumb = re.search(r"header\.top \.crumb\{[^}]+\}", css).group()
+        self.assertNotIn("ellipsis", crumb)
+        self.assertNotIn("nowrap", crumb)
         for name, text in self.sources.items():
             with self.subTest(page=name):
                 self.assertIn('href="dashboard-shell.css"', text)
