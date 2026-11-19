@@ -3,7 +3,7 @@
 给后续任何 AI。先读这一页，再按任务打开下面两份，不要凭文件名猜。
 
 - 视觉：[docs/DESIGN.md](docs/DESIGN.md)。字号和页眉只改 `dashboard-shell.css`。
-- 豆包定时任务：[AUTOMATION.md](AUTOMATION.md)。只引用，不改其中的规则、窗口和输出。
+- 豆包定时任务：[AUTOMATION.md](AUTOMATION.md)。2026-11-19 主人批准新增三条：盘中刷新自恢复、成交后更新持仓、IC 策略信号变化提醒。除此之外不改其中的规则、窗口和输出。
 - 脚本与字段：[BACKEND.md](BACKEND.md)。
 
 ## 这是什么
@@ -36,7 +36,7 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 | `data/history.json`、`data/minutes/` | `archive.py`；云端入口见 AUTOMATION.md 的八宫格归档 | 腾讯分时补不了错过的日期 |
 | `data/margin_balance.json` | `margin.py`；云端窗口见 AUTOMATION.md | 不要用各自最近日期拼成同一天 |
 | `data/ic_strategy.json` | `ic_strategy.py`；工作流 `ic-strategy.yml`（北京 17:40 和 20:10） | 未获授权不改 A/B/C/D、选约、换仓 |
-| `data/holdings.json` | 只按主人明确给出的成交改 | 不改、不删、不模拟。缺成交价就留空，不要用开仓价冒充最新价 |
+| `data/holdings.json` | 主人在对话里给齐 contract、direction、lots、entry_price、entry_date 后可改；换仓再写 rolls（close_price、open_price、realized_pnl=(平仓价−原开仓价)×lots×200，空头符号相反）并累加 d_realized_net_pnl | 缺任一项先问。account_balance 只用主人报的数。成交价不写入 last_price。除此之外不改、不删、不模拟 |
 | `preview-data/official/`、`preview-data/status.json` | `preview-tools/collect_preview.py`；工作流 `preview-data.yml`（北京 23:30） | 不写 `data/` |
 | `preview-data/global.json` | 同上采集里的全球风险更新 | 受限源不要填造数值 |
 | `preview-data/turnover-*.json` | `preview-tools/turnover_baseline.py`、`turnover_history.py` | |
