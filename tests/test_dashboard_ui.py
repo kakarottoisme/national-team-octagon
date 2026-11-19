@@ -110,6 +110,21 @@ class DashboardContract(unittest.TestCase):
         self.assertIn("m.status==='connected'||m.status==='connected_stale'", risk)
         self.assertIn("m.status==='restricted'?'受限不转录':'未接入，不能据此判断风险'", risk)
 
+    def test_header_master_is_one_stylesheet(self):
+        css = (ROOT / "dashboard-shell.css").read_text(encoding="utf-8")
+        self.assertIn("--shell-head-h:120px", css)
+        self.assertIn("--shell-head-h:68px", css)
+        self.assertIn("--shell-icon:38px", css)
+        self.assertIn("--shell-title-size:18px", css)
+        self.assertIn("--shell-title-lh:26px", css)
+        self.assertIn("text-overflow:ellipsis", css)
+        for name, text in self.sources.items():
+            with self.subTest(page=name):
+                self.assertIn('href="dashboard-shell.css"', text)
+                tail = text.split("/* ===== End reviewed shared UI ===== */", 1)[1]
+                self.assertNotIn(".ui-page .top .shell-head{", tail)
+                self.assertNotIn(".ui-page .crumb{font-size:13px}", tail)
+
     def test_inline_javascript_parses(self):
         for name, p in self.parsed.items():
             for i, script in enumerate(p.scripts):

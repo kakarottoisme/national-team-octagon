@@ -1,0 +1,65 @@
+/* 四页共用的页眉母版。标题栏高度、图标、标题行高和左右页边距只在这里定义。
+   副标题过长时单行省略，不把分隔线顶下去。 */
+:root{
+ --shell-icon:38px;
+ --shell-title-size:18px;
+ --shell-title-lh:26px;
+ --shell-crumb-size:14px;
+ --shell-crumb-lh:22px;
+ --shell-brand-h:48px;
+ --shell-ctl-h:44px;
+ --shell-gap:8px;
+ --shell-pad-top:12px;
+ --shell-pad-bottom:8px;
+ --page-pad-x:16px;
+ --shell-head-h:120px;
+ --shell-nav-h:66px;
+}
+@media(min-width:700px){
+ :root{--page-pad-x:24px;--shell-head-h:68px}
+}
+
+.ui-page .wrap{padding-left:var(--page-pad-x);padding-right:var(--page-pad-x)}
+.ui-page header.top{background:var(--card);border-bottom:1px solid var(--line)}
+.ui-page .top .shell-head{
+ display:grid;
+ grid-template-columns:minmax(0,1fr);
+ grid-template-rows:var(--shell-brand-h) var(--shell-ctl-h);
+ align-items:center;
+ gap:var(--shell-gap);
+ height:var(--shell-head-h);
+ min-height:var(--shell-head-h);
+ max-height:var(--shell-head-h);
+ padding:var(--shell-pad-top) var(--page-pad-x) var(--shell-pad-bottom);
+ overflow:hidden;
+}
+@media(min-width:700px){
+ .ui-page .top .shell-head{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:var(--shell-brand-h)}
+}
+.ui-page .brand{
+ display:grid;
+ grid-template-columns:var(--shell-icon) minmax(0,1fr);
+ gap:10px;
+ align-items:center;
+ height:var(--shell-brand-h);
+ min-height:var(--shell-brand-h);
+ max-height:var(--shell-brand-h);
+ min-width:0;
+}
+.ui-page .mark,.ui-page .mark img,.ui-page .mark svg{display:block;width:var(--shell-icon);height:var(--shell-icon);background:transparent}
+.ui-page .brand-copy{min-width:0;height:var(--shell-brand-h);display:flex;flex-direction:column;justify-content:flex-start}
+.ui-page header.top h1{
+ margin:0;height:var(--shell-title-lh);font-size:var(--shell-title-size);line-height:var(--shell-title-lh);
+ font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ui-page header.top .crumb{
+ height:var(--shell-crumb-lh);margin:0;font-size:var(--shell-crumb-size);line-height:var(--shell-crumb-lh);
+ color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ui-page .top .ctl{min-width:0;height:var(--shell-ctl-h);flex-wrap:nowrap;align-items:center;overflow:hidden}
+.ui-page .top .nav-row{
+ display:block;box-sizing:border-box;height:var(--shell-nav-h);min-height:var(--shell-nav-h);max-height:var(--shell-nav-h);
+ padding-top:0;padding-bottom:12px;overflow:hidden;
+}
+.ui-page .view-tabs{height:54px;box-sizing:border-box}
+.ui-page .view-tab{height:44px;max-height:44px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
