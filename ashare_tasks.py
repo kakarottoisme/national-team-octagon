@@ -15,6 +15,8 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import time
+import urllib.error
 import urllib.request
 
 from backend_io import write_json_atomic
@@ -164,32 +166,59 @@ def ic(now):
     return {'notify':True,'message':message,'data':result,'sources':[HOLDINGS_URL,SINA+','.join(['sh000905',*['nf_'+c for c in codes]])]}
 
 
+class ArchiveSourcePending(ValueError):
+    """Same-day source is incomplete or being corrected; never usable as-is."""
+
+
+def validate_archive_source(raw, url, date):
+    if '/minute/query' in url:
+        code = url.rsplit('=', 1)[1]
+        payload = raw['data'][code]['data']
+        if payload['date'] != date.replace('-', ''):
+            raise ValueError(f'{code} 分时不是目标交易日，未写入')
+        times = [r.split()[0] for r in payload['data']]
+        if len(times) < 200 or max(times) < '1500':
+            raise ArchiveSourcePending(f'{code} 当日收盘分时不完整，未写入')
+        previous = 0.
+        for row in payload['data']:
+            amount = number(row.split()[3])
+            if amount < previous:
+                raise ArchiveSourcePending(f'{code} 累计成交额倒退，未写入')
+            previous = amount
+    else:
+        k = raw['data']['sh000001']
+        rows = k.get('day') or k.get('qfqday') or []
+        i = next((i for i, r in enumerate(rows) if r[0] == date), None)
+        if i is None or i == 0:
+            raise ArchiveSourcePending('上证当日收盘及前日基准不完整，未存档')
+    return raw
+
+
+def fetch_archive_source(fetch, url, date):
+    # Tencent may revise post-close cumulative amounts. Re-read the entire
+    # response, never clamp negative deltas, omit bad rows, or reuse old data.
+    for attempt in range(3):
+        try:
+            return validate_archive_source(fetch(url), url, date)
+        except urllib.error.HTTPError as exc:
+            if attempt == 2 or (exc.code not in (408, 429) and exc.code < 500):
+                raise  # Authentication/permission failures are not retried.
+        except (ArchiveSourcePending, urllib.error.URLError, TimeoutError):
+            if attempt == 2:
+                raise
+        if attempt == 2:
+            raise ValueError('分时来源连续读取失败，未写入')
+        time.sleep((15, 30)[attempt])
+    raise ValueError('分时来源连续读取失败，未写入')
+
+
 def archive(now, state):
     date = now.date().isoformat()
     if state.get('archive_success') == date:
         return {'notify':False,'reason':'当日已存档'}
     import archive as producer
     def validated(url):
-        raw = producer.g(url)
-        if '/minute/query' in url:
-            code=url.rsplit('=',1)[1]
-            payload=raw['data'][code]['data']
-            times=[r.split()[0] for r in payload['data']]
-            if payload['date']!=date.replace('-','') or len(times)<200 or max(times)<'1500':
-                raise ValueError(f'{code} 当日收盘分时不完整，未写入')
-            previous = 0.
-            for row in payload['data']:
-                amount = number(row.split()[3])
-                if amount<previous:
-                    raise ValueError(f'{code} 累计成交额倒退，未写入')
-                previous=amount
-        else:
-            k = raw['data']['sh000001']
-            rows = k.get('day') or k.get('qfqday') or []
-            i = next((i for i,r in enumerate(rows) if r[0] == date),None)
-            if i is None or i == 0:
-                raise ValueError('上证当日收盘及前日基准不完整，未存档')
-        return raw
+        return fetch_archive_source(producer.g, url, date)
     day,summary,minutes = producer.build_archive(fetch=validated)
     if day!=date or '上证收盘' not in summary or '上证涨跌幅' not in summary:
         raise ValueError('上证当日收盘或涨跌幅缺失，未存档')
