@@ -78,12 +78,8 @@ select{max-width:100%}
 :root{--page:#f5f6f8;--card:#fff;--line:#e6e8ec;--line-2:#f0f1f4;--ink:#1f2733;--ink-2:#4a5260;--muted:#606c7c;--faint:#697586;--accent:#3d6a9e;--chip:#f2f4f7;--accent-bg:#edf2f8}
 html{-webkit-text-size-adjust:100%;scrollbar-gutter:stable}
 body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif;color:var(--ink-2);background:var(--page);margin:0}
-.ui-page .wrap{width:100%;max-width:1600px;padding:0 16px;margin:auto;min-width:0}
-.ui-page .top .shell-head{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding-top:16px;padding-bottom:12px}
-.ui-page .brand{display:grid;grid-template-columns:38px minmax(0,1fr);gap:10px;align-items:center;min-width:0}
-.ui-page .mark,.ui-page .mark img{display:block;width:38px;height:38px;background:transparent}
-.ui-page h1{font-size:18px;line-height:26px;margin:0;color:var(--ink)}
-.ui-page .crumb{font-size:14px;line-height:22px;white-space:normal;overflow-wrap:anywhere;color:var(--muted)}
+.ui-page .wrap{width:100%;max-width:1600px;margin:auto;min-width:0}
+/* 页眉高度、图标、标题行高和页边距只在 dashboard-shell.css，四页共用。 */
 .ui-page .ctl{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;min-width:0}
 .ui-page button:not(.mrow),.ui-page select{font:inherit;font-size:14px;line-height:22px;min-height:44px;height:auto;min-width:44px;padding:10px 12px;border:1px solid #ccd5df;border-radius:10px;background:#fff;color:var(--ink);cursor:pointer;box-shadow:none}
 .ui-page select{font-size:16px;padding:8px 10px;max-width:100%}
@@ -146,7 +142,7 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 .skip-link{position:fixed;top:-90px;left:12px;z-index:200;background:#fff;padding:12px;color:#325b90}.skip-link:focus{top:12px}
 @media(min-width:500px){.ui-page .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(min-width:900px){.ui-page .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(min-width:700px){.ui-page .wrap{padding-left:24px;padding-right:24px}.ui-page .top .shell-head{grid-template-columns:minmax(0,1fr) auto}.ui-page .view-tab svg{display:block}.ui-page .ui-mask{padding:24px}.ui-page .ui-dialog{max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px)}.ui-page .ui-modal-body dl,.ui-page .ui-modal-body .mf{grid-template-columns:132px minmax(0,1fr);gap:12px 16px}.ui-page .ui-modal-body dd{margin:0}.ui-page .filter-group>label{flex-basis:auto}}
+@media(min-width:700px){.ui-page .view-tab svg{display:block}.ui-page .ui-mask{padding:24px}.ui-page .ui-dialog{max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px)}.ui-page .ui-modal-body dl,.ui-page .ui-modal-body .mf{grid-template-columns:132px minmax(0,1fr);gap:12px 16px}.ui-page .ui-modal-body dd{margin:0}.ui-page .filter-group>label{flex-basis:auto}}
 @media(max-width:699px){.ui-page .section-actions{width:100%}.scroll-hint{display:block}.ui-page .sec #st{flex-basis:100%}}
 @media(prefers-reduced-motion:reduce){.ui-page *{scroll-behavior:auto!important;transition:none!important}}
 /* ===== End reviewed shared UI ===== */
@@ -201,16 +197,15 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 .ui-page .kpi .vl{font-size:25px;line-height:32px;margin:4px 0}
 .ui-page .kpi .ft{font-size:13px;line-height:20px;margin-top:4px}
 .ui-page .panel{margin-bottom:18px}.ui-page .foot,.ui-page .hold-note{font-size:13px;line-height:20px;padding:10px 16px}
-.ui-page .top .shell-head{padding-top:12px;padding-bottom:8px;gap:8px}
 .ui-page .view-tabs{border-radius:12px}.ui-page .view-tab[aria-current="page"]{box-shadow:0 1px 3px rgba(39,63,101,.08)}
 .ui-page .model-h{padding:12px 16px}.ui-page .model-meta{font-size:13px;line-height:20px}
 .ui-page .leg-row .leg{padding:12px 14px;gap:6px}.ui-page .blk .k{font-size:13px;line-height:18px}.ui-page .blk .s{font-size:13px;line-height:20px}
 .ui-page .chart-help{font-size:13px;line-height:20px;margin:6px 0}.ui-page .scroll-hint{padding:4px 12px;font-size:13px}
 .ui-page .account-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ui-page .account-tools small{font-size:13px;color:var(--muted)}
-@media(min-width:700px){.ui-page .top .shell-head{grid-template-columns:minmax(0,1fr) auto}.ui-page .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.ui-page .kpis:has(>.kpi:nth-child(2):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:699px){.ui-page .kpi .ft,.ui-page .blk .s,.ui-page .foot{font-size:14px}.ui-page .crumb{font-size:13px}}
-</style></head><body data-ui-version="3" class="ui-page" data-ui-view="futures">
-<header class="top"><div class="wrap shell-head"><div class="brand"><span class="mark" aria-hidden="true"><img src="favicon.svg?v=ui-2" width="38" height="38" alt=""></span><div class="brand-copy"><h1>期指持仓</h1></div></div><div class="ctl">
+@media(min-width:700px){.ui-page .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.ui-page .kpis:has(>.kpi:nth-child(2):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:699px){.ui-page .kpi .ft,.ui-page .blk .s,.ui-page .foot{font-size:14px}}
+</style><link rel="stylesheet" href="dashboard-shell.css"></head><body data-ui-version="3" class="ui-page" data-ui-view="futures">
+<header class="top"><div class="wrap shell-head"><div class="brand"><span class="mark" aria-hidden="true"><img src="favicon.svg?v=ui-2" width="38" height="38" alt=""></span><div class="brand-copy"><h1>期指持仓</h1><div class="crumb" title="中信期货(代客) · CFFEX 前20会员">中信期货(代客) · CFFEX 前20会员</div></div></div><div class="ctl">
   <button type="button" onclick="openDrawer()">口径说明</button>
   <button id="rb" type="button" onclick="refresh()">刷新</button>
  </div></div><div class="wrap nav-row"><nav class="view-tabs" aria-label="数据视图导航"><a class="view-tab" href="index.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 14V9m5 5V5m5 9V8m4 6V3"/></svg><span>资金观察</span></a><a class="view-tab" href="margin.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 6h14M3 10h10M3 14h14"/><circle cx="7" cy="6" r="2" fill="#fff"/><circle cx="13" cy="14" r="2" fill="#fff"/></svg><span>两融余额</span></a><a class="view-tab" href="futures-preview.html" aria-current="page"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 3h7l4 4v10H6z"/><path d="M13 3v4h4M9 11h5M9 14.5h5"/></svg><span>期指持仓</span></a><a class="view-tab" href="risk-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M3.5 10h13M10 3.5c-2.8 2.8-2.8 10.2 0 13 2.8-2.8 2.8-10.2 0-13Z"/></svg><span>全球风险</span></a></nav></div></header>
