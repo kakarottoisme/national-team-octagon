@@ -60,7 +60,7 @@
     document.querySelectorAll('.view-tabs').forEach(nav=>{
       if(nav.querySelector('a[href="market-cycle.html"]'))return;
       const a=document.createElement('a');a.className='view-tab';a.href='market-cycle.html';
-      a.innerHTML='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 14l5-8 5 5 6-7"/></svg><span>市场顶底</span>';nav.append(a);
+      a.innerHTML='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12c2.5 0 2.5-7 5.5-7s2.5 10 5.5 10 2.5-7 5-7"/><circle cx="7.5" cy="5" r="1.25" fill="currentColor" stroke="none"/><circle cx="13" cy="15" r="1.25" fill="currentColor" stroke="none"/></svg><span>市场顶底</span>';nav.append(a);
     });
     document.querySelector('a.view-tab[aria-current="page"]')?.scrollIntoView({block:'nearest',inline:'nearest'});
     new MutationObserver(report).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});

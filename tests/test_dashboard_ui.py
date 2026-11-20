@@ -169,6 +169,26 @@ H=Object.fromEntries(Object.entries(H).slice(0,5));table(cur);assert.equal(eleme
         result = subprocess.run(['node','-'],input=stub+code+checks,text=True,capture_output=True)
         self.assertEqual(result.returncode,0,result.stderr)
 
+    def test_cycle_navigation_has_all_shared_icons(self):
+        cycle = (ROOT / 'market-cycle.html').read_text(encoding='utf-8')
+        nav = re.search(r'<nav class="view-tabs"[^>]*>(.*?)</nav>', cycle, re.S).group(1)
+        links = re.findall(r'<a\b[^>]*>(.*?)</a>', nav, re.S)
+        self.assertEqual(len(links), 5)
+        for link in links:
+            self.assertEqual(link.count('<svg '), 1)
+            self.assertIn('<span>', link)
+        original_nav = re.search(r'<nav class="view-tabs"[^>]*>(.*?)</nav>', self.sources['risk-preview.html'], re.S).group(1)
+        self.assertEqual(re.findall(r'<svg .*?</svg>', nav, re.S)[:4], re.findall(r'<svg .*?</svg>', original_nav, re.S))
+        cycle_icon = re.findall(r'<svg .*?</svg>', nav, re.S)[4]
+        runtime = (ROOT / 'dashboard-tabs.js').read_text(encoding='utf-8')
+        self.assertIn(cycle_icon, runtime)
+        self.assertIn('stroke-linejoin="round"', cycle_icon)
+        for name in (*PAGES, 'market-cycle.html'):
+            self.assertIn('dashboard-tabs.js?v=nav-icons-2', (ROOT / name).read_text(encoding='utf-8'))
+        css = (ROOT / 'dashboard-shell.css').read_text(encoding='utf-8')
+        self.assertIn('.ui-page .view-tab{gap:6px}', css)
+        self.assertIn('.ui-page .view-tab svg{display:none;width:16px;height:16px;flex:none}', css)
+
     def test_inline_javascript_parses(self):
         for name, p in self.parsed.items():
             for i, script in enumerate(p.scripts):
