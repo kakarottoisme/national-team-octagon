@@ -27,7 +27,7 @@ def main():
     before = protected_files()
     suite = unittest.TestSuite()
     # Avoid the local single-file packaging suite, which is not a repository dependency.
-    for pattern in ("test_backend_compatibility.py", "test_ic_strategy.py", "test_dashboard_ui.py", "test_reviewed_ux.py", "test_chart_readout.py", "test_market_status.py"):
+    for pattern in ("test_backend_compatibility.py", "test_ic_strategy.py", "test_dashboard_ui.py", "test_reviewed_ux.py", "test_chart_readout.py", "test_index_backfill.py", "test_market_status.py"):
         suite.addTests(unittest.defaultTestLoader.discover(str(ROOT / "tests"), pattern=pattern))
     # Separate loaders keep unittest's discovery root state from crossing directories.
     suite.addTests(unittest.TestLoader().discover(str(ROOT / "preview-tools/tests")))

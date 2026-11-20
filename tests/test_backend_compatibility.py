@@ -51,7 +51,7 @@ class TestLegacyOutputs(unittest.TestCase):
                         if script == "fetch_live.py":
                             fetch_live.main(data / "live.json", fetch=fixture_fetch(case), now=now, include_indices=False)
                         else:
-                            archive.main(data, fetch=fixture_fetch(case))
+                            archive.main(data, fetch=fixture_fetch(case), include_indices=False)
                     for path, legacy in expected.items():
                         self.assertEqual((root / path).read_bytes(), legacy.encode("utf-8"), path)
 
@@ -97,8 +97,14 @@ class TestNoBehaviorChanges(unittest.TestCase):
                 self.assertEqual(hashlib.sha256((ROOT / name).read_bytes()).hexdigest(), expected)
 
     def test_import_does_not_fetch_or_write(self):
-        with patch("urllib.request.urlopen", side_effect=AssertionError("import fetched")), \
-             patch("backend_io.write_json_atomic", side_effect=AssertionError("import wrote")):
+        try:
+            with patch("urllib.request.urlopen", side_effect=AssertionError("import fetched")), \
+                 patch("backend_io.write_json_atomic", side_effect=AssertionError("import wrote")):
+                importlib.reload(fetch_live)
+                importlib.reload(archive)
+        finally:
+            # Reloaded modules bind patched imports; restore them so subsequent
+            # isolated archive tests do not inherit the mock writer.
             importlib.reload(fetch_live)
             importlib.reload(archive)
 

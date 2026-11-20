@@ -328,6 +328,7 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
     </ul>
     <h4>样本与核对</h4>
     <ul>
+     <li>悬浮框指数按同日同分钟匹配；回补的5分钟K线只在端点显示并标明“5分钟”，其余分钟不插值，不能与ETF成交额互换。</li>
      <li>分时曲线与同时点基准：20 个完整交易日（新浪 5 分钟 K，单次上限约 22 日）。</li>
     </ul>
     <h4>已知局限</h4>
@@ -358,7 +359,9 @@ const V={axis:"#9aa1ab",grid:"#f0f1f4",base:"#e1e4e9",line:"#334155",zero:"#c9ce
 const INDEX_CODES=['sh000016','sh000300','sh000510','sh000905','sh000852','sz399006','sh000688'];
 function pointIndex(value,times){if(typeof value==='string'){const found=times.indexOf(value);if(found>=0)return found}return Number.isInteger(value)&&value>=0&&value<times.length?value:null}
 function pointNumber(value,digits,suffix=''){const v=uiNumber(value);return v==null?'—':v.toFixed(digits)+suffix}
-function matchedIndexValues(i,m,times){const source=(view==='live'?LIVE?.index_minutes:m.index_minutes)?.[INDEX_CODES[i]];if(!source||String(source.date).replace(/-/g,'')!==String(m.date||LIVE?.date||'').replace(/-/g,''))return times.map(()=>null);const byTime=new Map((source.t||[]).map((t,k)=>[String(t).replace(/\D/g,''),uiNumber(source.p?.[k])]));return times.map(t=>byTime.get(t.replace(/\D/g,''))??null)}
+function matchedIndexSource(i,m){const source=(view==='live'?LIVE?.index_minutes:m.index_minutes)?.[INDEX_CODES[i]];return source&&String(source.date).replace(/-/g,'')===String(m.date||LIVE?.date||'').replace(/-/g,'')?source:null}
+function matchedIndexValues(i,m,times){const source=matchedIndexSource(i,m);if(!source)return times.map(()=>null);const byTime=new Map((source.t||[]).map((t,k)=>[String(t).replace(/\D/g,''),uiNumber(source.p?.[k])]));return times.map(t=>byTime.get(t.replace(/\D/g,''))??null)}
+function indexPointField(i,m,times,name){const source=matchedIndexSource(i,m),interval=Number(source?.interval_minutes)||1,data=matchedIndexValues(i,m,times);return {name:name+'指数'+(source?' · '+interval+'分钟':''),data,format:v=>v==null?(source?(interval===5?'无5分钟点':'该分钟缺数据'):(view==='live'?'指数源未取到':'当日未存档')):pointNumber(v,2,' 点')}}
 function hoverPosition(plot,point,size){
  const r=plot.getBoundingClientRect(),width=size.contentSize[0],height=size.contentSize[1],gap=12,pad=8;
  const vw=document.documentElement.clientWidth||innerWidth,vh=innerHeight,px=r.left+point[0],py=r.top+point[1];
@@ -472,7 +475,7 @@ function drawEtf(i,m){const [n,code]=E[i];if(!m||!Array.isArray(m.t)||!Array.isA
  const ax=k=>({type:"category",data:t,gridIndex:k,axisLabel:{show:k==2,fontSize:10,color:V.axis,margin:6,hideOverlap:true},axisTick:{show:false},axisLine:{show:k==2,lineStyle:{color:V.base}}});
  const ya=(k,extra)=>Object.assign({gridIndex:k,splitNumber:2,splitLine:{show:false},axisLabel:{fontSize:10,color:V.axis},axisLine:{show:false},axisTick:{show:false}},extra);
  if(!charts[i]){document.getElementById("n"+i).style.display="flex";document.getElementById("n"+i).textContent="图表组件未加载";return est}
- const tooltip=compactHover(charts[i],t,[{name:n+'指数',data:matchedIndexValues(i,m,t),format:v=>pointNumber(v,2,' 点')},{name:'ETF价格',data:p,format:v=>pointNumber(v,3)},{name:'ETF涨跌幅',data:pct,format:v=>pointNumber(v,2,'%')},{name:'分钟成交额',data:a,format:v=>pointNumber(v,4,' 亿')}]);
+ const tooltip=compactHover(charts[i],t,[indexPointField(i,m,t,n),{name:'ETF价格',data:p,format:v=>pointNumber(v,3)},{name:'ETF涨跌幅',data:pct,format:v=>pointNumber(v,2,'%')},{name:'分钟成交额',data:a,format:v=>pointNumber(v,4,' 亿')}]);
  charts[i].setOption({backgroundColor:"transparent",animation:false,tooltip,axisPointer:{link:[{xAxisIndex:"all"}]},
   grid:[{top:6,height:"52%",left:44,right:8},{top:"62%",height:"16%",left:44,right:8},{top:"82%",height:"9%",left:44,right:8}],
   xAxis:[ax(0),ax(1),ax(2)],yAxis:[
@@ -579,7 +582,7 @@ async function refresh(){
   }else{
    const d=requestView,h=H[d]||{};let m=null;try{m=await j('./data/minutes/'+d+'.json')}catch(e){}
    if(view!==requestView)return;
-   E.forEach((e,i)=>{const x=m?.etfs?.[e[1]];x?drawEtf(i,x):noMin(i,h[e[0]])});
+   E.forEach((e,i)=>{const x=m?.etfs?.[e[1]];x?drawEtf(i,{...x,date:m.date||d,index_minutes:m.index_minutes}):noMin(i,h[e[0]])});
    bn.style.display=!m?'block':'none';bn.textContent=d+'：分时未存档，仅显示当日汇总，缺失曲线不补造。';
    drawSum(Object.keys(H).sort().map(x=>[x,0,H[x]['上证收盘']]),d);table(d);chartStatusSnapshot={view:d};renderMarketStatus();
   }

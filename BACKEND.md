@@ -6,8 +6,9 @@
 ### 资金观察
 `index.html` 读 `data/live.json`、`data/history.json`、`data/minutes/YYYY-MM-DD.json`，以及 `preview-data/turnover-baseline.json` / `turnover-history.json`。ETF 列表固定为上证50、沪深300、中证A500、中证500、中证1000、创业板、科创50。
 - `fetch_live.py`：腾讯七 ETF 分时和上证日线；腾讯上证失败时东财兜底；只生成 live
-- `index_quotes.py`：仅供悬浮展示的七个对应指数分时。`fetch_live.main` 可选附加 `index_minutes`，8秒超时并行、单源失败不阻断ETF。既有 `build_payload` 和策略输入不变；前端严格同日同分钟匹配，历史缺档显示“—”，不反推指数
-- `archive.py`：收盘后抓取当天分时，追加 history 并写当天 minutes；不能补抓错过日期的腾讯分时
+- `index_quotes.py`：仅供悬浮展示的七个对应指数分时。`fetch_live.main` 可选附加 `index_minutes`，8秒超时并行、单源失败不阻断ETF。前端严格同日同分钟匹配，不反推指数
+- `archive.py`：收盘后抓取当天ETF分时，追加 history；默认一起保存同日完整指数1分钟记录，来源失败时保留已存完整指数或同日live缓存，不拿其他日期替代。`include_indices=False`保留旧字节输出
+- `backfill_index_minutes.py`：只给已存在的ETF日期档补充顶层`index_minutes`，不改ETF、日汇总、持仓或策略。新浪历史1分钟必须完整才采用，否则取完整5分钟端点（48点/日）；不插值。每只附`date/interval_minutes/price_type/source/source_url/collected_at/interpolated`，回补全部覆盖后才写入；命令`python3 backfill_index_minutes.py --staging-dir <目录> --apply`。悬浮标签明示1/5分钟，5分钟非端点显示“无5分钟点”
 - `preview-tools/turnover_baseline.py`：20 完整交易日、48 个同时点均值，供盘中成交额比较
 - `preview-tools/turnover_history.py`：新浪60分钟K按日累加、配合本地 live 进行一致性检查
 

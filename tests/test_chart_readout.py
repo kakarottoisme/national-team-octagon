@@ -12,7 +12,7 @@ class PointReadoutTests(unittest.TestCase):
         self.assertIn("triggerOn:'mousemove|click'",source)
         fields=source[source.index('const tooltip=compactHover(charts[i]'):source.index('charts[i].setOption',source.index('const tooltip=compactHover(charts[i]'))]
         for name in ('MACD','DIF','DEA'): self.assertNotIn("name:'"+name+"'",fields)
-        self.assertIn("name:n+'指数'",fields)
+        self.assertIn("indexPointField(i,m,t,n)",fields)
         self.assertIn("name:'ETF价格'",fields)
 
     def test_formatter_single_time_missing_date_and_outside_position(self):
@@ -28,6 +28,11 @@ const chart={getDom(){return plot},dispatchAction(a){actions.push(a)}};
         checks="""
 assert.deepStrictEqual(matchedIndexValues(6,{date:'20261118'},['09:30','09:31']),[1234.56,null]);
 assert.deepStrictEqual(matchedIndexValues(6,{date:'20261117'},['09:30']),[null]);
+view='2026-11-04';const hist={date:'2026-11-04',index_minutes:{sh000905:{date:'2026-11-04',interval_minutes:5,t:['1325','1330'],p:[6384.644,6385]}}};
+assert.deepStrictEqual(matchedIndexValues(3,hist,['13:25','13:26']),[6384.644,null]);
+const backfill=indexPointField(3,hist,['13:25','13:26'],'中证500');assert.equal(backfill.name,'中证500指数 · 5分钟');assert.equal(backfill.format(backfill.data[0]),'6384.64 点');assert.equal(backfill.format(backfill.data[1]),'无5分钟点');
+const missing=indexPointField(3,{date:'2026-11-04'},['13:25'],'中证500');assert.equal(missing.format(null),'当日未存档');
+assert.deepStrictEqual(matchedIndexValues(3,{...hist,date:'2026-11-03'},['13:25']),[null]);view='live';
 const fields=[{name:'指数',data:[1234.56,1235],format:v=>pointNumber(v,2,' 点')},{name:'ETF价格',data:[1.305,0],format:v=>pointNumber(v,3)}];
 const opt=compactHover(chart,['09:30','09:31'],fields);let html=opt.formatter([{dataIndex:0},{dataIndex:0}]);assert.equal(html.split('09:30').length,2);assert(html.includes('1234.56 点'));assert(!html.includes('MACD'));
 assert.equal(pointNumber(null,2),'—');assert.equal(pointNumber(0,2),'0.00');

@@ -36,7 +36,7 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 | 文件 | 谁写 | 不要做什么 |
 |---|---|---|
 | `data/live.json` | `.github/workflows/live.yml` 里的 `live_runner.py`，内部调用 `fetch_live.py` | 不要停用这个工作流，也不要再做一个写 live 的定时任务 |
-| `data/history.json`、`data/minutes/` | `archive.py`；云端入口见 AUTOMATION.md 的八宫格归档 | 腾讯分时补不了错过的日期 |
+| `data/history.json`、`data/minutes/` | `archive.py`；云端入口见 AUTOMATION.md 的八宫格归档 | 腾讯分时补不了错过的ETF日期；已有ETF日期的指数可用`backfill_index_minutes.py`补1/5分钟端点，严格标注粒度、不插值 |
 | `data/margin_balance.json` | `margin.py`；云端窗口见 AUTOMATION.md | 不要用各自最近日期拼成同一天 |
 | `data/ic_strategy.json` | `ic_strategy.py`；工作流 `ic-strategy.yml`（北京 17:40 和 20:10） | 未获授权不改 A/B/C/D、选约、换仓 |
 | `data/holdings.json` | 主人在对话里给齐 contract、direction、lots、entry_price、entry_date 后可改；换仓再写 rolls（close_price、open_price、realized_pnl=(平仓价−原开仓价)×lots×200，空头符号相反）并累加 d_realized_net_pnl | 缺任一项先问。account_balance 只用主人报的数。成交价不写入 last_price。除此之外不改、不删、不模拟 |

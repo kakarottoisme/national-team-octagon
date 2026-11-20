@@ -41,9 +41,36 @@ def build_archive(fetch=None):
     return iso_date, summary, {"date": iso_date, "etfs": minutes}
 
 
-def main(data_dir=None, fetch=None):
+def main(data_dir=None, fetch=None, include_indices=True):
     date, summary, minutes = build_archive(fetch=fetch)
     directory = Path(data_dir) if data_dir is not None else ROOT / "data"
+    if include_indices:
+        from backfill_index_minutes import canonical_date, merge_indices
+        from index_quotes import fetch_index_minutes
+        # Prefer this same day's native minute quotes. Optional source failure
+        # must not erase an earlier good archive or prevent ETF archiving.
+        layers = []
+        for cached in (directory / "minutes" / f"{date}.json", directory / "live.json"):
+            try:
+                candidate = json.loads(cached.read_text(encoding="utf-8"))
+                if canonical_date(candidate.get("date", "")) == date:
+                    layers.append((candidate.get("index_minutes") or {}, False))
+            except (OSError, ValueError, TypeError):
+                pass
+        layers.append((fetch_index_minutes(date.replace("-", ""), fetch=fetch), True))
+        for code, row, fresh in [(code, row, fresh) for layer, fresh in layers for code, row in layer.items()]:
+            try:
+                native = dict(row)
+                if fresh or "interval_minutes" not in native:
+                    native.setdefault("interval_minutes", 1)
+                    native.setdefault("source", "tencent_minutes")
+                    native.setdefault("source_url", "https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=" + code)
+                    native.setdefault("price_type", "minute_quote")
+                    native.setdefault("interpolated", False)
+                minutes = merge_indices(minutes, {code: native})
+            except (ValueError, TypeError, KeyError, OverflowError):
+                # Bad/mixed-date/partial optional index data is not fabricated.
+                continue
     history_path = directory / "history.json"
     history = json.loads(history_path.read_text(encoding="utf-8")) if history_path.exists() else {}
     history[date] = summary
