@@ -22,6 +22,13 @@
 - `preview-tools/futures_history.py`：CFFEX 原始 CSV 严格验日期、前20会员并集、独立品种历史
 - `holdings.json`：本人配置，非模型仓位。采集器不应写它；缺净账本时前端不硬算 D
 
+### 份额与申赎
+`etf-flows.html` 读 `data/etf_share_flows.json` 和 `data/etf_official_holdings.json`。名单是第三方观察的 16 只宽基，另加 159352。
+- `etf_share_flows.py`：上交所按日份额、东财日 K 成交均价、深交所未标日期快照。估算净流入 = 份额差 × 成交均价。窗口内缺一天则为 null。
+- 深市快照文件是 `data/etf_szse_snapshot.json`，`date_status` 固定为 `undated`。
+- 官方持仓只来自 2026 年中期报告原文。报告没有前十名或没有具名时，`rows` 留空。
+- 云端由 `.github/workflows/etf-share-flows.yml` 在北京 23:40 和次日 00:10 运行，无变化不提交。不碰 `live.yml`。
+
 ### 全球风险
 `risk-preview.html` 读 `preview-data/global.json`。
 `collect_preview.maybe_collect_global()` 调 `global_sources.update_global()`；后者合并 Treasury、public_macro 与上次缓存。`public_macro.py` 管理名义/实际曲线、ACM、SOFR/IORB 同日差等。现有 Cboe/ICE/FINRA 等受限指标不自动复制成数值，保留现有 link_only/restricted/pending 处理；不要因清理代码绕开这些限制。文件里的历史注释曾描述旧接入状态，以当前函数和状态字段为准。
@@ -50,6 +57,7 @@ python3 ic_strategy.py
 python3 preview-tools/collect_preview.py
 python3 preview-tools/turnover_baseline.py
 python3 preview-tools/turnover_history.py
+python3 etf_share_flows.py
 ```
 `fetch_live/archive/ic_strategy` 用标准库；`margin` 需 akshare/pandas；preview 依赖按 `preview-tools/requirements.txt` 安装。本轮不改现有依赖版本或调度。
 

@@ -23,6 +23,7 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 | `margin.html` | 两融余额 | `data/margin_balance.json` |
 | `futures-preview.html` | 期指持仓 | `data/ic_strategy.json`、`data/holdings.json`、`preview-data/official/` |
 | `risk-preview.html` | 全球风险 | `preview-data/global.json` |
+| `etf-flows.html` | 份额申赎 | `data/etf_share_flows.json`、`data/etf_official_holdings.json` |
 
 文件名带 preview 的期指页和风险页就是正式 Tab，不是草稿。
 
@@ -40,6 +41,8 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 | `preview-data/official/`、`preview-data/status.json` | `preview-tools/collect_preview.py`；工作流 `preview-data.yml`（北京 23:30） | 不写 `data/` |
 | `preview-data/global.json` | 同上采集里的全球风险更新 | 受限源不要填造数值 |
 | `preview-data/turnover-*.json` | `preview-tools/turnover_baseline.py`、`turnover_history.py` | |
+| `data/etf_share_history.json`、`data/etf_share_flows.json`、`data/etf_szse_snapshot.json` | `etf_share_flows.py`；工作流 `etf-share-flows.yml`（北京 23:40，次日 00:10 再试） | 深市快照无统计日，不得写成交易日。缺份额或成交均价保持 null。不改 live.yml |
+| `data/etf_official_holdings.json` | 每年 4 月年报、9 月中期报告后按基金原文核对。未在原文具名的持有人不写 | 不用媒体或 Wind 汇总 |
 
 工作流文件：
 

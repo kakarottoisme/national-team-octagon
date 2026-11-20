@@ -10,7 +10,7 @@ import unittest
 from html.parser import HTMLParser
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = ("index.html", "margin.html", "futures-preview.html", "risk-preview.html")
+PAGES = ("index.html", "margin.html", "futures-preview.html", "risk-preview.html", "etf-flows.html")
 
 
 class Collector(HTMLParser):
@@ -126,6 +126,7 @@ class DashboardContract(unittest.TestCase):
             "margin.html": "沪深两市 · 日度数据",
             "futures-preview.html": "中信期货(代客) · CFFEX 前20会员",
             "risk-preview.html": "利率条件与融资成本 · 读最新值与历史",
+            "etf-flows.html": "宽基 ETF · 全市场申赎，非国家队专属",
         }
         for name, text in self.sources.items():
             with self.subTest(page=name):

@@ -2,7 +2,7 @@
    embedded pages continue to use the original live JSON endpoints. */
 (() => {
   'use strict';
-  const names = ['index.html','margin.html','futures-preview.html','risk-preview.html'];
+  const names = ['index.html','margin.html','futures-preview.html','risk-preview.html','etf-flows.html'];
   const page = location.pathname.split('/').pop() || 'index.html';
   if (!names.includes(page)) return;
   const embedded = new URLSearchParams(location.search).get('view') === 'embedded';
@@ -33,6 +33,7 @@
     if (page === 'index.html') return !!document.querySelector('#tb tr') && document.querySelector('#ds')?.options.length>0;
     if (page === 'margin.html') return !!document.querySelector('#marginKpis .kpi') && document.querySelector('#marginDate')?.options.length>0;
     if (page === 'futures-preview.html') return !!document.querySelector('#icDynamic .model') && document.querySelector('#icDate')?.options.length>0;
+    if (page === 'etf-flows.html') return !!document.querySelector('#flowTable tbody tr') && !!document.querySelector('#holdTable tbody tr');
     return !!document.querySelector('#grid .mrow');
   }
   function report() {

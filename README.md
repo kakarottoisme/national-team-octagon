@@ -34,6 +34,9 @@
 `data/margin_balance.json`：两融余额（沪+深，亿元，2010-03-31 起）与创业板指 399006、科创50 000688、中证500 000905、中证1000 000852、沪深300 000300、上证50 000016 日收盘（全量历史）。
 收盘后（建议 17:00 以后/次日，交易所两融披露滞后约 1 交易日）运行 `python3 margin.py`（需 akshare，可用 /workspace/.venv-nt），然后 commit 并 push `data/margin_balance.json`。脚本每次全量重拉，漏跑无影响。
 
+## 份额与申赎（etf-flows.html）
+`data/etf_share_flows.json` 是全市场申赎估算，不是国家队专属，也不是本页分钟成交额代理。沪市份额按上交所统计日回补，深市当前规模没有统计日，不写入交易日。晚间由 **Refresh ETF share flows**（`.github/workflows/etf-share-flows.yml`）更新。国家队持仓表只收基金中期报告和年报里写明的持有人，见 `data/etf_official_holdings.json`。
+
 ## IC 策略 · 收盘信号（futures-preview.html 顶部）
 `data/ic_strategy.json`：中证500收盘算出的 IC 只做多目标手数、A/B/C 底仓、D 腿（盈利覆盖加仓）和建议手数、建议合约、下一交易日触发价，以及可回看的历史。页面上的「最终规则」是计算口径。实际持仓写在 `data/holdings.json`，页面「当前持仓」只读这份配置。保证金按交易所 12% 估算。
 

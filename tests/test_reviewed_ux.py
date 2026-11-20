@@ -37,6 +37,6 @@ class ReviewedUX(unittest.TestCase):
  def test_source_values_are_escaped(self):
   s=self.source('risk-preview.html');self.assertIn('esc(typeof m.value',s);self.assertIn('esc(ten)',s)
  def test_safe_fetch_timeout(self):
-  for name in ['index.html','margin.html','futures-preview.html','risk-preview.html']:
+  for name in ['index.html','margin.html','futures-preview.html','risk-preview.html','etf-flows.html']:
    s=self.source(name);self.assertIn('AbortController',s);self.assertIn('12000',s);self.assertIn('cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/',s)
 if __name__=='__main__':unittest.main()

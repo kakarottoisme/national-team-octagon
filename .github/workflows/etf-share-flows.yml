@@ -1,0 +1,75 @@
+name: Refresh ETF share flows
+
+# 晚间补宽基 ETF 份额和全市场申赎估算。只写 data/etf_share_history.json、
+# data/etf_share_flows.json、data/etf_szse_snapshot.json。
+# 不改 live.yml，不写 data/live.json，不写持仓和 IC 策略。
+# 23:40 北京是上交所份额通常已经发布之后；00:10 再试一次，发布晚了也能补上。
+# 份额没变、或上交所尚未发布，脚本不改文件，这里也不做空提交。
+on:
+  schedule:
+    - cron: "40 15 * * 1-5"
+    - cron: "10 16 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-etf-share-flows
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 20
+          persist-credentials: true
+
+      - name: Configure git identity
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          export GIT_TERMINAL_PROMPT=0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch official shares and rebuild flows
+        shell: bash
+        run: python3 etf_share_flows.py
+
+      - name: Commit share files only when they changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          export GIT_TERMINAL_PROMPT=0
+          STAMP=$(date -u +%Y-%m-%dT%H:%MZ)
+          git add data/etf_share_history.json data/etf_share_flows.json data/etf_szse_snapshot.json
+          if git diff --cached --quiet; then
+            echo "ETF份额无变化，不提交"
+            exit 0
+          fi
+          git commit -m "ETF share flows ${STAMP}"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "已推送 ETF 份额"
+              exit 0
+            fi
+            echo "push 第 ${attempt} 次失败，尝试 rebase"
+            git fetch --depth=20 origin main
+            if ! git rebase origin/main; then
+              echo "::error::rebase 冲突，保留工作树，不 force"
+              git rebase --abort || true
+              exit 1
+            fi
+          done
+          echo "::error::多次 push 失败"
+          exit 1
