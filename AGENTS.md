@@ -3,7 +3,7 @@
 给后续任何 AI。先读这一页，再按任务打开下面两份，不要凭文件名猜。
 
 - 视觉：[docs/DESIGN.md](docs/DESIGN.md)。字号和页眉只改 `dashboard-shell.css`。
-- 豆包定时任务：[AUTOMATION.md](AUTOMATION.md)。2026-11-19 主人批准新增三条：盘中刷新自恢复、成交后更新持仓、IC 策略信号变化提醒。除此之外不改其中的规则、窗口和输出。
+- 豆包定时任务：[AUTOMATION.md](AUTOMATION.md)。2026-11-19 主人批准新增三条：盘中刷新自恢复、成交后更新持仓、IC 策略信号变化提醒。2026-11-20另授权期指前台60秒可见刷新与两条既有后台工作流收盘补查；除此之外不改规则、窗口和输出。
 - 脚本与字段：[BACKEND.md](BACKEND.md)。
 
 ## 这是什么
@@ -40,9 +40,9 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 | `data/live.json` | `.github/workflows/live.yml` 里的 `live_runner.py`，内部调用 `fetch_live.py` | 不要停用这个工作流，也不要再做一个写 live 的定时任务 |
 | `data/history.json`、`data/minutes/` | `archive.py`；云端入口见 AUTOMATION.md 的八宫格归档 | 腾讯分时补不了错过的ETF日期；已有ETF日期的指数可用`backfill_index_minutes.py`补1/5分钟端点，严格标注粒度、不插值 |
 | `data/margin_balance.json` | `margin.py`；云端窗口见 AUTOMATION.md | 不要用各自最近日期拼成同一天 |
-| `data/ic_strategy.json` | `ic_strategy.py`；工作流 `ic-strategy.yml`（北京 17:40 和 20:10） | 未获授权不改 A/B/C/D、选约、换仓 |
+| `data/ic_strategy.json` | 原 `ic_strategy.py` 计算，`futures_close_update.py --mode strategy` 增量门禁；`ic-strategy.yml` 收盘后补查（详见 AUTOMATION.md） | 未获授权不改 A/B/C/D、选约、换仓 |
 | `data/holdings.json` | 主人在对话里给齐 contract、direction、lots、entry_price、entry_date 后可改；换仓再写 rolls（close_price、open_price、realized_pnl=(平仓价−原开仓价)×lots×200，空头符号相反）并累加 d_realized_net_pnl | 缺任一项先问。account_balance 只用主人报的数。成交价不写入 last_price。除此之外不改、不删、不模拟 |
-| `preview-data/official/`、`preview-data/status.json` | `preview-tools/collect_preview.py`；工作流 `preview-data.yml`（北京 23:30） | 不写 `data/` |
+| `preview-data/official/`、`preview-data/status.json` | `preview-data.yml` 收盘补查只运行 `futures_close_update.py --mode members`；23:30保留 `collect_preview.py` 全量 | 不写 `data/`；会员持仓不等待ETF/全球源 |
 | `preview-data/global.json` | 同上采集里的全球风险更新 | 受限源不要填造数值 |
 | `preview-data/turnover-*.json` | `preview-tools/turnover_baseline.py`、`turnover_history.py` | |
 | `data/etf_share_history.json`、`data/etf_share_flows.json`、`data/etf_szse_snapshot.json` | `etf_share_flows.py`；工作流 `etf-share-flows.yml`（北京 23:40，次日 00:10 再试） | 深市只认 fund_jjgm 的 size_date；失败降级的无日期快照不得写成交易日。缺份额或成交均价保持 null。不改 live.yml |
@@ -51,8 +51,9 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 工作流文件：
 
 - `live.yml`：名称 Refresh live.json。北京 08:53 / 12:43 预热，`*/5 1-7 * * 1-5`（UTC）是重启机会。真正采集只在 09:15–11:35 和 12:55–15:05。
-- `ic-strategy.yml`：只提交 `data/ic_strategy.json`。
-- `preview-data.yml`：只提交 `preview-data/official` 和 `status.json`。
+- `ic-strategy.yml`：只提交 `data/ic_strategy.json`，当前日已有时不重算、不提交；北京15:35–17:55每10分钟，保留17:40，20:10/22:10/23:30兜底。
+- `preview-data.yml`：同一收盘补查窗口只提交新增四会员shard；20:10/22:10兜底，23:30保留原ETF/全球/成交额全量路径。手动默认期指only，`full_refresh=true`明确选择全量。
+- 期指页可见时每60秒读取；切回Tab/浏览器可见立即读，隐藏暂停，网络失败保留原日期。后台schedule不是精确实时保证，可能排队。
 
 `live_daemon.sh` 是电脑醒着时的可选补充，不是云端定时。`run_ashare_task.sh` 配 `ashare_tasks.py`，给 AUTOMATION.md 里的豆包任务用。
 

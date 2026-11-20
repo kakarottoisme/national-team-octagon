@@ -212,7 +212,7 @@ assert.equal(nextObservationDate(null,null,[]),null);
     def test_dashboard_preserves_explicit_release_version(self):
         source = (ROOT / 'dashboard.html').read_text(encoding='utf-8')
         code = source.split('const requestedVersion=',1)[1].split('function mount(',1)[0]
-        for search, expected in [('?v=ic20-release','ic20-release'),('','svg-margin-20261120-4'),('?v=bad%2Fpath','svg-margin-20261120-4')]:
+        for search, expected in [('?v=ic20-release','ic20-release'),('','futures-auto-20261120'),('?v=bad%2Fpath','futures-auto-20261120')]:
             stub = "const assert=require('assert');const location={search:" + repr(search) + "};const requestedVersion=" + code + "assert.equal(version," + repr(expected) + ");"
             result = subprocess.run(['node','-'],input=stub,text=True,capture_output=True)
             self.assertEqual(result.returncode,0,result.stderr)
@@ -221,6 +221,36 @@ assert.equal(nextObservationDate(null,null,[]),null);
         for script in parsed.scripts:
             result = subprocess.run(['node','--check','-'],input=script,text=True,capture_output=True)
             self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_futures_timer_visibility_and_busy_gates(self):
+        source=self.sources['futures-preview.html']
+        code=source.split('/* ===== Futures automatic refresh: active view only, no reload ===== */',1)[1].split('/* ===== End futures automatic refresh ===== */',1)[0]
+        stub=r'''
+const assert=require('assert');const events={},docEvents={};let tick=null,interval=0,now=2000,calls=0;
+const top={},parent={};const window={top,parent,futuresBusy:false,reloadIC(){},refresh(){calls++;return Promise.resolve()}};
+const location={origin:'https://example.test'};const document={hidden:false,addEventListener(k,f){docEvents[k]=f}};
+const Date={now(){return now}};const addEventListener=(k,f)=>{events[k]=f};
+const setInterval=(f,ms)=>{tick=f;interval=ms};const pageNotice=()=>{};
+'''
+        checks=r'''
+assert.equal(interval,60000);tick();assert.equal(calls,0);
+events.message({source:{},origin:location.origin,data:{kind:'view-visibility',page:'futures-preview.html',visible:true}});assert.equal(calls,0);
+events.message({source:parent,origin:location.origin,data:{kind:'view-visibility',page:'futures-preview.html',visible:true}});assert.equal(calls,1);
+now+=60000;tick();assert.equal(calls,2);assert.equal(window.futuresRefreshStats.lastReason,'timer');
+window.futuresBusy=true;now+=60000;tick();assert.equal(calls,2);window.futuresBusy=false;
+document.hidden=true;now+=60000;tick();assert.equal(calls,2);
+document.hidden=false;docEvents.visibilitychange();assert.equal(calls,3);
+events.message({source:parent,origin:location.origin,data:{kind:'view-visibility',page:'futures-preview.html',visible:false}});now+=60000;tick();assert.equal(calls,3);
+events.message({source:parent,origin:location.origin,data:{kind:'view-visibility',page:'futures-preview.html',visible:true}});assert.equal(calls,4);
+'''
+        result=subprocess.run(['node','-'],input=stub+code+checks,text=True,capture_output=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        dashboard=(ROOT/'dashboard.html').read_text()
+        self.assertIn("kind:'view-visibility'",dashboard)
+        self.assertIn('signalVisibility(previous,false)',dashboard)
+        self.assertIn('signalVisibility(next,true)',dashboard)
+        self.assertIn("addEventListener('visibilitychange'",dashboard)
+        self.assertIn('active===name',dashboard)
 
     def test_inline_javascript_parses(self):
         for name, p in self.parsed.items():

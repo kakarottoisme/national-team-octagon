@@ -3,22 +3,23 @@
 const names=['index.html','margin.html','futures-preview.html','risk-preview.html','market-cycle.html'];
 const frames=Object.create(null),switchStats=[];let active='',desired='',clickStarted=0;
 const requestedVersion=new URLSearchParams(location.search).get('v');
-const version=requestedVersion&&/^[A-Za-z0-9_-]{1,64}$/.test(requestedVersion)?requestedVersion:'svg-margin-20261120-4';
+const version=requestedVersion&&/^[A-Za-z0-9_-]{1,64}$/.test(requestedVersion)?requestedVersion:'futures-auto-20261120';
 function mount(name){
  if(frames[name])return frames[name];
  const frame=document.createElement('iframe');frame.className='page-frame';frame.title='投资观察看板';frame.dataset.page=name;frame.setAttribute('aria-hidden','true');frame.inert=true;
  const entry={frame,ready:false,loads:0,width:0,height:0};frames[name]=entry;
- frame.addEventListener('load',()=>entry.loads++);document.body.append(frame);
+ frame.addEventListener('load',()=>{entry.loads++;signalVisibility(entry,active===name)});document.body.append(frame);
  const url=new URL(name,location.href);url.search=location.search;url.searchParams.set('view','embedded');url.searchParams.set('v',version);frame.src=url.href;
  return entry;
 }
+function signalVisibility(entry,visible){entry.frame.contentWindow.postMessage({kind:'view-visibility',page:entry.frame.dataset.page,visible:visible&&!document.hidden},location.origin);}
 function prepare(e){e.frame.contentWindow.postMessage({kind:'prepare-view'},location.origin);}
 function reveal(name){
  const next=frames[name];if(!next||!next.ready||desired!==name||active===name)return;
  if(Math.abs(next.width-innerWidth)>1||Math.abs(next.height-innerHeight)>1){prepare(next);return;}
  const start=performance.now();
- if(active){const f=frames[active].frame;f.classList.remove('active');f.setAttribute('aria-hidden','true');f.inert=true;}
- next.frame.classList.add('active');next.frame.removeAttribute('aria-hidden');next.frame.inert=false;active=name;
+ if(active){const previous=frames[active],f=previous.frame;f.classList.remove('active');f.setAttribute('aria-hidden','true');f.inert=true;signalVisibility(previous,false);}
+ next.frame.classList.add('active');next.frame.removeAttribute('aria-hidden');next.frame.inert=false;active=name;signalVisibility(next,true);
  switchStats.push({page:name,commitMs:performance.now()-start,clickToCommitMs:clickStarted?Date.now()-clickStarted:null});clickStarted=0;
 }
 function show(name){
@@ -36,5 +37,7 @@ addEventListener('message',event=>{
  if(m?.kind==='navigate'&&names.includes(m.page)){clickStarted=m.sentAt||Date.now();show(m.page);if(location.hash.slice(1)!==m.page)location.hash=m.page;}
 });
 let resizeTimer;addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>Object.values(frames).filter(e=>e.ready).forEach(prepare),30);});
+addEventListener('visibilitychange',()=>{if(active)signalVisibility(frames[active],true);});
+addEventListener('pageshow',()=>{if(active)signalVisibility(frames[active],true);});
 addEventListener('hashchange',()=>show(location.hash.slice(1)));show(location.hash.slice(1));
 </script></body></html>

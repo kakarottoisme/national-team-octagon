@@ -491,6 +491,29 @@ function renderTable(products){
 }
 
 addEventListener('resize',()=>{chartLine&&chartLine.resize();chartBar&&chartBar.resize()});
+/* ===== Futures automatic refresh: active view only, no reload ===== */
+(()=>{
+ let activeView=window===window.top;
+ let lastAttempt=0;
+ function visible(){return activeView&&!document.hidden;}
+ function autoRefresh(reason){
+  if(!visible()||window.futuresBusy||typeof window.reloadIC!=='function')return;
+  const now=Date.now();if(now-lastAttempt<1000)return;
+  lastAttempt=now;
+  window.futuresRefreshStats=window.futuresRefreshStats||{count:0,lastAt:null,lastReason:null};
+  Object.assign(window.futuresRefreshStats,{count:window.futuresRefreshStats.count+1,lastAt:now,lastReason:reason});
+  Promise.resolve(window.refresh()).catch(()=>pageNotice('自动刷新失败，保留上次数据；下一分钟重试。'));
+ }
+ setInterval(()=>autoRefresh('timer'),60000);
+ addEventListener('message',event=>{
+  if(event.source!==parent||event.origin!==location.origin||event.data?.kind!=='view-visibility'||event.data.page!=='futures-preview.html')return;
+  const was=activeView;activeView=event.data.visible===true;
+  if(activeView&&!was)autoRefresh('tab-visible');
+ });
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)autoRefresh('browser-visible')});
+ addEventListener('pageshow',()=>autoRefresh('pageshow'));
+})();
+/* ===== End futures automatic refresh ===== */
 window.refresh=async()=>{if(window.futuresBusy)return;window.futuresBusy=true;$('rb').disabled=true;try{await Promise.all([refreshHistory(),window.reloadIC?window.reloadIC():Promise.resolve()])}finally{window.futuresBusy=false;$('rb').disabled=false;$('rb').textContent='刷新'}};
 </script><script>
 /* ===== Unified dashboard dialogs and route continuity ===== */

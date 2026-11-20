@@ -23,7 +23,7 @@
 - `preview-tools/futures_history.py`：CFFEX 原始 CSV 严格验日期、前20会员并集、独立品种历史
 - `holdings.json`：本人配置，非模型仓位。采集器不应写它；缺净账本时前端不硬算 D
 - 会员持仓观察日与顶部 IC 信号日是两套独立日期；验证发布必须打开 `dashboard.html#futures-preview.html` 核对两处，不以四个会员 shard 更新代替信号更新。日期选择停在上一次最新日时，刷新跟随新最新日；明确选择的历史日仍保留。
-- 手动日更先用原 `ic_strategy.py --out <候选路径>` 验证同日指数/官方今收盘。全历史重放如产生旧日期变化，不在单日日更中覆盖；仅在新增日与上一日状态一致、旧日期全部保留后发布。工作流时刻与规则另行授权。
+- `futures_close_update.py`：收盘后两种增量入口，members只追加已严格验日期的缺失四会员shard；strategy先验同日指数及四挂牌官方今收盘，再调用原引擎候选，仅追加新日且保留旧历史，已有当天不重算。独立于SSE/全球任务，不写账户。前台60秒可见重读及Tab恢复由dashboard可见消息驱动。
 
 ### 份额与申赎
 `margin.html` 中的独立 `etfFlows` 组件读 `data/etf_share_flows.json`，并入申赎两融 Tab，先申赎后两融。名单仍为 17 只宽基，包含 159352；概览、合计申赎柱/累计线、单只份额线按独立截止日展示，不与盘中成交混算。国家队持仓、ETF 明细从界面移除，原核验文件保留但页面不读。`etf-flows.html` 仅兼容旧链接跳转。
@@ -65,9 +65,9 @@ python3 preview-tools/turnover_baseline.py
 python3 preview-tools/turnover_history.py
 python3 etf_share_flows.py
 ```
-`fetch_live/archive/ic_strategy` 用标准库；`margin` 需 akshare/pandas；preview 依赖按 `preview-tools/requirements.txt` 安装。本轮不改现有依赖版本或调度。
+`fetch_live/archive/ic_strategy` 用标准库；`margin` 需 akshare/pandas；preview 全量依赖按 `preview-tools/requirements.txt` 安装，期指收盘补查只用标准库。2026-11-20用户授权追加期指收盘补查，不改依赖或其他调度。
 
-现有调度：live 保留 UTC `*/5 1-7 * * 1-5` 作为重启机会，另于北京08:53/12:43预热；同一concurrency组仅一个`live_runner.py`实例运行，每300秒复用原采集器，仅北京09:15–11:35、12:55–15:05采集，午休/收盘结束，周末/未确认日历关闭。首次GitHub启动仍可能排队延迟。IC 北京17:40及20:10；preview 北京23:30。`archive/margin`云端任务与去重见`AUTOMATION.md`；`live_daemon.sh` 是机器醒着时的可选补充，不属于云端定时。
+现有调度：live 保留 UTC `*/5 1-7 * * 1-5` 作为重启机会，另于北京08:53/12:43预热；同一concurrency组仅一个`live_runner.py`实例运行，每300秒复用原采集器，仅北京09:15–11:35、12:55–15:05采集，午休/收盘结束，周末/未确认日历关闭。首次GitHub启动仍可能排队延迟。IC与会员期指 北京15:35–17:55每10分钟，IC额外保留17:40，两者20:10/22:10/23:30兜底；preview全量仍23:30。`archive/margin`云端任务与去重见`AUTOMATION.md`；`live_daemon.sh` 是机器醒着时的可选补充，不属于云端定时。
 
 ## 关键数据契约
 ### live / archive

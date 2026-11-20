@@ -1,15 +1,15 @@
 name: Refresh IC close signal
 
-# 收盘后重算 data/ic_strategy.json，供期指持仓页的「IC 策略 · 收盘信号」。
-# Cron 是 UTC。
-#   40 9 * * 1-5  = 周一至周五 17:40 Asia/Shanghai（收盘后，中金所日行情通常已出）
-#   10 12 * * 1-5 = 周一至周五 20:10 Asia/Shanghai（当天文件晚到时再补一次）
-# 休市日指数没有新收盘，脚本重算后若只有 updated 变了，就不提交。
-# 定时和手动都只在本文件位于默认分支之后才会跑。
+# 收盘后增量更新 data/ic_strategy.json；不重写旧模型历史。
+# UTC 调度：北京时间15:35–17:55每10分钟补查，另保留17:40/20:10，22:10/23:30晚间兜底。
+# GitHub schedule可能排队；当天指数与官方今收盘不齐则保留旧日，下次补查。
 on:
   schedule:
+    - cron: "35,45,55 7 * * 1-5"
+    - cron: "5,15,25,35,45,55 8-9 * * 1-5"
     - cron: "40 9 * * 1-5"
-    - cron: "10 12 * * 1-5"
+    - cron: "10 12,14 * * 1-5"
+    - cron: "30 15 * * 1-5"
   workflow_dispatch:
 
 # 只写 data/ic_strategy.json。仓库 Settings → Actions → Workflow permissions
@@ -32,9 +32,9 @@ jobs:
           fetch-depth: 20
           persist-credentials: true
 
-      - name: Compute IC close signal
+      - name: Compute only new IC close days (pending sources keep previous)
         shell: bash
-        run: python3 ic_strategy.py
+        run: python3 futures_close_update.py --mode strategy
 
       - name: Commit data/ic_strategy.json when the signal changes
         shell: bash
