@@ -19,13 +19,15 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 
 | 文件 | 名称 | 读什么 |
 |---|---|---|
-| `index.html` | 资金观察 | `data/live.json`、`data/history.json`、`data/minutes/YYYY-MM-DD.json`，以及 `preview-data/turnover-baseline.json`、`turnover-history.json` |
-| `margin.html` | 两融余额 | `data/margin_balance.json` |
+| `index.html` | 资金观察 | 盘中成交及成交历史；读 `data/live.json`、`data/history.json`、`data/minutes/YYYY-MM-DD.json` 及成交基准 |
+| `margin.html` | 申赎两融 | 先 ETF 份额申赎、后两融余额，分别读 `data/etf_share_flows.json`、`data/margin_balance.json` |
 | `futures-preview.html` | 期指持仓 | `data/ic_strategy.json`、`data/holdings.json`、`preview-data/official/` |
 | `risk-preview.html` | 全球风险 | `preview-data/global.json` |
 | `market-cycle.html` | 市场顶底 | `data/market_cycle.json`；A股/美股分开，1–3个月价格观察规则，不联动持仓或 IC |
 
 新增独立采集器 `market_cycle.py`（计算模块 `market_factors.py`）与工作流 `market-cycle.yml`：北京官方A股交易日08:20、17:10，只写 `data/market_cycle.json`。factor-v2 顶部/底部各4组8项固定分母，满足比例不叫概率、不映射仓位。先读 `docs/MARKET_FACTORS.md`；固定分箱历史检验与上线后版本留痕分开，旧v1观察不删除。现有六项豆包定时任务及四页数据写入器不变。当前仅价格衍生证据，不把实现波动当VIX，不复制受限MOVE/CDS/GEX。
+
+`etf-flows.html` 只保留旧链接跳转到申赎两融的份额申赎段，不再是第五个 Tab。国家队官方持仓与 ETF 明细已按主人要求从界面移除；已核验数据文件保留，不再由页面读取。
 
 文件名带 preview 的期指页和风险页就是正式 Tab，不是草稿。
 
@@ -43,6 +45,8 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 | `preview-data/official/`、`preview-data/status.json` | `preview-tools/collect_preview.py`；工作流 `preview-data.yml`（北京 23:30） | 不写 `data/` |
 | `preview-data/global.json` | 同上采集里的全球风险更新 | 受限源不要填造数值 |
 | `preview-data/turnover-*.json` | `preview-tools/turnover_baseline.py`、`turnover_history.py` | |
+| `data/etf_share_history.json`、`data/etf_share_flows.json`、`data/etf_szse_snapshot.json` | `etf_share_flows.py`；工作流 `etf-share-flows.yml`（北京 23:40，次日 00:10 再试） | 深市只认 fund_jjgm 的 size_date；失败降级的无日期快照不得写成交易日。缺份额或成交均价保持 null。不改 live.yml |
+| `data/etf_official_holdings.json` | 每年 4 月年报、9 月中期报告后按基金原文核对。schema v2 分 `annual_2025`（2025 年报前十名具名份额，17 只全量核对）与 `interim_2026`（新规后无前十名，rows 留空并附法规依据）；未在原文具名的持有人不写 | 不用媒体或 Wind 汇总；2026-05-01 后年报中报均不强制前十名，以证监会公告〔2026〕5 号第三十一条为准 |
 
 工作流文件：
 

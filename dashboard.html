@@ -3,7 +3,7 @@
 const names=['index.html','margin.html','futures-preview.html','risk-preview.html','market-cycle.html'];
 const frames=Object.create(null),switchStats=[];let active='',desired='',clickStarted=0;
 const requestedVersion=new URLSearchParams(location.search).get('v');
-const version=requestedVersion&&/^[A-Za-z0-9_-]{1,64}$/.test(requestedVersion)?requestedVersion:'futures-sync-20261120';
+const version=requestedVersion&&/^[A-Za-z0-9_-]{1,64}$/.test(requestedVersion)?requestedVersion:'svg-margin-20261120-4';
 function mount(name){
  if(frames[name])return frames[name];
  const frame=document.createElement('iframe');frame.className='page-frame';frame.title='投资观察看板';frame.dataset.page=name;frame.setAttribute('aria-hidden','true');frame.inert=true;
@@ -22,7 +22,7 @@ function reveal(name){
  switchStats.push({page:name,commitMs:performance.now()-start,clickToCommitMs:clickStarted?Date.now()-clickStarted:null});clickStarted=0;
 }
 function show(name){
- if(!names.includes(name))name='index.html';desired=name;const e=mount(name);
+ if(name==='etf-flows.html'){name='margin.html';const u=new URL(location.href);u.searchParams.set('section','shareFlows');u.hash='margin.html';history.replaceState(null,'',u)}if(!names.includes(name))name='index.html';desired=name;const e=mount(name);
  if(!active){e.frame.classList.add('active');e.frame.removeAttribute('aria-hidden');e.frame.inert=false;active=name;}else reveal(name);
 }
 function preloadNext(){const next=['margin.html','index.html','futures-preview.html','risk-preview.html','market-cycle.html'].find(n=>!frames[n]);if(next)setTimeout(()=>mount(next),0);}

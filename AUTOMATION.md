@@ -22,6 +22,12 @@
 ## 验收
 `python3 -m unittest discover -s tests -p test_ashare_observers.py -v`覆盖18项新观察任务：排队/运行不重复启动、启动前持久预留、半日与每日去重、结果不明不重发、15分钟成功静默/失败提醒、交易窗口、首次基线、六字段变化、负C公式、持仓方向与手数差、无仓库写入。
 
+## 份额与申赎（GitHub Actions，不由豆包再抓一遍）
+- 工作流 `etf-share-flows.yml`，名称 Refresh ETF share flows。北京时间周一至周五 23:40（UTC `40 15 * * 1-5`）跑 `python3 etf_share_flows.py`，次日 00:10（UTC `10 16 * * 1-5`）再试一次。只写 `data/etf_share_history.json`、`data/etf_share_flows.json`、`data/etf_szse_snapshot.json`。份额和估算都没变就不提交。
+- 沪市份额只接受上交所 `STAT_DATE` 与请求日一致的 `TOT_VOL`。深交所当前规模没有统计日，只追加未核日期快照，不写成交易日，不参与申赎。缺值保持 null。
+- 这是全市场申赎估算，不是国家队买卖，也不是八宫格的分钟成交额代理。不改 Refresh live.json 的窗口和写入范围，不另建写 live 的任务。
+- `data/etf_official_holdings.json` 不由这个定时任务改。每年 4 月核对年报、9 月核对中期报告，只写入基金原文里具名的持有人。
+
 `python3 -m unittest discover -s tests -p test_ashare_tasks.py -v`
 8项离线测试覆盖假日/周末/未知日历、交易窗口、2pp边界、强制换月、最新价非结算价、旧行情拒绝、余额无新数据静默、停更去重、归档失败无写入。前端/账户/IC源与本次起点保持字节一致。
 既有check_backend基线在改动前已存在2项失败（Python版本AST差异、另一次期指页面修改未更新旧hash）；本次不篡改基线掩盖问题。

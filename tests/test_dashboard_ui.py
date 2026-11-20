@@ -123,9 +123,10 @@ class DashboardContract(unittest.TestCase):
         self.assertNotIn("nowrap", crumb)
         expected = {
             "index.html": "宽基 ETF · 盘中活跃度与主动买卖方向",
-            "margin.html": "沪深两市 · 日度数据",
+            "margin.html": "ETF 申赎 · 沪深两融 · 日度数据",
             "futures-preview.html": "中信期货(代客) · CFFEX 前20会员",
             "risk-preview.html": "利率条件与融资成本 · 读最新值与历史",
+            "etf-flows.html": "宽基 ETF · 全市场申赎，非国家队专属",
         }
         for name, text in self.sources.items():
             with self.subTest(page=name):
@@ -184,7 +185,7 @@ H=Object.fromEntries(Object.entries(H).slice(0,5));table(cur);assert.equal(eleme
         self.assertIn(cycle_icon, runtime)
         self.assertIn('stroke-linejoin="round"', cycle_icon)
         for name in (*PAGES, 'market-cycle.html'):
-            self.assertIn('dashboard-tabs.js?v=nav-icons-2', (ROOT / name).read_text(encoding='utf-8'))
+            self.assertRegex((ROOT / name).read_text(encoding='utf-8'), r'dashboard-tabs\.js\?v=[A-Za-z0-9_-]+')
         css = (ROOT / 'dashboard-shell.css').read_text(encoding='utf-8')
         self.assertIn('.ui-page .view-tab{gap:6px}', css)
         self.assertIn('.ui-page .view-tab svg{display:none;width:16px;height:16px;flex:none}', css)
@@ -211,7 +212,7 @@ assert.equal(nextObservationDate(null,null,[]),null);
     def test_dashboard_preserves_explicit_release_version(self):
         source = (ROOT / 'dashboard.html').read_text(encoding='utf-8')
         code = source.split('const requestedVersion=',1)[1].split('function mount(',1)[0]
-        for search, expected in [('?v=ic20-release','ic20-release'),('','futures-sync-20261120'),('?v=bad%2Fpath','futures-sync-20261120')]:
+        for search, expected in [('?v=ic20-release','ic20-release'),('','svg-margin-20261120-4'),('?v=bad%2Fpath','svg-margin-20261120-4')]:
             stub = "const assert=require('assert');const location={search:" + repr(search) + "};const requestedVersion=" + code + "assert.equal(version," + repr(expected) + ");"
             result = subprocess.run(['node','-'],input=stub,text=True,capture_output=True)
             self.assertEqual(result.returncode,0,result.stderr)

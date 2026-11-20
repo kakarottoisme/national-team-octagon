@@ -25,6 +25,13 @@
 - 会员持仓观察日与顶部 IC 信号日是两套独立日期；验证发布必须打开 `dashboard.html#futures-preview.html` 核对两处，不以四个会员 shard 更新代替信号更新。日期选择停在上一次最新日时，刷新跟随新最新日；明确选择的历史日仍保留。
 - 手动日更先用原 `ic_strategy.py --out <候选路径>` 验证同日指数/官方今收盘。全历史重放如产生旧日期变化，不在单日日更中覆盖；仅在新增日与上一日状态一致、旧日期全部保留后发布。工作流时刻与规则另行授权。
 
+### 份额与申赎
+`margin.html` 中的独立 `etfFlows` 组件读 `data/etf_share_flows.json`，并入申赎两融 Tab，先申赎后两融。名单仍为 17 只宽基，包含 159352；概览、合计申赎柱/累计线、单只份额线按独立截止日展示，不与盘中成交混算。国家队持仓、ETF 明细从界面移除，原核验文件保留但页面不读。`etf-flows.html` 仅兼容旧链接跳转。
+- `etf_share_flows.py`：上交所按日份额（STAT_DATE）、深交所 fund_jjgm 逐基金历史规模（每行自带 size_date，万份）、东财日 K 成交均价。估算净流入 = 份额差 × 成交均价。窗口内缺一天则为 null。
+- 深市主源 `CATALOGID=fund_jjgm` 失败时，才降级抓取 1000_lf 无日期当前规模，写入 `data/etf_szse_snapshot.json`（`date_status=undated_fallback`），仅留痕不参与计算；成功时 flows 内标 `dated_via_fund_jjgm`。长跨度查询按 28 自然日分段（接口 pageno 不翻历史，每段至多 20 个交易日），单页步行回退保证无缺口。
+- 官方持仓文件 `data/etf_official_holdings.json`（schema `etf-official-holdings-2`）分两个口径：`annual_2025` 存 2025 年年报（截止 2025-12-31）前十名中的国家队具名份额，17 只逐份核对自交易所/巨潮原始 PDF；`interim_2026` 保留 17 份中报核对痕迹且 `rows` 为空。证监会公告〔2026〕5 号（2026-05-01 施行）第三十一条后年报与中报均不再强制披露前十名持有人，法规原文链接写在 `regulation_notes`，媒体和 Wind 汇总不写入。
+- 云端由 `.github/workflows/etf-share-flows.yml` 在北京 23:40 和次日 00:10 运行，无变化不提交。不碰 `live.yml`。
+
 ### 全球风险
 `risk-preview.html` 读 `preview-data/global.json`。
 `collect_preview.maybe_collect_global()` 调 `global_sources.update_global()`；后者合并 Treasury、public_macro 与上次缓存。`public_macro.py` 管理名义/实际曲线、ACM、SOFR/IORB 同日差等。现有 Cboe/ICE/FINRA 等受限指标不自动复制成数值，保留现有 link_only/restricted/pending 处理；不要因清理代码绕开这些限制。文件里的历史注释曾描述旧接入状态，以当前函数和状态字段为准。
@@ -56,6 +63,7 @@ python3 ic_strategy.py
 python3 preview-tools/collect_preview.py
 python3 preview-tools/turnover_baseline.py
 python3 preview-tools/turnover_history.py
+python3 etf_share_flows.py
 ```
 `fetch_live/archive/ic_strategy` 用标准库；`margin` 需 akshare/pandas；preview 依赖按 `preview-tools/requirements.txt` 安装。本轮不改现有依赖版本或调度。
 

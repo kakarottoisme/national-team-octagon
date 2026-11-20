@@ -9,7 +9,7 @@
   if (window === window.top && !embedded) {
     const target = new URL('dashboard.html', location.href);
     target.search = location.search;
-    target.hash = page;
+    if(page==='margin.html'&&location.hash==='#shareFlows')target.searchParams.set('section','shareFlows');target.hash = page;
     document.documentElement.style.visibility = 'hidden';
     location.replace(target.href);
     return;
@@ -19,9 +19,8 @@
   const origin = location.origin;
   const post = data => parent.postMessage(data, origin);
   function sizeCharts() {
-    document.querySelectorAll('canvas').forEach(canvas => {
-      const el = canvas.parentElement?.parentElement;
-      const chart = el && window.echarts?.getInstanceByDom(el);
+    document.querySelectorAll('[_echarts_instance_]').forEach(el => {
+      const chart = window.echarts?.getInstanceByDom(el);
       if (!chart || el.clientWidth <= 0) return;
       if (Math.abs(chart.getWidth()-el.clientWidth)>1 || Math.abs(chart.getHeight()-el.clientHeight)>1)
         chart.resize({width:el.clientWidth,height:el.clientHeight});
@@ -65,6 +64,7 @@
     document.querySelector('a.view-tab[aria-current="page"]')?.scrollIntoView({block:'nearest',inline:'nearest'});
     new MutationObserver(report).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
     report();
+    if(page==='margin.html'&&new URLSearchParams(location.search).get('section')==='shareFlows')document.getElementById('shareFlows')?.scrollIntoView({block:'start'});
     // Errors stay on the original page. Never leave a requested tab waiting forever.
     setTimeout(() => {if(!ready){ready=true;sizeCharts();post({kind:'view-ready',page,width:innerWidth,height:innerHeight});}},14000);
   });

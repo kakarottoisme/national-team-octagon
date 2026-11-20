@@ -30,9 +30,13 @@
 ## 追加一天
 收盘后（15:05 以后，北京时间）在仓库根目录运行 `python3 archive.py`，然后 commit 并 push `data/`。腾讯分时接口只返回当天数据，错过的日子无法补录。
 
-## 两融余额 · 指数对比（margin.html）
+## 申赎两融（margin.html）
 `data/margin_balance.json`：两融余额（沪+深，亿元，2010-03-31 起）与创业板指 399006、科创50 000688、中证500 000905、中证1000 000852、沪深300 000300、上证50 000016 日收盘（全量历史）。
 收盘后（建议 17:00 以后/次日，交易所两融披露滞后约 1 交易日）运行 `python3 margin.py`（需 akshare，可用 /workspace/.venv-nt），然后 commit 并 push `data/margin_balance.json`。脚本每次全量重拉，漏跑无影响。
+
+## 申赎两融中的份额与申赎（margin.html）
+申赎两融按「ETF 份额与申赎 → 两融余额与指数走势」组织，主导航保持四个 Tab。申赎概览和合计/单只图共用自己的观察区间，两融保持独立日期和区间；ETF 明细与国家队持仓表已移除，持仓核验数据仅保留在仓库。旧 `etf-flows.html` 跳转到申赎两融申赎段。
+`data/etf_share_flows.json` 是 17 只宽基的申赎估算，不是国家队专属，也不是分钟成交额代理，两个口径不能相加。沪市按上交所 STAT_DATE、深市按深交所 fund_jjgm 的 size_date 同日对齐；失败降级的无日期快照不参与计算。晚间仍由 **Refresh ETF share flows** 更新。
 
 ## IC 策略 · 收盘信号（futures-preview.html 顶部）
 `data/ic_strategy.json`：中证500收盘算出的 IC 只做多目标手数、A/B/C 底仓、D 腿（盈利覆盖加仓）和建议手数、建议合约、下一交易日触发价，以及可回看的历史。页面上的「最终规则」是计算口径。实际持仓写在 `data/holdings.json`，页面「当前持仓」只读这份配置。保证金按交易所 12% 估算。

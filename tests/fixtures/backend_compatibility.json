@@ -2592,11 +2592,12 @@
     "load_old": "4e25078e39a4964755ace1ee9eb0a35ffb970bdcc32a8ade04df142a6b44f863"
   },
   "frontend_sha256": {
-    "index.html": "3ba973fdadbaee9b9520730f846085a914fd897249caa98eb126c45fcc6e9fab",
-    "margin.html": "311ed62a848f9d4178eb535e3cde4bda754884e7dfe0fcc1a9858dd01aa178e2",
-    "futures-preview.html": "ff26cbfe82d77735ab2acf9ccef6b6c0fd529056cc4642ba94dd4a2d10923a81",
-    "risk-preview.html": "077b9f30621d4aa9c6a48935c8cd07bb5c5baadb25f46a364b894775d38fbcad",
-    "dashboard.html": "8383d14e57964056ef3cb98a98db0515af96c8208622d0230185ceec6e68c3ca",
-    "dashboard-tabs.js": "7048a9773f5c6c673f3bbbaabbb3e6b9fbc910e31fcb1bbc287f8e703e6c279c"
+    "index.html": "a0c73ff7453d12d820a21c08d55dacb5b1baef6c36659c420cb9cebe1b22bef2",
+    "margin.html": "15c957d94a5ed4b2e4b29bc8b7a24423c1a59b7f0d15149c78ce5c534f87f2fb",
+    "futures-preview.html": "2a76229c92f8607fb2deb419a165253fd7a41bb0b823d1a824dc40f6280ccf43",
+    "risk-preview.html": "1b69db9f4ba464bba9e2a954013b06f6ebca202e7a1f60283683540462041c4e",
+    "dashboard.html": "b78fa3b23ac91cd1f8a6b270b7d4c846783c773ebf23666dd4a10143debfe3a6",
+    "dashboard-tabs.js": "6dd07b22a8d1b39cbe85a4d87a89ac4ef284f3f03cc196c5bdb18e134bd9a919",
+    "etf-flows.html": "b2feafefcf64b949e209c47900342796448b3373cbc35ee6d5caa0078192c2a4"
   }
 }
