@@ -102,6 +102,17 @@
 }
 .ui-page .view-tabs{height:54px;box-sizing:border-box}
 .ui-page .view-tab{height:44px;max-height:44px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Shared navigation icon contract: every view uses the same size and breakpoint. */
+.ui-page .view-tab{gap:6px}
+.ui-page .view-tab svg{display:none;width:16px;height:16px;flex:none}
+@media(min-width:700px){.ui-page .view-tab svg{display:block}}
+
+/* Five views: keep header geometry; mobile navigation scrolls, not crushed labels. */
+.ui-page .view-tabs{grid-template-columns:repeat(5,minmax(0,1fr));max-width:660px}
+@media(max-width:699px){
+ .ui-page .view-tabs{display:flex;overflow-x:auto;scrollbar-width:none;max-width:100%}
+ .ui-page .view-tab{flex:0 0 25%;min-width:84px}
+}
 
 .ui-page{font-size:var(--type-body);line-height:var(--type-body-lh)}
 .ui-page main.wrap{padding-top:var(--space-after-nav)}

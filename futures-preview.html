@@ -1,5 +1,5 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="dashboard-tabs.js?v=flows-margin-20261120-3"></script><link rel="apple-touch-icon" href="apple-touch-icon.png?v=ui-2"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=ui-2"><link rel="icon" type="image/svg+xml" sizes="any" href="favicon.svg?v=ui-2"><title>期指持仓</title>
+<script src="dashboard-tabs.js?v=svg-margin-20261120-4"></script><link rel="apple-touch-icon" href="apple-touch-icon.png?v=ui-2"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=ui-2"><link rel="icon" type="image/svg+xml" sizes="any" href="favicon.svg?v=ui-2"><title>期指持仓</title>
 <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js'"></script>
 <script>/* Shared safe primitives: no data assumptions or account mutations. */
 window.uiEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -311,7 +311,14 @@ async function loadOne(p){
  }catch(e){return null}
 }
 
+function nextObservationDate(current, previousLatest, dates){
+ const latest=dates[dates.length-1]||null;
+ if(!current||(previousLatest&&current===previousLatest)||!dates.includes(current))return latest;
+ return current; // Explicit historical observations remain selected.
+}
 async function refreshHistory(){
+ const previousDates=[...new Set(Object.values(HIST).flatMap(h=>h.dates))].sort();
+ const previousLatest=previousDates[previousDates.length-1]||null;
  $('rb').disabled=true;$('rb').textContent='读取中…';
  try{
   const results=await Promise.all(PRODUCTS.map(loadOne));
@@ -332,12 +339,8 @@ async function refreshHistory(){
   const allDates=new Set();
   loaded.forEach(p=>HIST[p].dates.forEach(d=>allDates.add(d)));
   const sortedAll=[...allDates].sort();
-  // select latest common date or latest per product
-  if(!selDate){
-   // pick latest date where most products have data
-   const counts={};sortedAll.forEach(d=>{counts[d]=loaded.filter(p=>HIST[p].records[d]).length});
-   selDate=sortedAll[sortedAll.length-1];
-  }
+  // Follow an advancing latest day; do not override a historical observation.
+  selDate=nextObservationDate(selDate,previousLatest,sortedAll);
   $('st').textContent='已加载 '+loaded.length+'/4 品种 · 日期 '+sortedAll[0]+' ~ '+sortedAll[sortedAll.length-1]+' · 选中 '+selDate;
   $('dMember').textContent=SNAP&&SNAP.futures?SNAP.futures.member:'中信期货(代客)';
   $('dAsOf').textContent=selDate;
@@ -731,10 +734,12 @@ function validateLocalAccount(h){
   }
   const sig=days.length+':'+latest.date;
   if(sel.dataset.sig!==sig){
-   const cur=sel.value||new URLSearchParams(location.search).get('signal');
+   const dates=days.map(d=>d.date);
+   const cur=nextObservationDate(sel.value||new URLSearchParams(location.search).get('signal'),sel.dataset.latest,dates);
    sel.innerHTML=days.slice().reverse().map(d=>'<option value="'+d.date+'">'+d.date+'</option>').join('');
    sel.dataset.sig=sig;
-   sel.value=(cur&&days.some(d=>d.date===cur))?cur:latest.date;
+   sel.dataset.latest=latest.date;
+   sel.value=cur||latest.date;
   }
   const day=days.find(d=>d.date===sel.value)||latest;
   const snap=accountSnap(latest);

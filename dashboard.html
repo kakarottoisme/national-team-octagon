@@ -1,8 +1,9 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>投资观察看板</title><link rel="icon" href="favicon.svg"><style>html,body{margin:0;height:100%;overflow:hidden;background:#f5f6f8}.page-frame{position:fixed;top:0;left:-200vw;display:block;width:100%;height:100vh;height:100dvh;border:0;visibility:hidden;pointer-events:none}.page-frame.active{left:0;visibility:visible;pointer-events:auto;z-index:1}</style></head><body><script>
 'use strict';
-const names=['index.html','margin.html','futures-preview.html','risk-preview.html'];
+const names=['index.html','margin.html','futures-preview.html','risk-preview.html','market-cycle.html'];
 const frames=Object.create(null),switchStats=[];let active='',desired='',clickStarted=0;
-const version='flows-margin-20261120-3';
+const requestedVersion=new URLSearchParams(location.search).get('v');
+const version=requestedVersion&&/^[A-Za-z0-9_-]{1,64}$/.test(requestedVersion)?requestedVersion:'svg-margin-20261120-4';
 function mount(name){
  if(frames[name])return frames[name];
  const frame=document.createElement('iframe');frame.className='page-frame';frame.title='投资观察看板';frame.dataset.page=name;frame.setAttribute('aria-hidden','true');frame.inert=true;
@@ -24,7 +25,7 @@ function show(name){
  if(name==='etf-flows.html'){name='margin.html';const u=new URL(location.href);u.searchParams.set('section','shareFlows');u.hash='margin.html';history.replaceState(null,'',u)}if(!names.includes(name))name='index.html';desired=name;const e=mount(name);
  if(!active){e.frame.classList.add('active');e.frame.removeAttribute('aria-hidden');e.frame.inert=false;active=name;}else reveal(name);
 }
-function preloadNext(){const next=['margin.html','index.html','futures-preview.html','risk-preview.html'].find(n=>!frames[n]);if(next)setTimeout(()=>mount(next),0);}
+function preloadNext(){const next=['margin.html','index.html','futures-preview.html','risk-preview.html','market-cycle.html'].find(n=>!frames[n]);if(next)setTimeout(()=>mount(next),0);}
 addEventListener('message',event=>{
  if(event.origin!==location.origin)return;
  const entry=Object.values(frames).find(e=>e.frame.contentWindow===event.source);if(!entry)return;const m=event.data;

@@ -23,6 +23,9 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 | `margin.html` | 申赎两融 | 先 ETF 份额申赎、后两融余额，分别读 `data/etf_share_flows.json`、`data/margin_balance.json` |
 | `futures-preview.html` | 期指持仓 | `data/ic_strategy.json`、`data/holdings.json`、`preview-data/official/` |
 | `risk-preview.html` | 全球风险 | `preview-data/global.json` |
+| `market-cycle.html` | 市场顶底 | `data/market_cycle.json`；A股/美股分开，1–3个月价格观察规则，不联动持仓或 IC |
+
+新增独立采集器 `market_cycle.py`（计算模块 `market_factors.py`）与工作流 `market-cycle.yml`：北京官方A股交易日08:20、17:10，只写 `data/market_cycle.json`。factor-v2 顶部/底部各4组8项固定分母，满足比例不叫概率、不映射仓位。先读 `docs/MARKET_FACTORS.md`；固定分箱历史检验与上线后版本留痕分开，旧v1观察不删除。现有六项豆包定时任务及四页数据写入器不变。当前仅价格衍生证据，不把实现波动当VIX，不复制受限MOVE/CDS/GEX。
 
 `etf-flows.html` 只保留旧链接跳转到申赎两融的份额申赎段，不再是第五个 Tab。国家队官方持仓与 ETF 明细已按主人要求从界面移除；已核验数据文件保留，不再由页面读取。
 
@@ -35,7 +38,7 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 | 文件 | 谁写 | 不要做什么 |
 |---|---|---|
 | `data/live.json` | `.github/workflows/live.yml` 里的 `live_runner.py`，内部调用 `fetch_live.py` | 不要停用这个工作流，也不要再做一个写 live 的定时任务 |
-| `data/history.json`、`data/minutes/` | `archive.py`；云端入口见 AUTOMATION.md 的八宫格归档 | 腾讯分时补不了错过的日期 |
+| `data/history.json`、`data/minutes/` | `archive.py`；云端入口见 AUTOMATION.md 的八宫格归档 | 腾讯分时补不了错过的ETF日期；已有ETF日期的指数可用`backfill_index_minutes.py`补1/5分钟端点，严格标注粒度、不插值 |
 | `data/margin_balance.json` | `margin.py`；云端窗口见 AUTOMATION.md | 不要用各自最近日期拼成同一天 |
 | `data/ic_strategy.json` | `ic_strategy.py`；工作流 `ic-strategy.yml`（北京 17:40 和 20:10） | 未获授权不改 A/B/C/D、选约、换仓 |
 | `data/holdings.json` | 主人在对话里给齐 contract、direction、lots、entry_price、entry_date 后可改；换仓再写 rolls（close_price、open_price、realized_pnl=(平仓价−原开仓价)×lots×200，空头符号相反）并累加 d_realized_net_pnl | 缺任一项先问。account_balance 只用主人报的数。成交价不写入 last_price。除此之外不改、不删、不模拟 |

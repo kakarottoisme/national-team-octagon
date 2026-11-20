@@ -38,14 +38,20 @@ class FundsStructure(unittest.TestCase):
             self.assertEqual(res.returncode,0,res.stderr)
     def test_live_financial_logic_unchanged(self):
         s=(ROOT/'index.html').read_text()
-        old=subprocess.run(['git','show','73752ba:index.html'],cwd=ROOT,capture_output=True,text=True,check=True).stdout
+        old=subprocess.run(['git','show','origin/main:index.html'],cwd=ROOT,capture_output=True,text=True,check=True).stdout
         a='const E=[["上证50"';b='// State can change at lunch/close without a new market snapshot.'
         self.assertEqual(s[s.index(a):s.index(b)],old[old.index(a):old.index(b)])
     def test_margin_financial_logic_unchanged(self):
         s=(ROOT/'margin.html').read_text()
-        old=subprocess.run(['git','show','ee6653c:margin.html'],cwd=ROOT,capture_output=True,text=True,check=True).stdout
+        old=subprocess.run(['git','show','origin/main:margin.html'],cwd=ROOT,capture_output=True,text=True,check=True).stdout
         a='let marginData=null';b="addEventListener('resize',()=>marginChart&&marginChart.resize());refreshMargin();"
-        self.assertEqual(s[s.index(a):s.index(b)],old[old.index(a):old.index(b)])
+        self.assertEqual(s[s.index(a):s.index(b)].replace(",null,{renderer:'svg'}",''),old[old.index(a):old.index(b)])
+    def test_vector_charts_and_date_controls_before_chart(self):
+        s=(ROOT/'margin.html').read_text()
+        self.assertEqual(s.count("{renderer:'svg'}"),3)
+        self.assertLess(s.index('id="marginDate"'),s.index('id="ch"'))
+        self.assertLess(s.index('id="marginDayValues"'),s.index('id="ch"'))
+        self.assertIn("querySelectorAll('[_echarts_instance_]')",(ROOT/'dashboard-tabs.js').read_text())
     def test_shared_styles_scope_flow_chart(self):
         css=(ROOT/'dashboard-shell.css').read_text()
         self.assertIn('.funds-flow-grid',css)

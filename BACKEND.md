@@ -6,8 +6,9 @@
 ### 资金观察
 `index.html` 读 `data/live.json`、`data/history.json`、`data/minutes/YYYY-MM-DD.json`，以及 `preview-data/turnover-baseline.json` / `turnover-history.json`。ETF 列表固定为上证50、沪深300、中证A500、中证500、中证1000、创业板、科创50。
 - `fetch_live.py`：腾讯七 ETF 分时和上证日线；腾讯上证失败时东财兜底；只生成 live
-- `index_quotes.py`：仅供悬浮展示的七个对应指数分时。`fetch_live.main` 可选附加 `index_minutes`，8秒超时并行、单源失败不阻断ETF。既有 `build_payload` 和策略输入不变；前端严格同日同分钟匹配，历史缺档显示“—”，不反推指数
-- `archive.py`：收盘后抓取当天分时，追加 history 并写当天 minutes；不能补抓错过日期的腾讯分时
+- `index_quotes.py`：仅供悬浮展示的七个对应指数分时。`fetch_live.main` 可选附加 `index_minutes`，8秒超时并行、单源失败不阻断ETF。前端严格同日同分钟匹配，不反推指数
+- `archive.py`：收盘后抓取当天ETF分时，追加 history；默认一起保存同日完整指数1分钟记录，来源失败时保留已存完整指数或同日live缓存，不拿其他日期替代。`include_indices=False`保留旧字节输出
+- `backfill_index_minutes.py`：只给已存在的ETF日期档补充顶层`index_minutes`，不改ETF、日汇总、持仓或策略。新浪历史1分钟必须完整才采用，否则取完整5分钟端点（48点/日）；不插值。每只附`date/interval_minutes/price_type/source/source_url/collected_at/interpolated`，回补全部覆盖后才写入；命令`python3 backfill_index_minutes.py --staging-dir <目录> --apply`。悬浮标签明示1/5分钟，5分钟非端点显示“无5分钟点”
 - `preview-tools/turnover_baseline.py`：20 完整交易日、48 个同时点均值，供盘中成交额比较
 - `preview-tools/turnover_history.py`：新浪60分钟K按日累加、配合本地 live 进行一致性检查
 
@@ -21,6 +22,8 @@
 - `preview-tools/collect_preview.py`：SSE ETF 份额及 CFFEX 会员排名、快照、状态、四品种日更
 - `preview-tools/futures_history.py`：CFFEX 原始 CSV 严格验日期、前20会员并集、独立品种历史
 - `holdings.json`：本人配置，非模型仓位。采集器不应写它；缺净账本时前端不硬算 D
+- 会员持仓观察日与顶部 IC 信号日是两套独立日期；验证发布必须打开 `dashboard.html#futures-preview.html` 核对两处，不以四个会员 shard 更新代替信号更新。日期选择停在上一次最新日时，刷新跟随新最新日；明确选择的历史日仍保留。
+- 手动日更先用原 `ic_strategy.py --out <候选路径>` 验证同日指数/官方今收盘。全历史重放如产生旧日期变化，不在单日日更中覆盖；仅在新增日与上一日状态一致、旧日期全部保留后发布。工作流时刻与规则另行授权。
 
 ### 份额与申赎
 `margin.html` 中的独立 `etfFlows` 组件读 `data/etf_share_flows.json`，并入申赎两融 Tab，先申赎后两融。名单仍为 17 只宽基，包含 159352；概览、合计申赎柱/累计线、单只份额线按独立截止日展示，不与盘中成交混算。国家队持仓、ETF 明细从界面移除，原核验文件保留但页面不读。`etf-flows.html` 仅兼容旧链接跳转。
@@ -32,6 +35,9 @@
 ### 全球风险
 `risk-preview.html` 读 `preview-data/global.json`。
 `collect_preview.maybe_collect_global()` 调 `global_sources.update_global()`；后者合并 Treasury、public_macro 与上次缓存。`public_macro.py` 管理名义/实际曲线、ACM、SOFR/IORB 同日差等。现有 Cboe/ICE/FINRA 等受限指标不自动复制成数值，保留现有 link_only/restricted/pending 处理；不要因清理代码绕开这些限制。文件里的历史注释曾描述旧接入状态，以当前函数和状态字段为准。
+
+### 市场顶底（独立新增）
+`market_cycle.py` + `market_factors.py` → `data/market_cycle.json` → `market-cycle.html`。schema=`market-factor-2`，规则=`factor-v2`，先读 `docs/MARKET_FACTORS.md`。A股六宽基、美股三宽基分开；顶部/底部各4组×2项固定8项分母，组内组间等权。`latest.scores`含score/met/total/missing/groups/factors，各项当前值、阈值和数据日可追溯。任何必需缺项不给总分，不缩分母；底部改善6项与超跌2项分别展示。`history`保存252日评分，`evaluation`固定4分箱、21/63日非重叠观察、方向/严格命中、均值/最低/基准/年份匹配/分段/次日敏感性及观察点。仅价格衍生评分，比例不等于概率；没有信用/估值/期权实质接入。两融不参与评分。`observations`按日期+rule_version保留首次留痕，旧v1不覆盖也不冒充v2前向结果。缺源保留旧日stale；旧包版本不显示新评分。不联动原六任务、持仓、IC或live。既有market-cycle工作流及更新时间保持不变，美国在A股长假不更新的限制尚未改变。测试 `python3 -m unittest tests.test_market_cycle tests.test_market_factors tests.test_dashboard_ui`。
 
 ## 本轮整理后的模块
 - `backend_common.py`：ETF 常量、分时累计额差分、方向估算及旧日期转换；纯函数，无抓取与写入
