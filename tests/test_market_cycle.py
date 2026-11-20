@@ -43,9 +43,9 @@ class CycleTests(unittest.TestCase):
         rows.append(rows[0])
         with self.assertRaises(ValueError):m.fetch('sh000300',dt.datetime(2026,1,1,tzinfo=m.TZ),lambda _:{'data':{'sh000300':{'day':rows}}})
     def test_future_outcomes_not_filled(self):
-        a=series(350);sig=[{'date':a[-1]['date'],'top':'x','bottom':'y'}]
-        f=m.outcomes(a,sig,'x')[0]['forward']
-        self.assertIsNone(f['21']);self.assertIsNone(f['63'])
+        from market_factors import forward
+        self.assertIsNone(forward(series(350),349,21))
+        self.assertIsNone(forward(series(350),349,63))
     def test_margin_never_uses_future(self):
         with tempfile.TemporaryDirectory() as t:
             p=Path(t)/'m.json';p.write_text(json.dumps({'margin':{'2026-11-18':20000,'2026-11-20':90000}}))
@@ -68,21 +68,15 @@ class CycleTests(unittest.TestCase):
         self.assertIn('git add -- data/market_cycle.json',y)
         self.assertNotIn('workflow run',y)
         for file in ['live.json','holdings.json','ic_strategy.json']:self.assertNotIn(file,y)
-    def test_judgment_hot_then_break(self):
-        base={'close':110,'ma20':100,'ma50':100,'ma60':100,'ma200':100,'below200_3':False,'above20_3':False,'above50_3':False,'dd63':0,'hot':True,'washed':False,'rebound':0,'rsi14':75,'vol20':20}
-        matrices={str(i):{'old':dict(base),'new':dict(base,close=90,dd63=-8,hot=False)} for i in range(3)}
-        self.assertEqual(m.judge('new',matrices,['old','new'],'0')['top'],'顶部风险确认')
-    def test_oversold_is_not_confirmed_bottom(self):
-        base={'close':70,'ma20':90,'ma50':95,'ma60':100,'ma200':100,'below200_3':True,'above20_3':False,'above50_3':False,'dd63':-30,'hot':False,'washed':True,'rebound':0,'rsi14':20,'vol20':35}
-        matrices={str(i):{'day':dict(base)} for i in range(3)}
-        r=m.judge('day',matrices,['day'],'0')
-        self.assertEqual(r['top'],'中期下行压力');self.assertEqual(r['bottom'],'底部观察区')
-    def test_volatility_peak_blocks_improvement(self):
-        old={'close':70,'ma20':90,'ma50':95,'ma60':100,'ma200':100,'below200_3':True,'above20_3':False,'above50_3':False,'dd63':-30,'hot':False,'washed':True,'rebound':0,'rsi14':20,'vol20':35}
-        new=dict(old,close=94,ma20=90,above20_3=True,rebound=10,rsi14=50,washed=False,vol20=40)
-        matrices={str(i):{'old':dict(old),'new':dict(new)} for i in range(3)}
-        r=m.judge('new',matrices,['old','new'],'0')
-        self.assertEqual(r['bottom'],'底部观察区');self.assertEqual(r['breadth']['improving'],0)
+    def test_no_confirmation_api(self):
+        self.assertFalse(hasattr(m,'judge'))
+        self.assertEqual(m.RULES['version'],'factor-v2')
+    def test_page_has_scores_not_confirmation_labels(self):
+        text=(ROOT/'market-cycle.html').read_text()
+        self.assertIn('因子满足比例',text)
+        self.assertIn('年份匹配基准',text)
+        self.assertNotIn('顶部风险确认',text)
+        self.assertNotIn('趋势修复确认',text)
     def test_navigation(self):
         self.assertIn("'market-cycle.html'",(ROOT/'dashboard.html').read_text())
         self.assertIn("page === 'market-cycle.html'",(ROOT/'dashboard-tabs.js').read_text())

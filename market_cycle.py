@@ -1,5 +1,5 @@
 """Independent medium-term market observations; never reads holdings/IC or writes their files.
-Price-derived rules are v1 heuristics, not calibrated probabilities. All histories
+Price-derived factor-v2 scores are coverage ratios, not calibrated probabilities. All histories
 use data available on/before their signal day; forward results are kept separate.
 """
 from __future__ import annotations
@@ -14,6 +14,7 @@ import statistics
 import urllib.request
 from zoneinfo import ZoneInfo
 from backend_io import write_json_atomic
+from market_factors import VERSION, FACTOR_DEFS, score_day, compact, evaluate
 
 ROOT = Path(__file__).resolve().parent
 TZ = ZoneInfo('Asia/Shanghai')
@@ -24,17 +25,14 @@ MARKETS = {
     'us': [('us.INX','标普500'),('us.IXIC','纳斯达克综合'),('us.DJI','道琼斯')],
 }
 RULES = {
-    'version':'cycle-v1', 'horizon':'1–3个月', 'validated':False,
-    'overheat':'200日乖离≥15%且位于此前最多756日的90%分位以上；或63日涨幅≥20%且RSI14≥70',
-    'breadth':'仅上述宽基指数等权计数，不是全市场个股上涨家数，不计算重复的ETF',
-    'top':'过热指数≥一半为过热；近20日出现过热且至少一半跌破20日线、63日高点回撤≥5%，为顶部风险确认；仅价格层确认',
-    'bottom':'至少一半指数回撤≥15%且RSI14≤35，或过去20日达到此条件，为底部观察区；至少一半从63日低点反弹≥5%、连续3日站上20日线、RSI14≥45且波动未创新高，为筑底改善',
-    'downtrend':'至少一半指数连续3日位于200日线下且20日线低于60日线，显示中期下行压力；与顶部过热不是同一概念',
-    'confirmation':'主指数50日线>200日线、连续3日站上50日线、至少2/3指数站上50日线，且距63日高点仍回撤≥10%：趋势修复确认，不宣称绝对底部',
-    'margin':'A股两融仅用已入库且不晚于信号日的余额，辅助展示20个余额记录变化；不纳入顶底评分；历史发布时间未知，不用于回测',
-    'missing':'核心价格缺源或共同交易日相差超过5个自然日，不生成新综合判断，保留旧数据及旧行情日期并标为陈旧',
-    'evaluation':'历史按当日及以前价格逐日重算，不用今天指标回填；21/63交易日后的收益和期间最低收益独立列示，未满窗口为空。observations仅保存v1上线后的首次日度判断，不覆盖已留痕日期',
-    'coverage':'价格、实现波动、多宽基共振；RSI14按最近14日涨跌幅的简单均值计算（Cutler口径）。没有全成分股宽度、估值、期权结构、信用确认。美国没有复制VIX、MOVE、GEX或CDS，也不把实现波动冒充VIX',
+    'version': VERSION, 'horizon':'1–3个月', 'validated':False,
+    'scoring':'顶部风险、底部机会各4组×2项；组内等权、组间等权。8项固定分母，有缺项不给总分；比例不是概率或仓位',
+    'groups':'价格位置/过热动量/高位转弱/共振与波动；超跌程度/抛压缓和/趋势改善/共振与波动',
+    'breadth':'A股6宽基、美股3宽基，至少一半满足才计1项；不是全市场个股宽度',
+    'bottom':'超跌组最多25分，后6项均有近63日超跌背景；改善项单列，不把跌深当已反转',
+    'missing':'核心价格缺失、非有限值、上下文不足不给新分数；保留旧行情日，不缩小8项分母',
+    'evaluation':'固定0–<25、25–<50、50–<75、75–100分箱；每侧每箱每窗口非重叠取点，未来21/63日独立检验，未满为空。回溯结果不是样本外概率',
+    'coverage':'仅价格位置、动量、趋势、多宽基及实现波动；RSI14为Cutler口径。未接估值、信用、期权、全成分股宽度，四组也非独立证据',
 }
 
 
@@ -97,7 +95,7 @@ def features(series, bias_history=None):
     above50 = all(closes[-1-j] > statistics.fmean(closes[-50-j:len(closes)-j if j else None]) for j in range(3))
     below200 = all(closes[-1-j] < statistics.fmean(closes[-200-j:len(closes)-j if j else None]) for j in range(3))
     return {'close':c, 'ma20':mean(20),'ma50':mean(50),'ma60':mean(60),'ma200':mean(200),
-            'bias200':bias,'bias_pctile':percentile,'ret63':ret63,'drawdown':drawdown,'dd63':dd63,'rebound':rebound,
+            'bias200':bias,'bias_pctile':percentile,'ret63':ret63,'ret5':(c/closes[-6]-1)*100,'drawdown':drawdown,'dd63':dd63,'rebound':rebound,
             'rsi14':rsi,'vol20':vol,'above20_3':above20,'above50_3':above50,'below200_3':below200,
             'hot':(bias>=15 and percentile>=90) or (ret63>=20 and rsi>=70),
             'washed':drawdown<=-15 and rsi<=35}
@@ -107,53 +105,6 @@ def compute_features(history):
     closes=[r['close'] for r in history]
     biases={i:(closes[i]/statistics.fmean(closes[i-199:i+1])-1)*100 for i in range(199,len(closes))}
     return {history[i]['date']:features(history[:i+1],[biases[j] for j in range(max(199,i-755),i)]) for i in range(252,len(history))}
-
-
-def judge(day, matrices, recent, main):
-    fs = {c:m[day] for c,m in matrices.items()}
-    n = len(fs)
-    need = math.ceil(n/2)
-    hot = sum(f['hot'] for f in fs.values())
-    washed = sum(f['washed'] for f in fs.values())
-    above50 = sum(f['close']>f['ma50'] for f in fs.values())
-    broken = sum(f['close']<f['ma20'] and f['dd63']<=-5 for f in fs.values())
-    falling = sum(f['below200_3'] and f['ma20']<f['ma60'] for f in fs.values())
-    recently_hot = any(sum(m[d]['hot'] for m in matrices.values())>=need for d in recent)
-    recently_washed = any(sum(m[d]['washed'] for m in matrices.values())>=need for d in recent)
-    improving = sum(f['above20_3'] and f['rebound']>=5 and f['rsi14']>=45 and
-                    f['vol20']<max(matrices[c][d]['vol20'] for d in recent[:-1]) for c,f in fs.items()) if len(recent)>1 else 0
-    f = fs[main]
-    repaired = f['above50_3'] and f['ma50']>f['ma200'] and above50>=math.ceil(2*n/3) and f['dd63']<=-10
-    top = '顶部风险确认' if recently_hot and broken>=need else '过热累积' if hot>=need else '中期下行压力' if falling>=need else '未见顶部共振'
-    bottom = '趋势修复确认' if recently_washed and repaired else '筑底改善' if recently_washed and improving>=need else '底部观察区' if washed>=need or recently_washed else '未见底部共振'
-    summary = '下行趋势仍在，反弹还没形成底部确认' if falling>=need and bottom=='底部观察区' else '底部迹象正在改善，尚未确认中期反转' if bottom=='筑底改善' else '价格与宽基共振出现趋势修复' if bottom=='趋势修复确认' else '高位过热后出现破位，顶部风险已获价格确认' if top=='顶部风险确认' else '上涨过热累积，尚未出现顶部价格确认' if top=='过热累积' else '中期价格承压，不能仅凭回撤判断已经见底' if falling>=need else '暂未出现明显顶底共振，继续观察趋势'
-    return {'date':day,'top':top,'bottom':bottom,'summary':summary,
-            'breadth':{'above50':above50,'total':n,'hot':hot,'washed':washed,'improving':improving,'falling':falling},'indices':fs}
-
-
-def outcomes(history, signals, main):
-    prices = {r['date']:r['close'] for r in history}
-    days = sorted(prices)
-    positions = {d:i for i,d in enumerate(days)}
-    out=[]
-    last=None
-    for row in signals:
-        pair = (row['top'],row['bottom'])
-        if pair==last:
-            continue
-        last=pair
-        i=positions[row['date']]
-        item={'date':row['date'],'top':row['top'],'bottom':row['bottom'],'forward':{}}
-        for window in (21,63):
-            if i+window>=len(days):
-                item['forward'][str(window)] = None
-                continue
-            future = [prices[d] for d in days[i+1:i+window+1]]
-            base=prices[row['date']]
-            item['forward'][str(window)]={'return':(future[-1]/base-1)*100,'min_from_signal':(min(future)/base-1)*100,
-                                         'max_from_signal':(max(future)/base-1)*100,'end_date':days[i+window]}
-        out.append(item)
-    return out
 
 
 def build_market(key, series, now):
@@ -169,14 +120,14 @@ def build_market(key, series, now):
     if len(common)<63:
         raise ValueError('共同历史不足')
     # Signals start only after warm-up; all lookbacks use prior/current signal dates.
-    signals=[judge(d,matrices,common[max(0,i-19):i+1],codes[0]) for i,d in enumerate(common)]
+    signals=[score_day(d,matrices,common[max(0,i-62):i+1],codes[0]) for i,d in enumerate(common)]
     latest=signals[-1]
     names=dict(MARKETS[key])
     for c,f in latest['indices'].items():
         f['name']=names[c]
         f['source']=series[c]['source']
     return {'name':'A股' if key=='cn' else '美股','as_of':common[-1],'status':'ok','primary':codes[0],
-            'latest':latest,'history':signals[-252:], 'events':outcomes(data[codes[0]],signals,codes[0]),
+            'latest':latest,'history':[compact(r) for r in signals[-252:]], 'evaluation':evaluate(data[codes[0]],signals),
             'prices':{c:[r for r in data[c] if r['date']<=common[-1]][-504:] for c in codes},'sources':[series[c]['source'] for c in codes]}
 
 
@@ -223,10 +174,10 @@ def collect(output, now=None):
         markets['cn']['margin']=margin_context(ROOT/'data/margin_balance.json',markets['cn']['as_of'])
     observations={k:list(prior.get('observations',{}).get(k,[])) for k in MARKETS}
     for k,m in markets.items():
-        if m['status']=='ok' and not any(r['date']==m['as_of'] for r in observations[k]):
+        if m['status']=='ok' and not any(r['date']==m['as_of'] and r.get('rule_version')==VERSION for r in observations[k]):
             r=m['latest'];observations[k].append({'date':m['as_of'],'observed_at':now.isoformat(timespec='seconds'),
-                'rule_version':RULES['version'],'top':r['top'],'bottom':r['bottom'],'breadth':dict(r['breadth'])})
-    payload={'schema':'market-cycle-1','observations':observations,'generated_at':now.isoformat(timespec='seconds'),'rules':RULES,'markets':markets,'errors':errors,
+                'rule_version':VERSION,'scores':{s:v['score'] for s,v in r['scores'].items()}})
+    payload={'schema':'market-factor-2','observations':observations,'generated_at':now.isoformat(timespec='seconds'),'rules':RULES,'markets':markets,'errors':errors,
              'update_schedule':'北京时间交易日08:20、17:10；GitHub调度可能延迟；各市场只用已完成收盘日线',
              'reference':'https://musaeai.com/','history_kind':'按当日价格重放规则，非历史实盘预警',
              'first_published_at':prior.get('first_published_at') or now.isoformat(timespec='seconds')}
