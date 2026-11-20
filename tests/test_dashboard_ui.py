@@ -189,6 +189,38 @@ H=Object.fromEntries(Object.entries(H).slice(0,5));table(cur);assert.equal(eleme
         self.assertIn('.ui-page .view-tab{gap:6px}', css)
         self.assertIn('.ui-page .view-tab svg{display:none;width:16px;height:16px;flex:none}', css)
 
+    def test_futures_refresh_follows_latest_and_retains_history(self):
+        source = self.sources['futures-preview.html']
+        code = source.split('function nextObservationDate(', 1)[1].split('async function refreshHistory()', 1)[0]
+        stub = "const assert=require('assert');function nextObservationDate(" + code
+        checks = r'''
+const dates=['2026-11-18','2026-11-19','2026-11-20'];
+assert.equal(nextObservationDate(null,null,dates),'2026-11-20');
+assert.equal(nextObservationDate('2026-11-19','2026-11-19',dates),'2026-11-20');
+assert.equal(nextObservationDate('2026-11-18','2026-11-19',dates),'2026-11-18');
+assert.equal(nextObservationDate('2026-11-18',null,dates),'2026-11-18');
+assert.equal(nextObservationDate('2099-01-01',null,dates),'2026-11-20');
+assert.equal(nextObservationDate(null,null,[]),null);
+'''
+        result = subprocess.run(['node','-'],input=stub+checks,text=True,capture_output=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertIn('selDate=nextObservationDate(selDate,previousLatest,sortedAll)',source)
+        self.assertIn("get('signal'),sel.dataset.latest,dates)",source)
+        self.assertIn('sel.dataset.latest=latest.date',source)
+
+    def test_dashboard_preserves_explicit_release_version(self):
+        source = (ROOT / 'dashboard.html').read_text(encoding='utf-8')
+        code = source.split('const requestedVersion=',1)[1].split('function mount(',1)[0]
+        for search, expected in [('?v=ic20-release','ic20-release'),('','futures-sync-20261120'),('?v=bad%2Fpath','futures-sync-20261120')]:
+            stub = "const assert=require('assert');const location={search:" + repr(search) + "};const requestedVersion=" + code + "assert.equal(version," + repr(expected) + ");"
+            result = subprocess.run(['node','-'],input=stub,text=True,capture_output=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+        parsed = Collector()
+        parsed.feed(source)
+        for script in parsed.scripts:
+            result = subprocess.run(['node','--check','-'],input=script,text=True,capture_output=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+
     def test_inline_javascript_parses(self):
         for name, p in self.parsed.items():
             for i, script in enumerate(p.scripts):

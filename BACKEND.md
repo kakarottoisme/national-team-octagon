@@ -22,6 +22,8 @@
 - `preview-tools/collect_preview.py`：SSE ETF 份额及 CFFEX 会员排名、快照、状态、四品种日更
 - `preview-tools/futures_history.py`：CFFEX 原始 CSV 严格验日期、前20会员并集、独立品种历史
 - `holdings.json`：本人配置，非模型仓位。采集器不应写它；缺净账本时前端不硬算 D
+- 会员持仓观察日与顶部 IC 信号日是两套独立日期；验证发布必须打开 `dashboard.html#futures-preview.html` 核对两处，不以四个会员 shard 更新代替信号更新。日期选择停在上一次最新日时，刷新跟随新最新日；明确选择的历史日仍保留。
+- 手动日更先用原 `ic_strategy.py --out <候选路径>` 验证同日指数/官方今收盘。全历史重放如产生旧日期变化，不在单日日更中覆盖；仅在新增日与上一日状态一致、旧日期全部保留后发布。工作流时刻与规则另行授权。
 
 ### 全球风险
 `risk-preview.html` 读 `preview-data/global.json`。
