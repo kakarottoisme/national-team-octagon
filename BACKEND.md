@@ -26,6 +26,9 @@
 `risk-preview.html` 读 `preview-data/global.json`。
 `collect_preview.maybe_collect_global()` 调 `global_sources.update_global()`；后者合并 Treasury、public_macro 与上次缓存。`public_macro.py` 管理名义/实际曲线、ACM、SOFR/IORB 同日差等。现有 Cboe/ICE/FINRA 等受限指标不自动复制成数值，保留现有 link_only/restricted/pending 处理；不要因清理代码绕开这些限制。文件里的历史注释曾描述旧接入状态，以当前函数和状态字段为准。
 
+### 市场顶底（独立新增）
+`market_cycle.py` → `data/market_cycle.json` → `market-cycle.html`。A股六宽基、美国标普/纳综/道指各自按共同收盘日观察，均线、乖离历史分位、63日动量、RSI14（Cutler）、实现波动与多宽基共振。仅价格层v1启发式，不复制参考站分数/概率，不认定绝对顶部底部。两融只读背景，不参与历史评分。所有历史判定只用当日及以前数据；未来21/63交易日结果独立列示。`observations`保留上线后首次日度判断，不覆盖原留痕。缺源保留旧日及stale。只有新工作流可写该文件；不改/触发原六任务、持仓、IC、live等。更新北京08:20/17:10，官方A股休市日跳过；美股休市时保留原收盘日。测试 `python3 -m unittest discover -s tests -p test_market_cycle.py`。
+
 ## 本轮整理后的模块
 - `backend_common.py`：ETF 常量、分时累计额差分、方向估算及旧日期转换；纯函数，无抓取与写入
 - `backend_io.py`：原子文本/JSON 替换，先序列化，再写同目录临时文件、flush/fsync、rename；异常不覆盖旧文件，清理临时文件

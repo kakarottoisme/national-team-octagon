@@ -2,7 +2,7 @@
    embedded pages continue to use the original live JSON endpoints. */
 (() => {
   'use strict';
-  const names = ['index.html','margin.html','futures-preview.html','risk-preview.html'];
+  const names = ['index.html','margin.html','futures-preview.html','risk-preview.html','market-cycle.html'];
   const page = location.pathname.split('/').pop() || 'index.html';
   if (!names.includes(page)) return;
   const embedded = new URLSearchParams(location.search).get('view') === 'embedded';
@@ -33,6 +33,7 @@
     if (page === 'index.html') return !!document.querySelector('#tb tr') && document.querySelector('#ds')?.options.length>0;
     if (page === 'margin.html') return !!document.querySelector('#marginKpis .kpi') && document.querySelector('#marginDate')?.options.length>0;
     if (page === 'futures-preview.html') return !!document.querySelector('#icDynamic .model') && document.querySelector('#icDate')?.options.length>0;
+    if (page === 'market-cycle.html') return !!document.querySelector('#metrics tr') || document.querySelector('#st')?.textContent==='暂不能判断';
     return !!document.querySelector('#grid .mrow');
   }
   function report() {
@@ -56,6 +57,12 @@
     }
   });
   document.addEventListener('DOMContentLoaded',() => {
+    document.querySelectorAll('.view-tabs').forEach(nav=>{
+      if(nav.querySelector('a[href="market-cycle.html"]'))return;
+      const a=document.createElement('a');a.className='view-tab';a.href='market-cycle.html';
+      a.innerHTML='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 14l5-8 5 5 6-7"/></svg><span>市场顶底</span>';nav.append(a);
+    });
+    document.querySelector('a.view-tab[aria-current="page"]')?.scrollIntoView({block:'nearest',inline:'nearest'});
     new MutationObserver(report).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
     report();
     // Errors stay on the original page. Never leave a requested tab waiting forever.

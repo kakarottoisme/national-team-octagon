@@ -23,6 +23,9 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 | `margin.html` | 两融余额 | `data/margin_balance.json` |
 | `futures-preview.html` | 期指持仓 | `data/ic_strategy.json`、`data/holdings.json`、`preview-data/official/` |
 | `risk-preview.html` | 全球风险 | `preview-data/global.json` |
+| `market-cycle.html` | 市场顶底 | `data/market_cycle.json`；A股/美股分开，1–3个月价格观察规则，不联动持仓或 IC |
+
+新增独立采集器 `market_cycle.py` 与工作流 `market-cycle.yml`：北京官方A股交易日08:20、17:10，只写 `data/market_cycle.json`。只用已完成的中美收盘日线，规则版本、来源、历史重放和上线后前向留痕分开。现有六项豆包定时任务及四页数据写入器不变。规则未样本外验证，不伪造概率；没有把实现波动当VIX，也没有复制受限MOVE/CDS/GEX。
 
 文件名带 preview 的期指页和风险页就是正式 Tab，不是草稿。
 
