@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout latest main (采集前,保证干净基线)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 20
           persist-credentials: true
@@ -48,7 +48,7 @@ jobs:
 
       - name: Setup Python + preview-tools deps (ACM .xls 需要 pinned xlrd)
         if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install preview-tools requirements
