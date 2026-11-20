@@ -41,8 +41,8 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 | `preview-data/official/`、`preview-data/status.json` | `preview-tools/collect_preview.py`；工作流 `preview-data.yml`（北京 23:30） | 不写 `data/` |
 | `preview-data/global.json` | 同上采集里的全球风险更新 | 受限源不要填造数值 |
 | `preview-data/turnover-*.json` | `preview-tools/turnover_baseline.py`、`turnover_history.py` | |
-| `data/etf_share_history.json`、`data/etf_share_flows.json`、`data/etf_szse_snapshot.json` | `etf_share_flows.py`；工作流 `etf-share-flows.yml`（北京 23:40，次日 00:10 再试） | 深市快照无统计日，不得写成交易日。缺份额或成交均价保持 null。不改 live.yml |
-| `data/etf_official_holdings.json` | 每年 4 月年报、9 月中期报告后按基金原文核对。未在原文具名的持有人不写 | 不用媒体或 Wind 汇总 |
+| `data/etf_share_history.json`、`data/etf_share_flows.json`、`data/etf_szse_snapshot.json` | `etf_share_flows.py`；工作流 `etf-share-flows.yml`（北京 23:40，次日 00:10 再试） | 深市只认 fund_jjgm 的 size_date；失败降级的无日期快照不得写成交易日。缺份额或成交均价保持 null。不改 live.yml |
+| `data/etf_official_holdings.json` | 每年 4 月年报、9 月中期报告后按基金原文核对。schema v2 分 `annual_2025`（2025 年报前十名具名份额，17 只全量核对）与 `interim_2026`（新规后无前十名，rows 留空并附法规依据）；未在原文具名的持有人不写 | 不用媒体或 Wind 汇总；2026-05-01 后年报中报均不强制前十名，以证监会公告〔2026〕5 号第三十一条为准 |
 
 工作流文件：
 

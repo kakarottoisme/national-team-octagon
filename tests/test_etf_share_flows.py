@@ -1,4 +1,4 @@
-"""离线口径：份额缺口不补、深市无日期不进交易日、申赎用成交均价。"""
+"""离线口径：份额缺口不补、深市 fund_jjgm 带 size_date 才进交易日、申赎用成交均价。"""
 import datetime as dt
 import json
 import unittest
@@ -9,6 +9,13 @@ import etf_share_flows as f
 
 def sse_row(day, code, wan):
     return {"STAT_DATE": day, "SEC_CODE": code, "SEC_NAME": "x", "TOT_VOL": wan, "ETF_TYPE": "单市", "NUM": "1"}
+
+
+def jjgm_body(rows):
+    """rows: [(size_date, code, current_size万份)]。"""
+    return json.dumps([{"metadata": {"catalogid": "fund_jjgm"},
+                        "data": [{"size_date": d, "fund_code": c, "current_size": w} for d, c, w in rows]}],
+                      ensure_ascii=False)
 
 
 class ParseTests(unittest.TestCase):
@@ -45,6 +52,47 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(set(parsed), {"159919"})
         self.assertEqual(parsed["159919"]["scale_shares"], "1000000000")
         self.assertNotIn("stat_date", parsed["159919"])
+
+    def test_jjgm_parse_keeps_dated_wan_text_and_filters_garbage(self):
+        payload = json.loads(jjgm_body([
+            ("2026-11-19", "159919", "1,395,562.00"),
+            ("2026-11-18", "159919", "1390000"),
+            ("bad-date", "159919", "1"),
+            ("2026-11-19", "999999", "1"),
+            ("2026-11-19", "159352", "-"),
+        ]))
+        rows = f.parse_szse_jjgm(payload)
+        self.assertEqual(rows, {"2026-11-19": "1395562.00", "2026-11-18": "1390000"})
+
+    def test_fetch_jjgm_paginates_and_raises_on_http_error(self):
+        seen = []
+
+        def fake_get(url, headers=None, timeout=25, binary=False):
+            seen.append(url)
+            if "pageno=1" in url:
+                return 200, jjgm_body([("2026-11-18", "159915", "100"), ("2026-11-19", "159919", "110")])
+            if "pageno=2" in url:
+                return 200, json.dumps([{"data": []}])
+            raise AssertionError(url)
+
+        rows = f.fetch_szse_jjgm("159919", dt.date(2026, 11, 1), dt.date(2026, 11, 19), pages=3, get=fake_get)
+        self.assertEqual(rows, {"2026-11-18": "100", "2026-11-19": "110"})
+        self.assertEqual(len(seen), 2)  # 空页即停
+
+        def boom(url, headers=None, timeout=25, binary=False):
+            return 500, b""
+        with self.assertRaises(RuntimeError):
+            f.fetch_szse_jjgm("159919", dt.date(2026, 11, 1), dt.date(2026, 11, 19), pages=1, get=boom)
+
+    def test_merge_szse_series_respects_sh_cap_day(self):
+        history = f.empty_history()
+        n = f.merge_szse_series(history, "159919",
+                                {"2026-11-18": "100", "2026-11-19": "110", "2026-11-20": "120"},
+                                cap_day="2026-11-19")
+        self.assertEqual(n, 2)
+        self.assertNotIn("2026-11-20", history["days"])
+        self.assertEqual(history["days"]["2026-11-19"]["159919"]["source"], "szse_fund_jjgm")
+        self.assertEqual(history["days"]["2026-11-19"]["159919"]["stat_date"], "2026-11-19")
 
 
 class FlowTests(unittest.TestCase):
@@ -92,6 +140,27 @@ class FlowTests(unittest.TestCase):
         self.assertNotEqual(flows["summary"]["inflow_1d_yi"], "0.0000")
         self.assertEqual(flows["dates"], ["2026-11-17", "2026-11-18", "2026-11-19"])
 
+    def test_dated_szse_enters_calendar_and_total_without_undated_trace(self):
+        history = self.history()
+        for day, wan in (("2026-11-17", "2000000"), ("2026-11-18", "2000000"), ("2026-11-19", "2200000")):
+            history["days"][day]["159919"] = {"tot_vol_wan": wan, "stat_date": day,
+                                              "source": "szse_fund_jjgm", "sec_name": "沪深300ETF嘉实"}
+            history["quotes"][day]["159919"] = {"close": "4.000", "volume_hand": "10000",
+                                                "amount_yuan": "400000000"}
+        flows = f.build_flows(history, {"latest": {"collected_at": "2026-11-20T23:50:00+08:00", "rows": {
+            "159919": {"name": "沪深300ETF嘉实", "scale_shares": "22000000000", "nav": "4.2"}
+        }}})
+        by = {item["code"]: item for item in flows["etfs"]}
+        item = by["159919"]
+        self.assertEqual(item["shares_status"], "official_confirmed")
+        self.assertEqual(item["shares_yi"], "220.0000")
+        self.assertEqual(item["delta_1d_yi"], "20.0000")        # 220-200 亿份
+        self.assertIsNotNone(item["inflow_1d_yi"])
+        self.assertIsNone(item["undated_snapshot_yi"])         # 已确认就不展示无日期快照
+        self.assertIn("szse", flows["as_of_confirmed_by"])
+        # 合计覆盖 510050 与 159919 两只（510300 中间有洞被排除）
+        self.assertEqual(flows["summary"]["inflow_1d_covered"], 2)
+
     def test_blocked_request_is_a_hole_not_a_holiday(self):
         history = self.history()
         history["blocked_dates"] = ["2026-11-18"]
@@ -126,7 +195,7 @@ class RecordTests(unittest.TestCase):
         self.assertFalse(changed)
         self.assertEqual(len(again["snapshots"]), 1)
 
-    def test_backfill_empty_sse_is_not_a_share_row(self):
+    def test_backfill_merges_dated_szse_and_skips_xlsx_on_success(self):
         calls = []
 
         def fake_get(url, headers=None, timeout=25, binary=False):
@@ -134,8 +203,14 @@ class RecordTests(unittest.TestCase):
             if "kline" in url:
                 body = {"data": {"klines": ["2026-11-19,1,1,1,1,100,10000"]}}
                 return 200, json.dumps(body)
+            if "CATALOGID=fund_jjgm" in url:
+                # 每个深市 code 都给 11-19 一行，第二页空
+                if "pageno=2" in url:
+                    return 200, json.dumps([{"data": []}])
+                code = url.split("txtDm=")[1].split("&")[0]
+                return 200, jjgm_body([("2026-11-19", code, "10000.00")])
             if "ShowReport" in url:
-                return 200, b""
+                self.fail("jjgm 成功时不应回退无日期 xlsx")
             if "STAT_DATE=2026-11-19" in url:
                 payload = {"pageHelp": {"data": [sse_row("2026-11-19", code, "10000.00") for code in f.SH_CODES]}}
                 return 200, json.dumps(payload)
@@ -154,9 +229,53 @@ class RecordTests(unittest.TestCase):
         finally:
             f.HISTORY_PATH, f.FLOWS_PATH, f.SZSE_PATH = original
         self.assertEqual(result["added"], ["2026-11-19"])
+        self.assertEqual(result["szse_errors"], [])
+        self.assertGreaterEqual(result["szse_dated_records"], len(f.SZ_CODES))
         saved = json.loads((folder / "history.json").read_text())
+        self.assertEqual(saved["days"]["2026-11-19"]["159919"]["source"], "szse_fund_jjgm")
+        self.assertEqual(saved["days"]["2026-11-19"]["159919"]["tot_vol_wan"], "10000.00")
         self.assertNotIn("2026-11-20", saved["days"])
         self.assertNotIn("2026-11-20", saved["blocked_dates"])
+
+    def test_backfill_jjgm_failure_falls_back_to_undated_xlsx(self):
+        def fake_get(url, headers=None, timeout=25, binary=False):
+            if "kline" in url:
+                return 200, json.dumps({"data": {"klines": ["2026-11-19,1,1,1,1,100,10000"]}})
+            if "CATALOGID=fund_jjgm" in url:
+                return 500, b""
+            if "ShowReport" in url:
+                sheet = ("<?xml version='1.0'?><worksheet xmlns='http://schemas.openxmlformats.org/spreadsheetml/"
+                         "2006/main'><sheetData><row><c t='inlineStr'><is><t>基金代码</t></is></c>"
+                         "<c t='inlineStr'><is><t>当前规模(份)</t></is></c></row>"
+                         "<row><c t='inlineStr'><is><t>159919</t></is></c>"
+                         "<c t='inlineStr'><is><t>20000000000</t></is></c></row></sheetData></worksheet>")
+                import io, zipfile
+                buf = io.BytesIO()
+                with zipfile.ZipFile(buf, "w") as book:
+                    book.writestr("xl/worksheets/sheet1.xml", sheet)
+                return 200, buf.getvalue()
+            if "STAT_DATE=2026-11-19" in url:
+                payload = {"pageHelp": {"data": [sse_row("2026-11-19", code, "10000.00") for code in f.SH_CODES]}}
+                return 200, json.dumps(payload)
+            return 200, json.dumps({"pageHelp": {"data": []}})
+
+        original = (f.HISTORY_PATH, f.FLOWS_PATH, f.SZSE_PATH)
+        import tempfile
+        from pathlib import Path
+        folder = Path(tempfile.mkdtemp())
+        f.HISTORY_PATH = folder / "history.json"
+        f.FLOWS_PATH = folder / "flows.json"
+        f.SZSE_PATH = folder / "szse.json"
+        try:
+            result = f.backfill(dt.date(2026, 11, 19), dt.date(2026, 11, 19), get=fake_get, sleep=lambda s: None,
+                                now=dt.datetime(2026, 11, 20, 23, 40, tzinfo=dt.timezone(dt.timedelta(hours=8))))
+            flows = json.loads((folder / "flows.json").read_text())
+        finally:
+            f.HISTORY_PATH, f.FLOWS_PATH, f.SZSE_PATH = original
+        self.assertTrue(any("159919" in e for e in result["szse_errors"]))
+        item = {e["code"]: e for e in flows["etfs"]}["159919"]
+        self.assertEqual(item["shares_status"], "pending_unverifiable")
+        self.assertEqual(item["undated_snapshot_yi"], "200.0000")
 
 
 if __name__ == "__main__":

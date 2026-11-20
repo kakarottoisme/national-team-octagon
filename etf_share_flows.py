@@ -3,8 +3,10 @@
 """宽基 ETF 份额与全市场申赎估算。
 
 份额只接受带统计日的官方发布：上交所 query.sse.com.cn 的 STAT_DATE 必须等于
-请求日，TOT_VOL 单位为万份。深交所基金列表只有「当前规模」，文件本身不带份额
-统计日，只追加未核日期快照，不写入交易日、不参与申赎估算。
+请求日，TOT_VOL 单位为万份。深交所主源为 fund.szse.cn 的 fund_jjgm 逐基金历史
+规模接口，每行自带官方 size_date，current_size 单位为万份，与沪市同一交易日对齐
+后写入历史并参与申赎估算。fund_jjgm 请求失败时才降级保留 1000_lf「当前规模」
+无日期快照：快照不写入交易日、不参与申赎估算。
 
 估算净流入（亿元）= (当日份额 − 前一官方交易日份额) × 当日成交均价。
 成交均价 = 东财日 K 成交额 / (成交量 × 100)。这是全市场申购赎回，不能单独
@@ -42,6 +44,16 @@ SSE_URL = ("https://query.sse.com.cn/commonQuery.do?isPagination=true"
 KLINE_URL = "https://push2his.eastmoney.com/api/qt/stock/kline/get"
 SZSE_URL = ("https://fund.szse.cn/api/report/ShowReport?SHOWTYPE=xlsx"
             "&CATALOGID=1000_lf&TABKEY=tab1&random=0.5")
+# 逐基金历史规模（带官方 size_date，current_size 单位万份）。注意该接口 pageno
+# 不翻历史（实测各页返回同一批最新 20 个交易日），取更早数据必须收窄 txtStart/txtEnd，
+# 因此所有拉取都按 <=28 自然日分段（28 天至多 20 个工作日，单页可完整覆盖）。
+SZSE_JJGM_URL = ("https://fund.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON"
+                 "&CATALOGID=fund_jjgm&TABKEY=tab1&txtDm={code}"
+                 "&txtStart={start}&txtEnd={end}&pageno={page}")
+SZSE_JJGM_PAGES = 1
+SZSE_JJGM_LOOKBACK_DAYS = 28
+SZSE_SEGMENT_DAYS = 28       # 每段 28 自然日（≤20 个交易日），步行回退保证无洞
+SZSE_REQUEST_GAP = 0.5
 Q4 = Decimal("0.0001")
 Q2 = Decimal("0.01")
 LARGE_MOVE = Decimal("0.25")
@@ -68,6 +80,7 @@ WATCH = (
 )
 BY_CODE = {item["code"]: item for item in WATCH}
 SH_CODES = tuple(item["code"] for item in WATCH if item["exch"] == "SH")
+SZ_CODES = tuple(item["code"] for item in WATCH if item["exch"] == "SZ")
 METHOD = ("估算净流入 =（当日官方份额 − 前一官方交易日份额）× 当日成交均价；"
           "成交均价 = 成交额 / 成交量。这是全市场申购赎回，不能单独归因国家队，"
           "也不是资金观察页的分钟成交额代理。")
@@ -248,12 +261,12 @@ def aum_yi(wan, quote) -> str | None:
 
 
 def calendar_dates(history) -> list:
-    """官方交易日 = 至少一只沪市标的有同日 STAT_DATE 的日期，加上请求失败日（缺口）。"""
+    """官方交易日 = 任一 watch 标的存在同日 STAT_DATE/size_date 确认值的日期，加上请求失败日（缺口）。"""
     days = history.get("days") or {}
     confirmed = []
     for day, rows in days.items():
         if any((rows.get(code) or {}).get("stat_date") == day and (rows.get(code) or {}).get("tot_vol_wan")
-               for code in SH_CODES):
+               for code in BY_CODE):
             confirmed.append(day)
     blocked = [day for day in history.get("blocked_dates") or [] if day not in confirmed]
     return sorted(set(confirmed) | set(blocked))
@@ -316,7 +329,11 @@ def build_flows(history, szse=None, generated_at=None) -> dict:
             "close": quote.get("close") if quote else None,
             "vwap": _q(vwap_of(quote), Q4) if vwap_of(quote) is not None else None,
             "aum_yi": aum_yi(wan, quote),
-            "share_source": (SSE_URL.format(date=as_of) if meta["exch"] == "SH" and as_of else None),
+            "share_source": (
+                SSE_URL.format(date=as_of) if meta["exch"] == "SH" and as_of else
+                (SZSE_JJGM_URL.format(code=code, start=as_of, end=as_of, page=1)
+                 if meta["exch"] == "SZ" and wan is not None else None)
+            ),
             "quote_source": KLINE_URL if quote else None,
         }
         deltas = {}
@@ -354,10 +371,11 @@ def build_flows(history, szse=None, generated_at=None) -> dict:
                 per_day_inflows[day].append(daily_inflow(history, code, day, full_calendar[index - 1]))
         item["share_series"] = series
         if meta["exch"] == "SZ":
+            # 带日期的 fund_jjgm 已确认时不再展示无日期快照；仅失败/未发布日降级留痕。
             snap = ((szse or {}).get("latest") or {}).get("rows") or {}
-            row = snap.get(code)
+            row = snap.get(code) if wan is None else None
             item["undated_snapshot_yi"] = shares_yi_text(str(Decimal(row["scale_shares"]) / Decimal(10000))) if row else None
-            item["undated_snapshot_note"] = "深交所当前规模无统计日，不参与申赎估算" if row else None
+            item["undated_snapshot_note"] = "fund_jjgm 未确认当日规模，无日期快照仅留痕，不参与申赎估算" if row else None
         etfs.append(item)
 
     aggregate = []
@@ -391,12 +409,16 @@ def build_flows(history, szse=None, generated_at=None) -> dict:
     inflow_20d, n20 = summary("inflow_20d_yi")
     aum, na = summary("aum_yi")
     latest_sz = (szse or {}).get("latest")
+    sz_confirmed = any(item["exch"] == "SZ" and item["stat_date"] == as_of for item in etfs)
+    confirmed_by = None
+    if as_of:
+        confirmed_by = "sse_stat_date+szse_size_date" if sz_confirmed else "sse_stat_date"
     return {
         "schema": SCHEMA,
         "method": METHOD,
         "generated_at": generated_at or (history.get("updated_at")),
         "as_of": as_of,
-        "as_of_confirmed_by": "sse_stat_date" if as_of else None,
+        "as_of_confirmed_by": confirmed_by,
         "backfill_start": full_calendar[0] if full_calendar else None,
         "backfill_end": full_calendar[-1] if full_calendar else None,
         "trading_days": len([day for day in full_calendar if day not in blocked]),
@@ -411,14 +433,15 @@ def build_flows(history, szse=None, generated_at=None) -> dict:
             "aum_yi": aum,
             "aum_covered": na,
             "universe": len(WATCH),
-            "aum_note": "只加总统计日与收盘价同一天的标的。深市未核日期快照不计入。",
+            "aum_note": "只加总统计日与收盘价同一天的标的。fund_jjgm 失败日的深市无日期快照不计入。",
         },
         "aggregate": {"inflow_yi": aggregate, "covered": covered, "cumulative_yi": cumulative},
         "etfs": etfs,
         "szse_snapshot": {
             "collected_at": None if not latest_sz else latest_sz.get("collected_at"),
-            "date_status": "undated",
-            "note": "深交所基金列表的当前规模没有份额统计日。只留快照，不写成某个交易日，也不参与申赎估算。",
+            "date_status": "dated_via_fund_jjgm" if sz_confirmed else "undated_fallback",
+            "note": ("深市主源 fund_jjgm 自带 size_date，已按官方交易日入历史；本块仅在 jjgm 失败时"
+                     "保留 1000_lf 无日期当前规模留痕，不写成交易日，不参与申赎估算。"),
             "source": SZSE_URL,
             "rows": {} if not latest_sz else latest_sz.get("rows") or {},
         },
@@ -451,6 +474,70 @@ def fetch_szse(get=http_get):
     if status != 200:
         raise RuntimeError(f"SZSE HTTP {status}")
     return parse_szse_xlsx(raw)
+
+
+def parse_szse_jjgm(obj) -> dict:
+    """fund_jjgm 单页响应 -> {YYYY-MM-DD: current_size 万份原文}。只收 watch 内深市基金。"""
+    blocks = obj or []
+    try:
+        rows = blocks[0].get("data") or []
+    except (AttributeError, IndexError, TypeError):
+        raise RuntimeError("SZSE fund_jjgm 响应结构无法解析")
+    out = {}
+    for row in rows:
+        day = str(row.get("size_date") or "").strip()
+        code = str(row.get("fund_code") or "").strip()
+        wan = row.get("current_size")
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day) or code not in BY_CODE:
+            continue
+        if wan in (None, "", "-"):
+            continue
+        text = str(wan).replace(",", "").strip()
+        try:
+            Decimal(text)
+        except Exception:
+            continue
+        out[day] = text
+    return out
+
+
+def fetch_szse_jjgm(code, beg: dt.date, end: dt.date, pages=SZSE_JJGM_PAGES, get=http_get) -> dict:
+    """逐基金拉带 size_date 的历史规模。翻页到空即停；任一页非 200/无有效记录则抛错。"""
+    if code not in BY_CODE or BY_CODE[code]["exch"] != "SZ":
+        raise RuntimeError(f"{code} 不是深市 watch 标的")
+    merged = {}
+    for page in range(1, pages + 1):
+        url = SZSE_JJGM_URL.format(code=code, start=beg.strftime("%Y-%m-%d"),
+                                   end=end.strftime("%Y-%m-%d"), page=page)
+        status, text = get(url, headers={"User-Agent": UA, "Accept": "application/json, text/plain, */*",
+                                         "X-Requested-With": "XMLHttpRequest",
+                                         "Referer": "https://fund.szse.cn/"})
+        if status != 200:
+            raise RuntimeError(f"SZSE fund_jjgm {code} p{page} HTTP {status}")
+        try:
+            rows = parse_szse_jjgm(json.loads(text))
+        except (ValueError, RuntimeError) as exc:
+            raise RuntimeError(f"SZSE fund_jjgm {code} p{page} 解析失败: {exc}")
+        if not rows:
+            break
+        merged.update(rows)
+    if not merged:
+        raise RuntimeError(f"SZSE fund_jjgm {code} 无有效规模记录")
+    return merged
+
+
+def merge_szse_series(history, code, rows, cap_day=None):
+    """把带 size_date 的深市规模写进同一套 days 结构。cap_day 之后的日期丢弃，
+    深市不得领先沪市最新确认日推进 as_of。返回实际写入的日期数。"""
+    written = 0
+    for day, wan in rows.items():
+        if cap_day is not None and day > cap_day:
+            continue
+        bucket = history.setdefault("days", {}).setdefault(day, {})
+        bucket[code] = {"tot_vol_wan": wan, "stat_date": day, "source": "szse_fund_jjgm",
+                        "sec_name": BY_CODE[code]["name"]}
+        written += 1
+    return written
 
 
 def merge_sse_day(history, day, shares):
@@ -492,6 +579,33 @@ def daterange(beg: dt.date, end: dt.date):
         day += dt.timedelta(days=1)
 
 
+def pull_szse_dated(beg: dt.date, end: dt.date, get, sleep, pages=SZSE_JJGM_PAGES):
+    """全量深市 watch 基金分段拉带日期规模。返回 ({code: {day: wan}}, [error])。
+    单基金失败不影响其他基金；每段 <=28 自然日步行回退（接口不支持 pageno 翻历史）。"""
+    series_map, errors = {}, []
+    for index, code in enumerate(SZ_CODES):
+        if index:
+            sleep(SZSE_REQUEST_GAP)
+        series, seg_end = {}, end
+        try:
+            while seg_end >= beg:
+                seg_start = max(beg, seg_end - dt.timedelta(days=SZSE_SEGMENT_DAYS - 1))
+                series.update(fetch_szse_jjgm(code, seg_start, seg_end, pages=pages, get=get))
+                seg_end = seg_start - dt.timedelta(days=1)
+                sleep(SZSE_REQUEST_GAP)
+            series_map[code] = series
+        except Exception as exc:  # noqa: BLE001
+            errors.append(f"{code}: {type(exc).__name__}: {exc}")
+    return series_map, errors
+
+
+def sh_confirmed_days(history) -> list:
+    days = history.get("days") or {}
+    return sorted(day for day, rows in days.items()
+                  if any((rows.get(code) or {}).get("stat_date") == day and (rows.get(code) or {}).get("tot_vol_wan")
+                         for code in SH_CODES))
+
+
 def backfill(beg: dt.date, end: dt.date, get=http_get, sleep=time.sleep, now=None):
     history = load_json(HISTORY_PATH, empty_history())
     for code in BY_CODE:
@@ -528,22 +642,32 @@ def backfill(beg: dt.date, end: dt.date, get=http_get, sleep=time.sleep, now=Non
         elif shares:
             merge_sse_day(history, text, shares)
             added.append(text)
+    # 深市带日期历史规模（fund_jjgm），分段回补；日期不得领先沪市最新确认日。
+    cap_day = (sh_confirmed_days(history) or [None])[-1]
+    sz_series, sz_errors = pull_szse_dated(beg, end, get, sleep)
+    sz_added = 0
+    for code, dated in sz_series.items():
+        sz_added += merge_szse_series(history, code, dated, cap_day=cap_day)
     stamp = bj_now(now).strftime("%Y-%m-%dT%H:%M:%S+08:00")
     history["updated_at"] = stamp
     history["schema"] = SCHEMA
     szse_doc = load_json(SZSE_PATH, {"schema": "etf-szse-snapshot-1", "snapshots": []})
     szse_error = None
-    try:
-        rows = fetch_szse(get=get)
-        szse_doc, _ = record_szse(szse_doc, rows, stamp)
-    except Exception as exc:
-        rows = {}
-        szse_error = f"{type(exc).__name__}: {exc}"
+    rows = {}
+    if sz_errors:
+        # 仅在 fund_jjgm 有失败时回退无日期 xlsx 留痕（不参与计算）。
+        try:
+            rows = fetch_szse(get=get)
+            szse_doc, _ = record_szse(szse_doc, rows, stamp)
+        except Exception as exc:
+            rows = {}
+            szse_error = f"{type(exc).__name__}: {exc}"
     flows = build_flows(history, szse_doc, generated_at=stamp)
     changed = write_if_changed(HISTORY_PATH, history)
     changed = write_if_changed(SZSE_PATH, szse_doc) or changed
     changed = write_if_changed(FLOWS_PATH, flows) or changed
     return {"added": added, "empty_days": len(empty), "blocked": blocked,
+            "szse_dated_records": sz_added, "szse_errors": sz_errors,
             "szse_rows": len(rows), "szse_error": szse_error, "as_of": flows.get("as_of"),
             "changed": changed, "trading_days": flows.get("trading_days")}
 
@@ -585,16 +709,27 @@ def update_recent(lookback_days=12, get=http_get, sleep=time.sleep, now=None):
             else:
                 history["blocked_dates"] = [item for item in history.get("blocked_dates") or [] if item != text]
         sleep(0.3)
+    # 深市 fund_jjgm 带日期窗口（日常 3 页），cap 到沪市最新确认日，失败才降级无日期快照。
+    sh_days = sh_confirmed_days(history)
+    cap_day = sh_days[-1] if sh_days else None
+    sz_beg = today - dt.timedelta(days=SZSE_JJGM_LOOKBACK_DAYS)
+    sz_series, sz_errors = pull_szse_dated(sz_beg, today, get, sleep, pages=SZSE_JJGM_PAGES)
+    sz_added = 0
+    if cap_day is not None:
+        for code, dated in sz_series.items():
+            sz_added += merge_szse_series(history, code, dated, cap_day=cap_day)
     stamp = bj_now(now).strftime("%Y-%m-%dT%H:%M:%S+08:00")
     szse_doc = load_json(SZSE_PATH, {"schema": "etf-szse-snapshot-1", "snapshots": []})
-    try:
-        szse_doc, szse_changed = record_szse(szse_doc, fetch_szse(get=get), stamp)
-    except Exception:
-        szse_changed = False
-    if not added and not szse_changed and history.get("updated_at"):
+    szse_changed = False
+    if sz_errors:
+        try:
+            szse_doc, szse_changed = record_szse(szse_doc, fetch_szse(get=get), stamp)
+        except Exception:
+            szse_changed = False
+    if not added and not sz_added and not szse_changed and history.get("updated_at"):
         flows = build_flows(history, szse_doc, generated_at=history.get("updated_at"))
         changed = write_if_changed(FLOWS_PATH, flows)
-        return {"added": [], "as_of": flows.get("as_of"), "changed": changed}
+        return {"added": [], "szse_errors": sz_errors, "as_of": flows.get("as_of"), "changed": changed}
     history["updated_at"] = stamp
     history["schema"] = SCHEMA
     flows = build_flows(history, szse_doc, generated_at=stamp)

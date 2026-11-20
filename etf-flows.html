@@ -103,18 +103,26 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 <div class="quick-read"><p><b>全市场申赎，不是国家队专属。</b> 估算净流入 =（当日官方份额 − 前一官方交易日份额）× 当日成交均价。成交均价 = 成交额 / 成交量。这和资金观察页的分钟成交额代理不是同一件事。</p></div>
 <div class="sec"><h2>合计申赎</h2><span class="side">柱为当日合计，线为累计。缺口留空，不按零画。</span><div class="section-actions"><div class="filter-group" role="group" aria-label="观察区间"><button type="button" class="chip" data-w="60" onclick="setSpan(60)">近60发布日</button><button type="button" class="chip on" data-w="120" onclick="setSpan(120)">近120发布日</button><button type="button" class="chip" data-w="ALL" onclick="setSpan('ALL')">全部</button></div></div></div>
 <section class="panel"><div id="aggChart" class="ch"></div></section>
-<div class="sec"><h2>单只份额</h2><span class="side">只画统计日已核对的份额。深市未核日期快照不进这根线。</span><div class="section-actions"><label for="etfSelect">ETF<select id="etfSelect" onchange="drawOne()"></select></label></div></div>
+<div class="sec"><h2>单只份额</h2><span class="side">只画交易所统计日已核对的份额：沪市 STAT_DATE、深市 fund_jjgm 的 size_date。降级快照不进这根线。</span><div class="section-actions"><label for="etfSelect">ETF<select id="etfSelect" onchange="drawOne()"></select></label></div></div>
 <section class="panel"><div id="oneChart" class="ch"></div></section>
 <div class="sec"><h2>明细</h2><span class="side">份额变动达到或超过 25% 仍显示原值，并标「待核」，不改写成拆分。</span></div>
 <section class="panel"><div class="tbx"><table class="flow" id="flowTable"><thead><tr>
-<th data-k="code">代码</th><th data-k="name">名称</th><th data-k="exch">市场</th><th data-k="shares_yi">份额（亿份）</th><th data-k="delta_1d_yi">1日变动</th><th data-k="delta_5d_yi">5日变动</th><th data-k="delta_20d_yi">20日变动</th><th data-k="inflow_1d_yi">1日估算净流入（亿元）</th><th data-k="close">最新价</th><th data-k="vwap">成交均价</th><th data-k="aum_yi">同日规模（亿元）</th><th data-k="undated_snapshot_yi">未核日期规模</th>
+<th data-k="code">代码</th><th data-k="name">名称</th><th data-k="exch">市场</th><th data-k="shares_yi">份额（亿份）</th><th data-k="delta_1d_yi">1日变动</th><th data-k="delta_5d_yi">5日变动</th><th data-k="delta_20d_yi">20日变动</th><th data-k="inflow_1d_yi">1日估算净流入（亿元）</th><th data-k="close">最新价</th><th data-k="vwap">成交均价</th><th data-k="aum_yi">同日规模（亿元）</th><th data-k="undated_snapshot_yi">无日期快照（降级留痕）</th>
 </tr></thead><tbody></tbody></table></div>
-<p class="foot">沪市份额来自上交所 STAT_DATE，单位由万份换算。深市「当前规模」没有统计日，只出现在最后一列，不参与申赎和规模合计。</p></section>
+<p class="foot">沪市份额来自上交所 STAT_DATE、深市来自深交所 fund_jjgm 的 size_date，均由万份换算并按同一交易日对齐。fund_jjgm 抓取失败时才在最后一列保留无日期当前规模快照，该值不参与申赎和规模合计。</p></section>
 <div class="sec"><h2>国家队官方持仓</h2><span class="side" id="holdAsOf">截止日载入中…</span></div>
-<section class="panel"><p class="foot" id="holderRows">核对中…</p><div class="tbx"><table class="flow" id="holdTable"><thead><tr>
-<th>代码</th><th>名称</th><th>截止日</th><th>前十名持有人</th><th>国家队具名</th><th>核对说明</th><th>来源</th>
+<section class="panel"><p class="foot" id="holderRows">核对中…</p>
+<h3 style="margin:18px 0 8px;font-size:15px;color:var(--ink)">2025 年年度报告口径（截止 2025-12-31）</h3>
+<p class="foot" id="annualNote"></p>
+<div class="tbx"><table class="flow" id="holdAnnualTable"><thead><tr>
+<th>代码</th><th>名称</th><th>前十排名</th><th>具名持有人</th><th>类别</th><th>持有份额（亿份）</th><th>占上市总份额（%）</th><th>年报原文</th>
 </tr></thead><tbody></tbody></table></div>
-<p class="foot">每年 4 月核对年报（上一年 12 月 31 日），9 月核对中期报告（当年 6 月 30 日）。媒体和 Wind 汇总不写入。</p></section>
+<h3 style="margin:22px 0 8px;font-size:15px;color:var(--ink)">2026 年中期报告核对（截止 2026-06-30）</h3>
+<p class="foot" id="interimNote"></p>
+<div class="tbx"><table class="flow" id="holdInterimTable"><thead><tr>
+<th>代码</th><th>名称</th><th>前十名章节</th><th>国家队具名</th><th>核对说明</th><th>来源</th>
+</tr></thead><tbody></tbody></table></div>
+<p class="foot">每年 4 月核对年报、9 月核对中期报告，数字只取自基金在交易所或巨潮披露的原始报告；媒体和 Wind 汇总不写入。自 2026-05-01 起按<a href="https://www.csrc.gov.cn/csrc/c101954/c7619929/content.shtml" target="_blank" rel="noopener">证监会公告〔2026〕5 号</a>，年度报告与中期报告均不再强制披露前十名持有人，2025 年年报是最后一批含前十名的官方快照；份额为基金份数，不是市值。</p></section>
 </main>
 <div class="ui-mask" id="flowGuide" hidden>
 <div class="ui-backdrop" onclick="uiPanel.close()"></div>
@@ -124,8 +132,8 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 <dl><dt>份额</dt><dd>上交所 query.sse.com.cn 的 TOT_VOL，请求日必须等于该行 STAT_DATE。单位万份。对不上日期的行丢掉。</dd>
 <dt>成交均价</dt><dd>东方财富日 K 的成交额除以成交量。成交量为 0 或缺失时，均价和净流入都是空，不拿收盘价代替。</dd>
 <dt>估算净流入</dt><dd>（当日份额 − 前一官方交易日份额）× 当日成交均价。窗口里任何一天缺份额或均价，这一窗口就是空，不跨缺口凑，也不把空当成 0。</dd>
-<dt>深市</dt><dd>深交所基金列表只有当前规模，文件没有份额统计日。只留快照，不写成某个交易日，不参与变动、净流入和规模合计。</dd>
-<dt>国家队持仓</dt><dd>只采用基金 2026 年中期报告（截止 2026-06-30）里写明的持有人。报告没有前十名、或只写「机构」而没有名称的，不补数字。</dd></dl></div>
+<dt>深市</dt><dd>主源为深交所 fund_jjgm 逐基金历史规模接口，每行自带官方 size_date（万份），与沪市同一交易日对齐后才参与计算。接口失败时降级保留基金列表「当前规模」无日期快照，只留痕，不写成交易日，不参与合计。</dd>
+<dt>国家队持仓</dt><dd>2025 年年报（截止 2025-12-31）只列原始报告前十名里具名的国家队持有人。2026 年中报保留核对说明；新规已取消年报、中报前十名的强制披露要求，未披露不等于持仓为零。份额是基金份数，不是市值。</dd></dl></div>
 </section>
 </div>
 <script>
@@ -143,8 +151,46 @@ function drawOne(){const el=document.getElementById('oneChart');const code=docum
 function sortedEtfs(){const rows=(pack.etfs||[]).map((etf,i)=>Object.assign({order:i},etf));const dir=sortAsc?1:-1;rows.sort((a,b)=>{if(sortKey==='order')return (a.order-b.order)*dir;if(sortKey==='name'||sortKey==='code'||sortKey==='exch')return String(a[sortKey]||'').localeCompare(String(b[sortKey]||''),'zh')*dir;const av=uiNumber(a[sortKey]),bv=uiNumber(b[sortKey]);if(av==null&&bv==null)return a.order-b.order;if(av==null)return 1;if(bv==null)return -1;return (av-bv)*dir});return rows}
 function renderTable(){const tb=document.querySelector('#flowTable tbody');tb.replaceChildren();sortedEtfs().forEach(etf=>{const tr=document.createElement('tr');const vals=[etf.code,etf.name,etf.exch==='SH'?'沪':'深',shares(etf.shares_yi),shares(etf.delta_1d_yi)+(etf.anomaly_1d&&etf.delta_1d_yi!=null?' 待核':''),shares(etf.delta_5d_yi),shares(etf.delta_20d_yi),money(etf.inflow_1d_yi),px(etf.close),px(etf.vwap),money(etf.aum_yi),etf.exch==='SZ'?shares(etf.undated_snapshot_yi):'—'];vals.forEach(text=>{const td=document.createElement('td');td.textContent=text;tr.appendChild(td)});tb.appendChild(tr)})}
 function renderKpis(){const s=pack.summary||{},u=s.universe||0;const cards=[['当日估算净流入',money(s.inflow_1d_yi)+' 亿元','覆盖 '+(s.inflow_1d_covered||0)+'/'+u+' 只，缺值不计为 0'],['近 5 个交易日',money(s.inflow_5d_yi)+' 亿元','覆盖 '+(s.inflow_5d_covered||0)+'/'+u+' 只'],['近 20 个交易日',money(s.inflow_20d_yi)+' 亿元','覆盖 '+(s.inflow_20d_covered||0)+'/'+u+' 只'],['同日规模',s.aum_yi==null?'—':money(s.aum_yi)+' 亿元','覆盖 '+(s.aum_covered||0)+'/'+u+' 只。'+(s.aum_note||'')]];document.getElementById('flowKpis').innerHTML=cards.map(x=>'<div class="kpi"><div class="lb">'+uiEsc(x[0])+'</div><div class="vl">'+uiEsc(x[1])+'</div><div class="ft">'+uiEsc(x[2])+'</div></div>').join('')}
-function renderHolds(){const note=document.getElementById('holderRows');const tb=document.querySelector('#holdTable tbody');tb.replaceChildren();if(!holds){document.getElementById('holdAsOf').textContent='持仓核对文件未载入';note.textContent='没有持仓核对文件。';return}document.getElementById('holdAsOf').textContent='截止 '+(holds.as_of||'—')+' · '+(holds.report_type||'');(holds.checked||[]).forEach(row=>{const tr=document.createElement('tr');[row.code,row.name,row.as_of,row.top10_section?'有章节':'未列示',row.national_team_named?'有':'未见',row.note||''].forEach(text=>{const td=document.createElement('td');td.textContent=text==null?'':String(text);tr.appendChild(td)});const td=document.createElement('td');if(row.source_url){const a=document.createElement('a');a.href=row.source_url;a.target='_blank';a.rel='noopener';a.textContent='报告';td.appendChild(a)}else td.textContent='直链未定位';tr.appendChild(td);tb.appendChild(tr)});const named=holds.rows||[];note.textContent=named.length?('已写入 '+named.length+' 条报告中的国家队持有份额。'):'已核对的 2026 年中期报告没有可写入的国家队持有份额。未在原始报告里具名的数字不补。'}
-async function refreshFlows(){const rb=document.getElementById('rb');rb.disabled=true;rb.textContent='刷新中…';try{pack=await readJSON('data/etf_share_flows.json?t='+Date.now());try{holds=await readJSON('data/etf_official_holdings.json?t='+Date.now())}catch(err){holds=null}const sel=document.getElementById('etfSelect'),prev=sel.value||new URLSearchParams(location.search).get('code')||'510300';sel.replaceChildren();(pack.etfs||[]).forEach(etf=>{const o=document.createElement('option');o.value=etf.code;o.textContent=etf.code+' '+etf.name;sel.append(o)});if([...sel.options].some(o=>o.value===prev))sel.value=prev;const q=new URLSearchParams(location.search).get('window');if(q==='60'||q==='120')span=+q;else if(q==='ALL')span='ALL';setSpan(span);renderKpis();renderTable();renderHolds();const snap=pack.szse_snapshot||{};document.getElementById('st').textContent='截止 '+(pack.as_of||'—')+' · 自 '+(pack.backfill_start||'—')+(snap.date_status==='undated'?' · 深市快照未标日期':'');pageNotice('')}catch(err){document.getElementById('st').textContent='刷新失败';pageNotice('份额数据没有载入。缺失不表示申赎为零。')}finally{rb.disabled=false;rb.textContent='刷新'}}
+function renderHolds(){
+ const note=document.getElementById('holderRows');
+ const atb=document.querySelector('#holdAnnualTable tbody');
+ const itb=document.querySelector('#holdInterimTable tbody');
+ atb.replaceChildren();itb.replaceChildren();
+ if(!holds){document.getElementById('holdAsOf').textContent='持仓核对文件未载入';note.textContent='没有持仓核对文件。';return}
+ const annual=holds.annual_2025, interim=holds.interim_2026;
+ document.getElementById('holdAsOf').textContent='年报截止 '+(annual&&annual.as_of||'—')+' · 中报截止 '+(interim&&interim.as_of||'—');
+ const td=(text)=>{const e=document.createElement('td');e.textContent=text==null?'':String(text);return e};
+ const link=(url,text)=>{const e=document.createElement('td');if(url){const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.textContent=text||'报告';e.appendChild(a)}else e.textContent='直链未定位';return e};
+ if(annual){
+  (annual.funds||[]).forEach(f=>{
+   const hs=f.holders||[];
+   if(!hs.length){
+    const tr=document.createElement('tr');
+    [f.code,f.name,'—','前十名未见国家队具名','—','—','—'].forEach(v=>tr.appendChild(td(v)));
+    tr.appendChild(link(f.source_url));atb.appendChild(tr);return
+   }
+   hs.forEach((h,i)=>{
+    const tr=document.createElement('tr');
+    if(i===0){const c=td(f.code);c.rowSpan=hs.length;const n=td(f.name);n.rowSpan=hs.length;tr.append(c,n)}
+    tr.append(td(h.rank),td(h.holder_name),td(h.holder_kind),td((h.shares/1e8).toFixed(4)),td(h.pct_of_listed_shares));
+    if(i===0){const l=link(f.source_url);l.rowSpan=hs.length;tr.appendChild(l)}
+    atb.appendChild(tr)
+   })
+  });
+  const s=annual.summary||{};
+  document.getElementById('annualNote').textContent='17 只宽基中 '+(s.funds_with_named_national_team??'—')+' 只的年报前十名出现国家队具名，合计 '+(s.named_holder_total_shares_yi??'—')+' 亿份（其中直接持股 '+(s.direct_entity_shares_yi??'—')+' 亿份、汇金资管计划 '+(s.asset_management_plan_shares_yi??'—')+' 亿份）。联接基金按报告原注不计入前十名；数字逐份核对自原始年报 PDF。'
+ }
+ if(interim){
+  (interim.checked||[]).forEach(row=>{
+   const tr=document.createElement('tr');
+   [row.code,row.name,row.top10_section?'有章节':'未列示',row.national_team_named?'有':'未见',row.note||''].forEach(v=>tr.appendChild(td(v)));
+   tr.appendChild(link(row.source_url));itb.appendChild(tr)
+  });
+  document.getElementById('interimNote').textContent=(interim.gap||'2026 年中期报告没有可写入的国家队持有份额。未在原始报告里具名的数字不补。')
+ }
+ note.textContent='年报与中报两个口径分列；未在基金原始报告里具名的持有人和数字一律不写入。'
+}
+async function refreshFlows(){const rb=document.getElementById('rb');rb.disabled=true;rb.textContent='刷新中…';try{pack=await readJSON('data/etf_share_flows.json?t='+Date.now());try{holds=await readJSON('data/etf_official_holdings.json?t='+Date.now())}catch(err){holds=null}const sel=document.getElementById('etfSelect'),prev=sel.value||new URLSearchParams(location.search).get('code')||'510300';sel.replaceChildren();(pack.etfs||[]).forEach(etf=>{const o=document.createElement('option');o.value=etf.code;o.textContent=etf.code+' '+etf.name;sel.append(o)});if([...sel.options].some(o=>o.value===prev))sel.value=prev;const q=new URLSearchParams(location.search).get('window');if(q==='60'||q==='120')span=+q;else if(q==='ALL')span='ALL';setSpan(span);renderKpis();renderTable();renderHolds();const snap=pack.szse_snapshot||{};const szTxt=snap.date_status==='undated_fallback'?' · 深市接口失败，已降级无日期快照':(snap.date_status==='dated_via_fund_jjgm'?' · 深市 size_date 已核对':'');document.getElementById('st').textContent='截止 '+(pack.as_of||'—')+' · 自 '+(pack.backfill_start||'—')+szTxt;pageNotice('')}catch(err){document.getElementById('st').textContent='刷新失败';pageNotice('份额数据没有载入。缺失不表示申赎为零。')}finally{rb.disabled=false;rb.textContent='刷新'}}
 function sortBy(key){if(sortKey===key)sortAsc=!sortAsc;else{sortKey=key;sortAsc=key==='name'||key==='code'||key==='exch'}renderTable()}
 document.querySelectorAll('#flowTable th[data-k]').forEach(th=>{th.tabIndex=0;th.addEventListener('click',()=>sortBy(th.dataset.k));th.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();sortBy(th.dataset.k)}})});
 addEventListener('resize',()=>{if(aggChart)aggChart.resize();if(oneChart)oneChart.resize()});

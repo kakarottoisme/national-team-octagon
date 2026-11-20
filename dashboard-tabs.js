@@ -33,7 +33,7 @@
     if (page === 'index.html') return !!document.querySelector('#tb tr') && document.querySelector('#ds')?.options.length>0;
     if (page === 'margin.html') return !!document.querySelector('#marginKpis .kpi') && document.querySelector('#marginDate')?.options.length>0;
     if (page === 'futures-preview.html') return !!document.querySelector('#icDynamic .model') && document.querySelector('#icDate')?.options.length>0;
-    if (page === 'etf-flows.html') return !!document.querySelector('#flowTable tbody tr') && !!document.querySelector('#holdTable tbody tr');
+    if (page === 'etf-flows.html') return !!document.querySelector('#flowTable tbody tr') && !!document.querySelector('#holdAnnualTable tbody tr');
     return !!document.querySelector('#grid .mrow');
   }
   function report() {

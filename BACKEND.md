@@ -24,9 +24,9 @@
 
 ### 份额与申赎
 `etf-flows.html` 读 `data/etf_share_flows.json` 和 `data/etf_official_holdings.json`。名单是第三方观察的 16 只宽基，另加 159352。
-- `etf_share_flows.py`：上交所按日份额、东财日 K 成交均价、深交所未标日期快照。估算净流入 = 份额差 × 成交均价。窗口内缺一天则为 null。
-- 深市快照文件是 `data/etf_szse_snapshot.json`，`date_status` 固定为 `undated`。
-- 官方持仓只来自 2026 年中期报告原文。报告没有前十名或没有具名时，`rows` 留空。
+- `etf_share_flows.py`：上交所按日份额（STAT_DATE）、深交所 fund_jjgm 逐基金历史规模（每行自带 size_date，万份）、东财日 K 成交均价。估算净流入 = 份额差 × 成交均价。窗口内缺一天则为 null。
+- 深市主源 `CATALOGID=fund_jjgm` 失败时，才降级抓取 1000_lf 无日期当前规模，写入 `data/etf_szse_snapshot.json`（`date_status=undated_fallback`），仅留痕不参与计算；成功时 flows 内标 `dated_via_fund_jjgm`。长跨度查询按 28 自然日分段（接口 pageno 不翻历史，每段至多 20 个交易日），单页步行回退保证无缺口。
+- 官方持仓文件 `data/etf_official_holdings.json`（schema `etf-official-holdings-2`）分两个口径：`annual_2025` 存 2025 年年报（截止 2025-12-31）前十名中的国家队具名份额，17 只逐份核对自交易所/巨潮原始 PDF；`interim_2026` 保留 17 份中报核对痕迹且 `rows` 为空。证监会公告〔2026〕5 号（2026-05-01 施行）第三十一条后年报与中报均不再强制披露前十名持有人，法规原文链接写在 `regulation_notes`，媒体和 Wind 汇总不写入。
 - 云端由 `.github/workflows/etf-share-flows.yml` 在北京 23:40 和次日 00:10 运行，无变化不提交。不碰 `live.yml`。
 
 ### 全球风险

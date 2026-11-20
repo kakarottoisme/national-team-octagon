@@ -1,207 +1,711 @@
 {
- "schema": "etf-official-holdings-1",
- "as_of": "2026-06-30",
- "report_type": "2026年中期报告",
- "holders_sought": [
-  "中央汇金投资有限责任公司",
-  "中央汇金资产管理有限责任公司",
-  "中国证券金融股份有限公司",
-  "国新投资有限公司",
-  "中国国新控股有限责任公司",
-  "中国诚通控股集团有限公司",
-  "北京诚通金控投资有限公司",
-  "汇金资管计划"
- ],
- "update_schedule": "每年4月核对年报（上一年12月31日），9月核对中期报告（当年6月30日）。",
- "rows": [],
- "checked": [
-  {
-   "code": "510300",
-   "name": "沪深300ETF华泰柏瑞",
-   "published": "2026-08-29",
-   "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-29/510300_20260829_2Q86.pdf",
-   "source_kind": "sse",
-   "note": "无前十名持有人章节。§11.1写明无单一投资者达到或超过20%。正文没有中央汇金、证金、国新或诚通控股。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
+  "schema": "etf-official-holdings-2",
+  "holders_sought": [
+    "中央汇金投资有限责任公司",
+    "中央汇金资产管理有限责任公司",
+    "中国证券金融股份有限公司",
+    "国新投资有限公司",
+    "中国国新控股有限责任公司",
+    "中国诚通控股集团有限公司",
+    "北京诚通金控投资有限公司",
+    "汇金资管计划"
+  ],
+  "update_schedule": "每年4月核对年报（上一年12月31日），9月核对中期报告（当年6月30日）。2026-05-01起证监会公告〔2026〕5号施行，年度报告与中期报告均不再强制披露前十名持有人，2025年年度报告（截止2025-12-31）是最后一批含前十名持有人章节的官方定期报告快照。",
+  "regulation_notes": [
+    {
+      "topic": "2026年起基金定期报告不再强制披露前十名持有人",
+      "rule": "《公开募集证券投资基金信息披露内容与格式准则第2号—定期报告的内容与格式》（证监会公告〔2026〕5号，2026-03-13发布、2026-05-01施行）第三十一条规定，年度报告和中期报告的基金份额持有人情况仅披露持有人户数、平均每户份额、机构与个人投资者持有比例及从业人员持有情况；准则全文共36条，无前十名持有人要求。原《准则第2号—年度报告》《第3号—半年度报告》《第4号—季度报告》（证监会公告〔2020〕66号）同时废止，旧准则下上市基金应列示前十名持有人的要求失效。",
+      "urls": {
+        "announcement": "https://www.csrc.gov.cn/csrc/c101954/c7619929/content.shtml",
+        "rule_pdf": "http://www.csrc.gov.cn/csrc/c101954/c7619929/7619929/files/%E9%99%84%E4%BB%B61%EF%BC%9A%E5%85%AC%E5%BC%80%E5%8B%9F%E9%9B%86%E8%AF%81%E5%88%B8%E6%8A%95%E8%B5%84%E5%9F%BA%E9%87%91%E4%BF%A1%E6%81%AF%E6%8A%AB%E9%9C%B2%E5%86%85%E5%AE%B9%E4%B8%8E%E6%A0%BC%E5%BC%8F%E5%87%86%E5%88%99%E7%AC%AC2%E5%8F%B7%E2%80%94%E5%AE%9A%E6%9C%9F%E6%8A%A5%E5%91%8A%E7%9A%84%E5%86%85%E5%AE%B9%E4%B8%8E%E6%A0%BC%E5%BC%8F.pdf",
+        "press_release": "https://www.csrc.gov.cn/csrc/c100028/c7619936/content.shtml",
+        "old_rule_archive": "https://fg.amac.org.cn/governmentrules_3854/zcgz_gfxwj/gfxwj_gmjj/gfxwj_gmjj_xxpl/202003/t20200312_24749.html"
+      }
+    }
+  ],
+  "annual_2025": {
+    "report_type": "2025年年度报告",
+    "as_of": "2025-12-31",
+    "rule_basis": "按旧《证券投资基金信息披露内容与格式准则第2号—年度报告的内容与格式》（证监会公告〔2020〕66号）编制，年报第九章披露期末上市基金前十名持有人；各基金于2026年3-4月披露，数字逐份取自交易所或巨潮原始年报PDF。",
+    "funds": [
+      {
+        "code": "510300",
+        "name": "沪深300ETF华泰柏瑞",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-03-31/510300_20260331_W6CZ.pdf",
+        "source_kind": "sse",
+        "annual_report_title": "华泰柏瑞沪深300交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 37858474974.0,
+            "pct_of_listed_shares": 42.62
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 35654598859.0,
+            "pct_of_listed_shares": 40.14
+          }
+        ]
+      },
+      {
+        "code": "510310",
+        "name": "沪深300ETF易方达",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-03-31/510310_20260331_K996.pdf",
+        "source_kind": "sse",
+        "annual_report_title": "易方达沪深300交易型开放式指数发起式证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 28538696695.0,
+            "pct_of_listed_shares": 43.34
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 27355388757.0,
+            "pct_of_listed_shares": 41.54
+          },
+          {
+            "rank": 5,
+            "holder_name": "易方达基金－中央汇金资产管理有限责任公司－易方达基金－汇金资管单一资产管理计划",
+            "holder_kind": "汇金资管计划",
+            "shares": 254000077.0,
+            "pct_of_listed_shares": 0.39
+          }
+        ]
+      },
+      {
+        "code": "510330",
+        "name": "沪深300ETF华夏",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-03-31/510330_20260331_X8KM.pdf",
+        "source_kind": "sse",
+        "annual_report_title": "华夏沪深300交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 21090791723.0,
+            "pct_of_listed_shares": 44.47
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 20937230572.0,
+            "pct_of_listed_shares": 44.15
+          }
+        ]
+      },
+      {
+        "code": "159919",
+        "name": "沪深300ETF嘉实",
+        "as_of": "2025-12-31",
+        "published": "2026-03-30",
+        "source_url": "https://static.cninfo.com.cn/finalpage/2026-03-30/1225041523.PDF",
+        "source_kind": "cninfo",
+        "annual_report_title": "嘉实沪深300交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 19543686916.0,
+            "pct_of_listed_shares": 47.88
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 15954808069.0,
+            "pct_of_listed_shares": 39.09
+          },
+          {
+            "rank": 6,
+            "holder_name": "北京诚通金控投资有限公司",
+            "holder_kind": "诚通",
+            "shares": 124001926.0,
+            "pct_of_listed_shares": 0.3
+          }
+        ]
+      },
+      {
+        "code": "510050",
+        "name": "上证50ETF",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-03-31/510050_20260331_O8IB.pdf",
+        "source_kind": "sse",
+        "annual_report_title": "上证50交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 28791513899.0,
+            "pct_of_listed_shares": 50.81
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 19967517877.0,
+            "pct_of_listed_shares": 35.24
+          }
+        ]
+      },
+      {
+        "code": "510180",
+        "name": "上证180ETF",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-03-31/510180_20260331_VKLF.pdf",
+        "source_kind": "sse",
+        "annual_report_title": "上证180交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 5231571046.0,
+            "pct_of_listed_shares": 91.93
+          }
+        ]
+      },
+      {
+        "code": "510500",
+        "name": "中证500ETF南方",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-03-31/510500_20260331_Q394.pdf",
+        "source_kind": "sse",
+        "annual_report_title": "中证500交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 8235101633.0,
+            "pct_of_listed_shares": 43.2
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 5981977518.0,
+            "pct_of_listed_shares": 31.38
+          },
+          {
+            "rank": 4,
+            "holder_name": "易方达基金－中央汇金资产管理有限责任公司－易方达基金－汇金资管单一资产管理计划",
+            "holder_kind": "汇金资管计划",
+            "shares": 190080598.0,
+            "pct_of_listed_shares": 1.0
+          }
+        ]
+      },
+      {
+        "code": "512500",
+        "name": "中证500ETF华夏",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-03-31/512500_20260331_X3VF.pdf",
+        "source_kind": "sse",
+        "annual_report_title": "华夏中证500交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 2050885600.0,
+            "pct_of_listed_shares": 47.26
+          },
+          {
+            "rank": 2,
+            "holder_name": "华夏基金－中央汇金资产管理有限责任公司－华夏基金－汇金资管单一资产管理计划",
+            "holder_kind": "汇金资管计划",
+            "shares": 803000000.0,
+            "pct_of_listed_shares": 18.5
+          }
+        ]
+      },
+      {
+        "code": "512100",
+        "name": "中证1000ETF南方",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-03-31/512100_20260331_H7TX.pdf",
+        "source_kind": "sse",
+        "annual_report_title": "南方中证1000交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 13212186794.0,
+            "pct_of_listed_shares": 51.51
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 8956692256.0,
+            "pct_of_listed_shares": 34.92
+          }
+        ]
+      },
+      {
+        "code": "159845",
+        "name": "中证1000ETF华夏",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://static.cninfo.com.cn/finalpage/2026-03-31/1225052452.PDF",
+        "source_kind": "cninfo",
+        "annual_report_title": "华夏中证1000交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 8928108730.0,
+            "pct_of_listed_shares": 56.04
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 4797801550.0,
+            "pct_of_listed_shares": 30.11
+          }
+        ]
+      },
+      {
+        "code": "560010",
+        "name": "中证1000ETF广发",
+        "as_of": "2025-12-31",
+        "published": "2026-03-30",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-03-30/560010_20260330_VHV9.pdf",
+        "source_kind": "sse",
+        "annual_report_title": "广发中证1000交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 6749915042.0,
+            "pct_of_listed_shares": 58.77
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 3799915155.0,
+            "pct_of_listed_shares": 33.09
+          }
+        ]
+      },
+      {
+        "code": "159629",
+        "name": "中证1000ETF富国",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://static.cninfo.com.cn/finalpage/2026-03-31/1225062344.PDF",
+        "source_kind": "cninfo",
+        "annual_report_title": "富国中证1000交易型开放式指数证券投资基金二0二五年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 2320963700.0,
+            "pct_of_listed_shares": 54.52
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 1313005255.0,
+            "pct_of_listed_shares": 30.84
+          },
+          {
+            "rank": 9,
+            "holder_name": "北京诚通金控投资有限公司",
+            "holder_kind": "诚通",
+            "shares": 16118654.0,
+            "pct_of_listed_shares": 0.38
+          }
+        ]
+      },
+      {
+        "code": "588000",
+        "name": "科创50ETF",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-03-31/588000_20260331_65O5.pdf",
+        "source_kind": "sse",
+        "annual_report_title": "华夏上证科创板50成份交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": false,
+        "holders": []
+      },
+      {
+        "code": "588080",
+        "name": "科创板50ETF易方达",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-03-31/588080_20260331_9RCR.pdf",
+        "source_kind": "sse",
+        "annual_report_title": "易方达上证科创板50成份交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 11806564625.0,
+            "pct_of_listed_shares": 22.92
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 9800143835.0,
+            "pct_of_listed_shares": 19.03
+          }
+        ]
+      },
+      {
+        "code": "159915",
+        "name": "创业板ETF易方达",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://static.cninfo.com.cn/finalpage/2026-03-31/1225057688.PDF",
+        "source_kind": "cninfo",
+        "annual_report_title": "易方达创业板交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 11362962941.0,
+            "pct_of_listed_shares": 36.07
+          },
+          {
+            "rank": 2,
+            "holder_name": "中央汇金资产管理有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 5656821265.0,
+            "pct_of_listed_shares": 17.96
+          }
+        ]
+      },
+      {
+        "code": "159977",
+        "name": "创业板ETF天弘",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://static.cninfo.com.cn/finalpage/2026-03-31/1225050874.PDF",
+        "source_kind": "cninfo",
+        "annual_report_title": "天弘创业板交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": true,
+        "holders": [
+          {
+            "rank": 1,
+            "holder_name": "中央汇金投资有限责任公司",
+            "holder_kind": "中央汇金",
+            "shares": 462012436.0,
+            "pct_of_listed_shares": 8.94
+          }
+        ],
+        "verification_note": "plain 文本层折行错乱，前十名表经 pdftotext -layout 原文逐行核对，仅第1名中央汇金投资有限责任公司属国家队"
+      },
+      {
+        "code": "159352",
+        "name": "中证A500ETF南方",
+        "as_of": "2025-12-31",
+        "published": "2026-03-31",
+        "source_url": "https://static.cninfo.com.cn/finalpage/2026-03-31/1225055502.PDF",
+        "source_kind": "cninfo",
+        "annual_report_title": "南方中证A500交易型开放式指数证券投资基金2025年年度报告",
+        "top10_section": true,
+        "national_team_named": false,
+        "holders": []
+      }
+    ],
+    "summary": {
+      "watched_fund_count": 17,
+      "funds_with_named_national_team": 15,
+      "funds_without_named_national_team": [
+        "588000",
+        "159352"
+      ],
+      "named_holder_total_shares_yi": 3677.4654,
+      "direct_entity_shares_yi": 3664.9946,
+      "asset_management_plan_shares_yi": 12.4708,
+      "by_holder": [
+        {
+          "holder_name": "中央汇金投资有限责任公司",
+          "fund_count": 15,
+          "shares_yi": 1902.9893
+        },
+        {
+          "holder_name": "中央汇金资产管理有限责任公司",
+          "fund_count": 12,
+          "shares_yi": 1760.6041
+        },
+        {
+          "holder_name": "华夏基金－中央汇金资产管理有限责任公司－华夏基金－汇金资管单一资产管理计划",
+          "fund_count": 1,
+          "shares_yi": 8.03
+        },
+        {
+          "holder_name": "易方达基金－中央汇金资产管理有限责任公司－易方达基金－汇金资管单一资产管理计划",
+          "fund_count": 2,
+          "shares_yi": 4.4408
+        },
+        {
+          "holder_name": "北京诚通金控投资有限公司",
+          "fund_count": 2,
+          "shares_yi": 1.4012
+        }
+      ],
+      "unit_note": "shares 为基金份额（份），亿份=份额/1e8；不是市值，未按净值折算金额。"
+    }
   },
-  {
-   "code": "510310",
-   "name": "沪深300ETF易方达",
-   "published": "2026-08-31",
-   "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/510310_20260831_6DXN.pdf",
-   "source_kind": "sse",
-   "note": "无前十名持有人章节。§11.1具名的是易方达沪深300联接基金，不是国家队。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "510330",
-   "name": "沪深300ETF华夏",
-   "published": "2026-08-31",
-   "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/510330_20260831_6JBD.pdf",
-   "source_kind": "sse",
-   "note": "无前十名持有人章节。§11.1具名的是华夏沪深300ETF联接，不是国家队。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "159919",
-   "name": "沪深300ETF嘉实",
-   "published": "2026-08-31",
-   "source_url": "https://static.cninfo.com.cn/finalpage/2026-08-31/1225528257.PDF",
-   "source_kind": "cninfo",
-   "note": "无前十名持有人章节。§11.1具名的是联接基金，不是国家队。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "510050",
-   "name": "上证50ETF",
-   "published": "2026-08-31",
-   "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/510050_20260831_HP51.pdf",
-   "source_kind": "sse",
-   "note": "无前十名持有人章节。§11.1写明无单一投资者达到或超过20%。正文没有国家队名称。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "510180",
-   "name": "上证180ETF",
-   "published": "2026-08-31",
-   "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/510180_20260831_8JO7.pdf",
-   "source_kind": "sse",
-   "note": "无前十名持有人章节。§11.1写明无单一投资者达到或超过20%。正文没有国家队名称。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "510500",
-   "name": "中证500ETF南方",
-   "published": "2026-08-31",
-   "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/510500_20260831_5WK8.pdf",
-   "source_kind": "sse",
-   "note": "无前十名持有人章节。§11.1具名的是联接基金，不是国家队。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "512500",
-   "name": "中证500ETF华夏",
-   "published": "2026-08-31",
-   "source_url": "https://www.chinaamc.com.cn/upload/resources/file/2026/08/31/53971c2e1aba4ae59394d726b11ab19c.pdf",
-   "source_kind": "fund_company",
-   "note": "无前十名持有人章节。§11.1具名的是华夏中证500ETF联接，不是国家队。来源为基金管理人网站上的中期报告原文。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "512100",
-   "name": "中证1000ETF南方",
-   "published": "2026-08-31",
-   "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/512100_20260831_LWTY.pdf",
-   "source_kind": "sse",
-   "note": "无前十名持有人章节。§11.1写明无需要披露的单一投资者。正文没有国家队名称。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "159845",
-   "name": "中证1000ETF华夏",
-   "published": "2026-08-31",
-   "source_url": "https://static.cninfo.com.cn/finalpage/2026-08-31/1225528041.PDF",
-   "source_kind": "cninfo",
-   "note": "无前十名持有人章节。§11.1写明无需要披露的单一投资者。正文没有国家队名称。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "560010",
-   "name": "中证1000ETF广发",
-   "published": "2026-08-31",
-   "source_url": null,
-   "source_kind": null,
-   "note": "报告正文已核对：无前十名持有人章节，§11.1具名的是广发中证1000联接基金。本次没有定位到交易所或巨潮直链，所以来源链接留空，不写份额。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "159629",
-   "name": "中证1000ETF富国",
-   "published": "2026-08-31",
-   "source_url": null,
-   "source_kind": null,
-   "note": "报告正文已核对：无前十名持有人章节。§11.1只写投资者类别「机构」，没有名称，不能记成国家队。直链未定位，来源链接留空。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "588000",
-   "name": "科创50ETF",
-   "published": "2026-08-31",
-   "source_url": "https://www.chinaamc.com.cn/upload/resources/file/2026/08/31/36f8f7cb15304bb090acf3b9069f15cc.pdf",
-   "source_kind": "fund_company",
-   "note": "无前十名持有人章节。§11.1写明无需要披露的单一投资者。来源为基金管理人网站上的中期报告原文。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "588080",
-   "name": "科创板50ETF易方达",
-   "published": "2026-08-31",
-   "source_url": "https://cdn.efunds.com.cn/owch/data/bulletin/20260831/%E6%98%93%E6%96%B9%E8%BE%BE%E4%B8%8A%E8%AF%81%E7%A7%91%E5%88%9B%E6%9D%BF50%E6%88%90%E4%BB%BD%E4%BA%A4%E6%98%93%E5%9E%8B%E5%BC%80%E6%94%BE%E5%BC%8F%E6%8C%87%E6%95%B0%E8%AF%81%E5%88%B8%E6%8A%95%E8%B5%84%E5%9F%BA%E9%87%912026%E5%B9%B4%E4%B8%AD%E6%9C%9F%E6%8A%A5%E5%91%8A.pdf",
-   "source_kind": "fund_company",
-   "note": "无前十名持有人章节。§11.1具名的是易方达科创板50联接基金，不是国家队。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "159915",
-   "name": "创业板ETF易方达",
-   "published": "2026-08-31",
-   "source_url": "https://cdn.efunds.com.cn/owch/data/bulletin/20260831/%E6%98%93%E6%96%B9%E8%BE%BE%E5%88%9B%E4%B8%9A%E6%9D%BF%E4%BA%A4%E6%98%93%E5%9E%8B%E5%BC%80%E6%94%BE%E5%BC%8F%E6%8C%87%E6%95%B0%E8%AF%81%E5%88%B8%E6%8A%95%E8%B5%84%E5%9F%BA%E9%87%912026%E5%B9%B4%E4%B8%AD%E6%9C%9F%E6%8A%A5%E5%91%8A.pdf",
-   "source_kind": "fund_company",
-   "note": "无前十名持有人章节。§11.1具名的是易方达创业板联接基金，不是国家队。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "159977",
-   "name": "创业板ETF天弘",
-   "published": "2026-08-31",
-   "source_url": null,
-   "source_kind": null,
-   "note": "报告正文已核对：无前十名持有人章节。§11.1具名的是联接基金。正文里的中国证券金融是转融通对手方，不是持有人。直链未定位，来源链接留空。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
-  },
-  {
-   "code": "159352",
-   "name": "中证A500ETF南方",
-   "published": "2026-08-31",
-   "source_url": "https://static.cninfo.com.cn/finalpage/2026-08-31/1225528366.PDF",
-   "source_kind": "cninfo",
-   "note": "无前十名持有人章节。§11.1具名的是联接基金，不是国家队。",
-   "as_of": "2026-06-30",
-   "top10_section": false,
-   "national_team_named": false
+  "interim_2026": {
+    "report_type": "2026年中期报告",
+    "as_of": "2026-06-30",
+    "rows": [],
+    "checked": [
+      {
+        "code": "510300",
+        "name": "沪深300ETF华泰柏瑞",
+        "published": "2026-08-29",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-29/510300_20260829_2Q86.pdf",
+        "source_kind": "sse",
+        "note": "无前十名持有人章节。§11.1写明无单一投资者达到或超过20%。正文没有中央汇金、证金、国新或诚通控股。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "510310",
+        "name": "沪深300ETF易方达",
+        "published": "2026-08-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/510310_20260831_6DXN.pdf",
+        "source_kind": "sse",
+        "note": "无前十名持有人章节。§11.1具名的是易方达沪深300联接基金，不是国家队。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "510330",
+        "name": "沪深300ETF华夏",
+        "published": "2026-08-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/510330_20260831_6JBD.pdf",
+        "source_kind": "sse",
+        "note": "无前十名持有人章节。§11.1具名的是华夏沪深300ETF联接，不是国家队。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "159919",
+        "name": "沪深300ETF嘉实",
+        "published": "2026-08-31",
+        "source_url": "https://static.cninfo.com.cn/finalpage/2026-08-31/1225528257.PDF",
+        "source_kind": "cninfo",
+        "note": "无前十名持有人章节。§11.1具名的是联接基金，不是国家队。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "510050",
+        "name": "上证50ETF",
+        "published": "2026-08-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/510050_20260831_HP51.pdf",
+        "source_kind": "sse",
+        "note": "无前十名持有人章节。§11.1写明无单一投资者达到或超过20%。正文没有国家队名称。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "510180",
+        "name": "上证180ETF",
+        "published": "2026-08-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/510180_20260831_8JO7.pdf",
+        "source_kind": "sse",
+        "note": "无前十名持有人章节。§11.1写明无单一投资者达到或超过20%。正文没有国家队名称。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "510500",
+        "name": "中证500ETF南方",
+        "published": "2026-08-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/510500_20260831_5WK8.pdf",
+        "source_kind": "sse",
+        "note": "无前十名持有人章节。§11.1具名的是联接基金，不是国家队。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "512500",
+        "name": "中证500ETF华夏",
+        "published": "2026-08-31",
+        "source_url": "https://www.chinaamc.com.cn/upload/resources/file/2026/08/31/53971c2e1aba4ae59394d726b11ab19c.pdf",
+        "source_kind": "fund_company",
+        "note": "无前十名持有人章节。§11.1具名的是华夏中证500ETF联接，不是国家队。来源为基金管理人网站上的中期报告原文。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "512100",
+        "name": "中证1000ETF南方",
+        "published": "2026-08-31",
+        "source_url": "https://www.sse.com.cn/disclosure/fund/announcement/c/new/2026-08-31/512100_20260831_LWTY.pdf",
+        "source_kind": "sse",
+        "note": "无前十名持有人章节。§11.1写明无需要披露的单一投资者。正文没有国家队名称。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "159845",
+        "name": "中证1000ETF华夏",
+        "published": "2026-08-31",
+        "source_url": "https://static.cninfo.com.cn/finalpage/2026-08-31/1225528041.PDF",
+        "source_kind": "cninfo",
+        "note": "无前十名持有人章节。§11.1写明无需要披露的单一投资者。正文没有国家队名称。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "560010",
+        "name": "中证1000ETF广发",
+        "published": "2026-08-31",
+        "source_url": null,
+        "source_kind": null,
+        "note": "报告正文已核对：无前十名持有人章节，§11.1具名的是广发中证1000联接基金。本次没有定位到交易所或巨潮直链，所以来源链接留空，不写份额。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "159629",
+        "name": "中证1000ETF富国",
+        "published": "2026-08-31",
+        "source_url": null,
+        "source_kind": null,
+        "note": "报告正文已核对：无前十名持有人章节。§11.1只写投资者类别「机构」，没有名称，不能记成国家队。直链未定位，来源链接留空。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "588000",
+        "name": "科创50ETF",
+        "published": "2026-08-31",
+        "source_url": "https://www.chinaamc.com.cn/upload/resources/file/2026/08/31/36f8f7cb15304bb090acf3b9069f15cc.pdf",
+        "source_kind": "fund_company",
+        "note": "无前十名持有人章节。§11.1写明无需要披露的单一投资者。来源为基金管理人网站上的中期报告原文。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "588080",
+        "name": "科创板50ETF易方达",
+        "published": "2026-08-31",
+        "source_url": "https://cdn.efunds.com.cn/owch/data/bulletin/20260831/%E6%98%93%E6%96%B9%E8%BE%BE%E4%B8%8A%E8%AF%81%E7%A7%91%E5%88%9B%E6%9D%BF50%E6%88%90%E4%BB%BD%E4%BA%A4%E6%98%93%E5%9E%8B%E5%BC%80%E6%94%BE%E5%BC%8F%E6%8C%87%E6%95%B0%E8%AF%81%E5%88%B8%E6%8A%95%E8%B5%84%E5%9F%BA%E9%87%912026%E5%B9%B4%E4%B8%AD%E6%9C%9F%E6%8A%A5%E5%91%8A.pdf",
+        "source_kind": "fund_company",
+        "note": "无前十名持有人章节。§11.1具名的是易方达科创板50联接基金，不是国家队。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "159915",
+        "name": "创业板ETF易方达",
+        "published": "2026-08-31",
+        "source_url": "https://cdn.efunds.com.cn/owch/data/bulletin/20260831/%E6%98%93%E6%96%B9%E8%BE%BE%E5%88%9B%E4%B8%9A%E6%9D%BF%E4%BA%A4%E6%98%93%E5%9E%8B%E5%BC%80%E6%94%BE%E5%BC%8F%E6%8C%87%E6%95%B0%E8%AF%81%E5%88%B8%E6%8A%95%E8%B5%84%E5%9F%BA%E9%87%912026%E5%B9%B4%E4%B8%AD%E6%9C%9F%E6%8A%A5%E5%91%8A.pdf",
+        "source_kind": "fund_company",
+        "note": "无前十名持有人章节。§11.1具名的是易方达创业板联接基金，不是国家队。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "159977",
+        "name": "创业板ETF天弘",
+        "published": "2026-08-31",
+        "source_url": null,
+        "source_kind": null,
+        "note": "报告正文已核对：无前十名持有人章节。§11.1具名的是联接基金。正文里的中国证券金融是转融通对手方，不是持有人。直链未定位，来源链接留空。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      },
+      {
+        "code": "159352",
+        "name": "中证A500ETF南方",
+        "published": "2026-08-31",
+        "source_url": "https://static.cninfo.com.cn/finalpage/2026-08-31/1225528366.PDF",
+        "source_kind": "cninfo",
+        "note": "无前十名持有人章节。§11.1具名的是联接基金，不是国家队。",
+        "as_of": "2026-06-30",
+        "top10_section": false,
+        "national_team_named": false
+      }
+    ],
+    "gap": "17份2026年中期报告均无前十名持有人章节，系证监会公告〔2026〕5号新规要求（2026-05-01施行），属于合规披露而非漏查；全文未见中央汇金、证金、国新或诚通系具名。560010、159629、159977 三份报告的交易所或巨潮直链仍待补定位。"
   }
- ],
- "gap": "17份2026年中期报告都没有前十名持有人明细，也没有把中央汇金、汇金资管、证金、国新或诚通控股写成持有人。因此 rows 为空。560010、159629、159977 的交易所或巨潮直链本次没有定位到。"
 }

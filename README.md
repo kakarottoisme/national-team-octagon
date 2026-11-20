@@ -35,7 +35,7 @@
 收盘后（建议 17:00 以后/次日，交易所两融披露滞后约 1 交易日）运行 `python3 margin.py`（需 akshare，可用 /workspace/.venv-nt），然后 commit 并 push `data/margin_balance.json`。脚本每次全量重拉，漏跑无影响。
 
 ## 份额与申赎（etf-flows.html）
-`data/etf_share_flows.json` 是全市场申赎估算，不是国家队专属，也不是本页分钟成交额代理。沪市份额按上交所统计日回补，深市当前规模没有统计日，不写入交易日。晚间由 **Refresh ETF share flows**（`.github/workflows/etf-share-flows.yml`）更新。国家队持仓表只收基金中期报告和年报里写明的持有人，见 `data/etf_official_holdings.json`。
+`data/etf_share_flows.json` 是全市场申赎估算，不是国家队专属，也不是本页分钟成交额代理。沪市份额按上交所 STAT_DATE 回补，深市按深交所 fund_jjgm 自带 size_date 的历史规模回补并同一交易日对齐；fund_jjgm 失败日才保留无日期快照且不写入交易日。晚间由 **Refresh ETF share flows**（`.github/workflows/etf-share-flows.yml`）更新。国家队持仓表见 `data/etf_official_holdings.json`（schema `etf-official-holdings-2`）：2025 年年度报告口径（截止 2025-12-31）逐只收录年报前十名里具名的国家队持有份额，全部核对自交易所或巨潮原始 PDF；2026 年中期报告按证监会公告〔2026〕5 号（2026-05-01 施行）不再强制披露前十名持有人，只保留 17 份报告的核对痕迹，不补任何未具名数字。
 
 ## IC 策略 · 收盘信号（futures-preview.html 顶部）
 `data/ic_strategy.json`：中证500收盘算出的 IC 只做多目标手数、A/B/C 底仓、D 腿（盈利覆盖加仓）和建议手数、建议合约、下一交易日触发价，以及可回看的历史。页面上的「最终规则」是计算口径。实际持仓写在 `data/holdings.json`，页面「当前持仓」只读这份配置。保证金按交易所 12% 估算。
