@@ -177,11 +177,11 @@
 .ui-page .date-tools button[aria-pressed="true"]{
  background:var(--accent-bg);border-color:#9db8db;color:#325b90;font-weight:600;
 }
-/* 资金观察：盘中成交 → 日度申赎 → 成交历史，复用母版字号与卡片。 */
+/* 申赎两融：先 ETF 申赎 → 后两融余额，复用母版字号与卡片。 */
 .funds-section-nav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 var(--space-section);font-size:var(--type-ctrl-size);line-height:var(--type-ctrl-lh)}
 .funds-section-nav a{padding:7px 14px;min-height:var(--type-ctrl-h);color:var(--muted);border:1px solid var(--line);border-radius:var(--type-ctrl-radius);background:var(--card);text-decoration:none}
 .funds-section-nav a:hover{color:var(--accent);border-color:#9db8db;background:var(--accent-bg)}
-#intraday,#shareFlows,#tradingHistory{scroll-margin-top:16px}
+#shareFlows,#marginSection{scroll-margin-top:16px}
 .funds-context{font-size:var(--type-sec-meta);line-height:var(--type-sec-meta-lh);color:var(--muted);margin:12px 0 0}
 .ui-page .funds-flow-controls{padding:12px 0;gap:12px;font-size:var(--type-sec-meta);color:var(--muted)}
 .funds-flow-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;min-width:0}
@@ -190,6 +190,6 @@
 .ui-page .funds-flow-grid h2{font-size:var(--type-sec-title);line-height:var(--type-sec-title-lh)}
 .ui-page .funds-flow-grid select{font-size:var(--type-ctrl-size);line-height:var(--type-ctrl-lh);height:36px;min-height:36px;padding:0 8px;min-width:180px;max-width:290px}
 .funds-chart-note{font-size:var(--type-sec-meta);line-height:var(--type-sec-meta-lh);color:var(--muted);margin:0;padding:0 16px;min-height:40px}
-.ui-page[data-ui-view="funds"] .ch.funds-flow-chart{height:320px;margin:0}
+.ui-page[data-ui-view="margin"] .ch.funds-flow-chart{height:320px;margin:0}
 @media(min-width:1100px){.funds-flow-grid{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}}
-@media(max-width:699px){.ui-page .funds-flow-grid .panel-head{align-items:flex-start}.ui-page .funds-flow-grid .inline-select{width:100%}.ui-page .funds-flow-grid select{flex:1;max-width:100%}.ui-page[data-ui-view="funds"] .ch.funds-flow-chart{height:280px}}
+@media(max-width:699px){.ui-page .funds-flow-grid .panel-head{align-items:flex-start}.ui-page .funds-flow-grid .inline-select{width:100%}.ui-page .funds-flow-grid select{flex:1;max-width:100%}.ui-page[data-ui-view="margin"] .ch.funds-flow-chart{height:280px}}

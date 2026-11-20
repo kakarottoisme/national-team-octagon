@@ -123,7 +123,7 @@ class DashboardContract(unittest.TestCase):
         self.assertNotIn("nowrap", crumb)
         expected = {
             "index.html": "宽基 ETF · 盘中活跃度与主动买卖方向",
-            "margin.html": "沪深两市 · 日度数据",
+            "margin.html": "ETF 申赎 · 沪深两融 · 日度数据",
             "futures-preview.html": "中信期货(代客) · CFFEX 前20会员",
             "risk-preview.html": "利率条件与融资成本 · 读最新值与历史",
             "etf-flows.html": "宽基 ETF · 全市场申赎，非国家队专属",

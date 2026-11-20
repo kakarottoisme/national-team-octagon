@@ -19,12 +19,12 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 
 | 文件 | 名称 | 读什么 |
 |---|---|---|
-| `index.html` | 资金观察 | 盘中成交、日度份额申赎、成交历史顺序呈现；读 `data/live.json`、`data/history.json`、`data/minutes/YYYY-MM-DD.json`、`data/etf_share_flows.json` 及成交基准 |
-| `margin.html` | 两融余额 | `data/margin_balance.json` |
+| `index.html` | 资金观察 | 盘中成交及成交历史；读 `data/live.json`、`data/history.json`、`data/minutes/YYYY-MM-DD.json` 及成交基准 |
+| `margin.html` | 申赎两融 | 先 ETF 份额申赎、后两融余额，分别读 `data/etf_share_flows.json`、`data/margin_balance.json` |
 | `futures-preview.html` | 期指持仓 | `data/ic_strategy.json`、`data/holdings.json`、`preview-data/official/` |
 | `risk-preview.html` | 全球风险 | `preview-data/global.json` |
 
-`etf-flows.html` 只保留旧链接跳转到资金观察的份额申赎段，不再是第五个 Tab。国家队官方持仓与 ETF 明细已按主人要求从界面移除；已核验数据文件保留，不再由页面读取。
+`etf-flows.html` 只保留旧链接跳转到申赎两融的份额申赎段，不再是第五个 Tab。国家队官方持仓与 ETF 明细已按主人要求从界面移除；已核验数据文件保留，不再由页面读取。
 
 文件名带 preview 的期指页和风险页就是正式 Tab，不是草稿。
 

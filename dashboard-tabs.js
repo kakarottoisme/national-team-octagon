@@ -9,7 +9,7 @@
   if (window === window.top && !embedded) {
     const target = new URL('dashboard.html', location.href);
     target.search = location.search;
-    if(page==='index.html'&&location.hash==='#shareFlows')target.searchParams.set('section','shareFlows');target.hash = page;
+    if(page==='margin.html'&&location.hash==='#shareFlows')target.searchParams.set('section','shareFlows');target.hash = page;
     document.documentElement.style.visibility = 'hidden';
     location.replace(target.href);
     return;
@@ -58,7 +58,7 @@
   document.addEventListener('DOMContentLoaded',() => {
     new MutationObserver(report).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
     report();
-    if(page==='index.html'&&new URLSearchParams(location.search).get('section')==='shareFlows')document.getElementById('shareFlows')?.scrollIntoView({block:'start'});
+    if(page==='margin.html'&&new URLSearchParams(location.search).get('section')==='shareFlows')document.getElementById('shareFlows')?.scrollIntoView({block:'start'});
     // Errors stay on the original page. Never leave a requested tab waiting forever.
     setTimeout(() => {if(!ready){ready=true;sizeCharts();post({kind:'view-ready',page,width:innerWidth,height:innerHeight});}},14000);
   });
