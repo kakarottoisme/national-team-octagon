@@ -1,5 +1,5 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="dashboard-tabs.js?v=ui-20261117-4"></script><link rel="apple-touch-icon" href="apple-touch-icon.png?v=ui-2"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=ui-2"><link rel="icon" type="image/svg+xml" sizes="any" href="favicon.svg?v=ui-2"><title>资金观察</title>
+<script src="dashboard-tabs.js?v=funds-20261120-2"></script><link rel="apple-touch-icon" href="apple-touch-icon.png?v=ui-2"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=ui-2"><link rel="icon" type="image/svg+xml" sizes="any" href="favicon.svg?v=ui-2"><title>资金观察</title>
 <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js'"></script>
 <script>/* Shared safe primitives: no data assumptions or account mutations. */
 window.uiEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -192,7 +192,7 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 .ui-page button.on,.ui-page [aria-pressed="true"]{background:#edf3fc;border-color:#9db8db;color:#325b90;font-weight:600}
 .ui-page :focus-visible{outline:3px solid #3d6a9e;outline-offset:3px}
 .ui-page .top .nav-row{display:block;padding-top:0;padding-bottom:12px}
-.ui-page .view-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));width:100%;max-width:660px;gap:2px;padding:4px;background:#f4f6f9;border:1px solid #e7ebf0;border-radius:14px;overflow:visible}
+.ui-page .view-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;max-width:660px;gap:2px;padding:4px;background:#f4f6f9;border:1px solid #e7ebf0;border-radius:14px;overflow:visible}
 .ui-page .view-tab{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:4px;min-width:0;color:var(--muted);font-size:14px;line-height:20px;white-space:normal;text-align:center;text-decoration:none}
 .ui-page .view-tab svg{display:none;width:16px;height:16px;flex:none}
 .ui-page .view-tab[aria-current="page"]{background:#fff;color:#325b90;font-weight:600;border-radius:10px}
@@ -280,11 +280,12 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 <header class="top"><div class="wrap shell-head"><div class="brand"><span class="mark" aria-hidden="true"><img src="favicon.svg?v=ui-2" width="38" height="38" alt=""></span><div class="brand-copy"><h1>资金观察</h1><div class="crumb" title="宽基 ETF · 盘中活跃度与主动买卖方向">宽基 ETF · 盘中活跃度与主动买卖方向</div></div></div><div class="ctl">
   <button type="button" onclick="openGuide()">口径说明</button>
   <button id="rb" onclick="refresh()">刷新</button>
- </div></div><div class="wrap nav-row"><nav class="view-tabs" aria-label="数据视图导航"><a class="view-tab" href="index.html" aria-current="page"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 14V9m5 5V5m5 9V8m4 6V3"/></svg><span>资金观察</span></a><a class="view-tab" href="margin.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 6h14M3 10h10M3 14h14"/><circle cx="7" cy="6" r="2" fill="#fff"/><circle cx="13" cy="14" r="2" fill="#fff"/></svg><span>两融余额</span></a><a class="view-tab" href="futures-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 3h7l4 4v10H6z"/><path d="M13 3v4h4M9 11h5M9 14.5h5"/></svg><span>期指持仓</span></a><a class="view-tab" href="risk-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M3.5 10h13M10 3.5c-2.8 2.8-2.8 10.2 0 13 2.8-2.8 2.8-10.2 0-13Z"/></svg><span>全球风险</span></a><a class="view-tab" href="etf-flows.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 16V4m4 12V8m4 8V6m4 10V9"/></svg><span>份额申赎</span></a></nav></div></header>
+ </div></div><div class="wrap nav-row"><nav class="view-tabs" aria-label="数据视图导航"><a class="view-tab" href="index.html" aria-current="page"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 14V9m5 5V5m5 9V8m4 6V3"/></svg><span>资金观察</span></a><a class="view-tab" href="margin.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 6h14M3 10h10M3 14h14"/><circle cx="7" cy="6" r="2" fill="#fff"/><circle cx="13" cy="14" r="2" fill="#fff"/></svg><span>两融余额</span></a><a class="view-tab" href="futures-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 3h7l4 4v10H6z"/><path d="M13 3v4h4M9 11h5M9 14.5h5"/></svg><span>期指持仓</span></a><a class="view-tab" href="risk-preview.html"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M3.5 10h13M10 3.5c-2.8 2.8-2.8 10.2 0 13 2.8-2.8 2.8-10.2 0-13Z"/></svg><span>全球风险</span></a></nav></div></header>
 
 <main class="wrap" id="dashboard">
+<nav class="funds-section-nav" aria-label="资金观察页内导航"><a href="#intraday">盘中成交</a><a href="#shareFlows">份额申赎</a><a href="#tradingHistory">成交历史</a></nav>
 <!-- ===== 概览 ===== -->
-<div class="sec sec-first"><h2 id="kt">当日概览</h2><div class="section-actions"><label for="ds">日期<select id="ds"><option value="live">最新行情</option></select></label></div><span class="side" id="st">加载中…</span></div>
+<div class="sec sec-first" id="intraday"><h2 id="kt">当日概览</h2><div class="section-actions"><label for="ds">日期<select id="ds"><option value="live">最新行情</option></select></label></div><span class="side" id="st">加载中…</span></div>
 <div class="kpis">
  <div class="kpi"><div class="lb">大额分钟成交额</div><div class="vl" id="k1">—</div><div class="ft">分钟成交额 &gt; 1 亿的合计</div></div>
  <div class="kpi"><div class="lb">主动净买入（推算）</div><div class="vl" id="kC">—</div><div class="ft" id="kCf">外盘 − 内盘推算，非资金净流入</div></div>
@@ -294,11 +295,22 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 <div id="banner"></div>
 
 <!-- ===== 八宫格 ===== -->
-<div class="sec"><h2>今日分时走势</h2></div>
+<div class="sec"><h2>今日分时走势</h2><span class="side">7 只 ETF 分时与成交强度；最后一格是同口径历史合计</span></div>
 <div class="g" id="g"></div>
 
+
+<!-- ===== 日度份额申赎：独立口径、独立截止日 ===== -->
+<div class="sec" id="shareFlows"><h2>份额申赎 · 日度验证</h2><span class="side" id="flowStatus" role="status">份额数据加载中…</span><div class="section-actions"><button type="button" class="chip" onclick="uiPanel.open('flowGuide')">申赎口径</button><button type="button" class="chip" id="flowRefresh" onclick="etfFlows.refresh()">刷新份额</button></div></div>
+<div class="kpis" id="flowKpis"></div>
+<p class="funds-context">成交活跃说明“交易热不热”，份额增减帮助判断“申购还是赎回”。两种口径、覆盖标的和数据日期不同，不能相加，也不能据此识别买卖机构。</p>
+<div class="ctl-row funds-flow-controls"><span>观察区间</span><div class="filter-group" role="group" aria-label="申赎观察区间"><button type="button" class="chip" data-flow-window="60" onclick="etfFlows.setSpan(60)">近60发布日</button><button type="button" class="chip on" data-flow-window="120" onclick="etfFlows.setSpan(120)">近120发布日</button><button type="button" class="chip" data-flow-window="ALL" onclick="etfFlows.setSpan('ALL')">全部</button></div></div>
+<div class="funds-flow-grid">
+<section class="panel"><div class="panel-head"><h2>合计申赎走势</h2></div><p class="funds-chart-note">17 只宽基 ETF · 蓝柱为当日估算，蓝灰线为全历史累计</p><div id="aggChart" class="ch funds-flow-chart"></div></section>
+<section class="panel"><div class="panel-head"><h2>单只 ETF 份额走势</h2><label class="inline-select" for="etfSelect">ETF <select id="etfSelect" onchange="etfFlows.drawOne()"></select></label></div><p class="funds-chart-note" id="oneFlowNote">按交易所确认日期展示份额；与合计图共用观察区间</p><div id="oneChart" class="ch funds-flow-chart"></div></section>
+</div>
+
 <!-- ===== 日度汇总 ===== -->
-<div class="sec"><h2>日度汇总</h2><span class="side">点击一行切换到该日</span></div>
+<div class="sec" id="tradingHistory"><h2>成交历史 · 回看与对照</h2><span class="side">仅统计大额分钟成交，不是申赎金额；点击日期回看分时</span></div>
 <section class="panel">
  <div class="tbx"><table><colgroup><col style="width:22%"><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:18%"></colgroup>
  <thead><tr><th>日期</th><th>大额分钟成交额(亿)</th><th>上证收盘</th><th>上证涨跌幅</th><th>简评</th></tr></thead><tbody id="tb"></tbody></table></div>
@@ -306,6 +318,19 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 </section>
 
 </main>
+<div class="ui-mask" id="flowGuide" hidden>
+<div class="ui-backdrop" onclick="uiPanel.close()"></div>
+<section class="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="flowGuideTitle">
+<div class="ui-modal-head"><div><h3 id="flowGuideTitle">份额与申赎 · 口径说明</h3></div><button class="ui-close" type="button" aria-label="关闭" onclick="uiPanel.close()">&#215;</button></div>
+<div class="ui-modal-body"><p>这是全市场申购赎回估算，不能单独算成国家队买卖，也不是资金观察页里「分钟成交额大于 1 亿元」的代理。</p>
+<dl><dt>份额</dt><dd>上交所 query.sse.com.cn 的 TOT_VOL，请求日必须等于该行 STAT_DATE。单位万份。对不上日期的行丢掉。</dd>
+<dt>成交均价</dt><dd>东方财富日 K 的成交额除以成交量。成交量为 0 或缺失时，均价和净流入都是空，不拿收盘价代替。</dd>
+<dt>估算净流入</dt><dd>（当日份额 − 前一官方交易日份额）× 当日成交均价。窗口里任何一天缺份额或均价，这一窗口就是空，不跨缺口凑，也不把空当成 0。</dd>
+<dt>深市</dt><dd>主源为深交所 fund_jjgm 逐基金历史规模接口，每行自带官方 size_date（万份），与沪市同一交易日对齐后才参与计算。接口失败时降级保留基金列表「当前规模」无日期快照，只留痕，不写成交易日，不参与合计。</dd>
+</dl></div>
+</section>
+</div>
+
 <div class="ui-mask" id="guideMask" hidden>
  <div class="ui-backdrop" onclick="closeGuide()"></div>
  <div class="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="gmTitle">
@@ -645,4 +670,29 @@ const observedCharts=new WeakSet();const chartResize=new ResizeObserver(entries=
 function observeCharts(){document.querySelectorAll('.ch,#curveN,#curveR,.spark-card>div:last-child').forEach(el=>{if(!observedCharts.has(el)){observedCharts.add(el);chartResize.observe(el)}})}
 update();observeCharts();new MutationObserver(()=>{update();observeCharts()}).observe(main,{childList:true,subtree:true});
 if(!window.echarts)pageNotice('图表组件未加载，图形暂不可用；文字和表格仍可阅读。请联网刷新。');
-})();</script></body></html>
+})();</script><script>
+/* ===== Funds ETF share section: isolated read-only state ===== */
+(()=>{let pack=null,aggChart=null,oneChart=null,span=120,busy=false;
+function money(v){const n=uiNumber(v);return n==null?'—':n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function shares(v){const n=uiNumber(v);return n==null?'—':n.toLocaleString('zh-CN',{minimumFractionDigits:4,maximumFractionDigits:4});}
+function px(v){const n=uiNumber(v);return n==null?'—':n.toLocaleString('zh-CN',{minimumFractionDigits:3,maximumFractionDigits:4});}
+function setSpan(n){span=n;document.querySelectorAll('[data-flow-window]').forEach(b=>{const on=String(b.dataset.flowWindow)===String(n);b.classList.toggle('on',on)});syncPressed();if(pack){drawAgg();drawOne()}}
+function windowSlice(){const dates=pack.dates||[];if(span==='ALL'||dates.length<=span)return{dates,offset:0};return{dates:dates.slice(-span),offset:dates.length-span}}
+function axis(){return{type:'category',axisLabel:{color:'#606c7c',fontSize:12,hideOverlap:true},axisTick:{show:false},axisLine:{lineStyle:{color:'#e1e4e9'}}}}
+function drawAgg(){const el=document.getElementById('aggChart');if(!window.echarts){el.textContent='图表组件未加载，概览数值仍可查看';return}const slice=windowSlice();const inflow=(pack.aggregate&&pack.aggregate.inflow_yi||[]).slice(slice.offset).map(uiNumber);const cum=(pack.aggregate&&pack.aggregate.cumulative_yi||[]).slice(slice.offset).map(uiNumber);if(!aggChart)aggChart=echarts.init(el);const y=name=>({type:'value',name,scale:true,axisLabel:{fontSize:12,color:'#606c7c'},nameTextStyle:{fontSize:13,color:'#606c7c'},splitLine:{lineStyle:{color:'#eef1f4'}}});aggChart.setOption({backgroundColor:'transparent',animation:false,color:['#3d6a9e','#6b8aae'],tooltip:{trigger:'axis',confine:true,valueFormatter:v=>v==null?'未算出':Number(v).toLocaleString('zh-CN',{maximumFractionDigits:2})+' 亿元'},legend:{top:8,textStyle:{color:'#606c7c',fontSize:13}},grid:{left:12,right:16,top:42,bottom:24,containLabel:true},xAxis:Object.assign(axis(),{data:slice.dates}),yAxis:[y('当日（亿元）'),Object.assign(y('累计（亿元）'),{splitLine:{show:false}})],series:[{name:'当日估算净流入',type:'bar',yAxisIndex:0,data:inflow,itemStyle:{color:'#3d6a9e'}},{name:'累计',type:'line',yAxisIndex:1,data:cum,connectNulls:false,showSymbol:false,lineStyle:{width:2,color:'#6b8aae'}}]},true)}
+function drawOne(){const el=document.getElementById('oneChart');const code=document.getElementById('etfSelect').value;const etf=(pack.etfs||[]).find(x=>x.code===code);if(!window.echarts){el.textContent='图表组件未加载';return}if(!etf)return;const slice=windowSlice();const series=(etf.share_series||[]).slice(slice.offset).map(uiNumber);if(!oneChart)oneChart=echarts.init(el);oneChart.setOption({backgroundColor:'transparent',animation:false,color:['#3d6a9e'],tooltip:{trigger:'axis',confine:true,valueFormatter:v=>v==null?'无官方份额':Number(v).toLocaleString('zh-CN',{minimumFractionDigits:4,maximumFractionDigits:4})+' 亿份'},grid:{left:12,right:16,top:28,bottom:24,containLabel:true},xAxis:Object.assign(axis(),{data:slice.dates}),yAxis:{type:'value',name:'亿份',scale:true,axisLabel:{fontSize:12,color:'#606c7c'},splitLine:{lineStyle:{color:'#eef1f4'}},nameTextStyle:{fontSize:13,color:'#606c7c'}},series:[{name:etf.name,type:'line',data:series,connectNulls:false,showSymbol:series.filter(v=>v!=null).length<2,lineStyle:{width:2}}]},true);const u=new URL(location.href);u.searchParams.set('flow_code',code);u.searchParams.set('flow_window',String(span));history.replaceState(null,'',u);const v=uiNumber(etf.shares_yi);document.getElementById('oneFlowNote').textContent=(pack.as_of||'—')+' · '+etf.code+' · 最新 '+(v==null?'份额未确认':shares(v)+' 亿份')+'；图形只画交易所确认日'}
+function renderKpis(){const s=pack.summary||{},u=s.universe||0;const cards=[['当日估算净流入',money(s.inflow_1d_yi)+' 亿元','覆盖 '+(s.inflow_1d_covered||0)+'/'+u+' 只，缺值不计为 0'],['近 5 个交易日',money(s.inflow_5d_yi)+' 亿元','覆盖 '+(s.inflow_5d_covered||0)+'/'+u+' 只'],['近 20 个交易日',money(s.inflow_20d_yi)+' 亿元','覆盖 '+(s.inflow_20d_covered||0)+'/'+u+' 只'],['同日规模',s.aum_yi==null?'—':money(s.aum_yi)+' 亿元','同一数据日 · 覆盖 '+(s.aum_covered||0)+'/'+u+' 只']];document.getElementById('flowKpis').innerHTML=cards.map(x=>'<div class="kpi"><div class="lb">'+uiEsc(x[0])+'</div><div class="vl">'+uiEsc(x[1])+'</div><div class="ft">'+uiEsc(x[2])+'</div></div>').join('')}
+async function refreshFlows(){
+ if(busy)return;busy=true;const rb=document.getElementById('flowRefresh');rb.disabled=true;rb.textContent='读取中…';
+ try{const next=await readJSON('data/etf_share_flows.json?t='+Date.now());if(!next.etfs?.length||!next.dates?.length)throw new Error('份额数据为空');pack=next;
+ const sel=document.getElementById('etfSelect'),q=new URLSearchParams(location.search),prev=sel.value||q.get('flow_code')||q.get('code')||'510300';sel.replaceChildren();(pack.etfs||[]).forEach(etf=>{const o=document.createElement('option');o.value=etf.code;o.textContent=etf.code+' '+etf.name;sel.append(o)});if([...sel.options].some(o=>o.value===prev))sel.value=prev;
+ const w=q.get('flow_window')||q.get('window');if(w==='60'||w==='120')span=+w;else if(w==='ALL')span='ALL';setSpan(span);renderKpis();
+ const degraded=pack.szse_snapshot?.date_status==='undated_fallback';document.getElementById('flowStatus').textContent='统计日 '+(pack.as_of||'—')+' · '+(pack.summary?.universe||17)+' 只宽基 · 日度披露'+(degraded?' · 深市降级，未计入合计':'');
+ }catch(err){document.getElementById('flowStatus').textContent='份额读取失败'+(pack?'，保留上次数据':'；点击刷新重试')+'，缺失不等于零'}finally{busy=false;rb.disabled=false;rb.textContent='刷新份额'}
+}
+window.etfFlows={setSpan,drawOne,refresh:refreshFlows};
+addEventListener('resize',()=>{aggChart?.resize();oneChart?.resize()});
+refreshFlows();
+})();
+</script>
+</body></html>

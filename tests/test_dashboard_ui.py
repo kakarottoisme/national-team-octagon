@@ -10,7 +10,7 @@ import unittest
 from html.parser import HTMLParser
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = ("index.html", "margin.html", "futures-preview.html", "risk-preview.html", "etf-flows.html")
+PAGES = ("index.html", "margin.html", "futures-preview.html", "risk-preview.html")
 
 
 class Collector(HTMLParser):
