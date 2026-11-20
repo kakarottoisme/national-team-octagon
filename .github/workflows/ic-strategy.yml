@@ -11,11 +11,17 @@ on:
     - cron: "10 12,14 * * 1-5"
     - cron: "30 15 * * 1-5"
   workflow_dispatch:
+    inputs:
+      verify_publish:
+        description: 'Smoke-test existing Pages build request and verify collected files'
+        type: boolean
+        default: false
 
 # 只写 data/ic_strategy.json。仓库 Settings → Actions → Workflow permissions
 # 需要 Read and write permissions；若 main 禁止直接推送，还要放行 github-actions[bot]。
 permissions:
   contents: write
+  pages: write # Request existing branch Pages build after a collected JSON change.
 
 concurrency:
   group: refresh-ic-strategy
@@ -87,3 +93,13 @@ jobs:
           done
           echo "::error::多次 push 失败"
           exit 1
+
+      - name: Ensure collected IC data is served by GitHub Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_PUBLISH: ${{ inputs.verify_publish }}
+        shell: bash
+        run: |
+          args=()
+          if [[ "$VERIFY_PUBLISH" == "true" ]]; then args+=(--request-build); fi
+          python3 futures_pages_sync.py data/ic_strategy.json "${args[@]}"

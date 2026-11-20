@@ -15,10 +15,15 @@ on:
         description: 'Run ETF/global/turnover collection as well'
         type: boolean
         default: false
+      verify_publish:
+        description: 'Smoke-test existing Pages build request and verify collected files'
+        type: boolean
+        default: false
 
 # 最小权限: 仅 contents write(用于提交 preview-data/),不通知、不扩权、不需 secret。
 permissions:
   contents: write
+  pages: write # Publish collected futures JSON through the existing Pages site.
 
 concurrency:
   group: refresh-preview-official
@@ -102,3 +107,13 @@ jobs:
           done
           echo "::error::多次 push 失败,已保留提交与工作树"
           exit 1
+
+      - name: Ensure collected futures data is served by GitHub Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_PUBLISH: ${{ inputs.verify_publish }}
+        shell: bash
+        run: |
+          args=()
+          if [[ "$VERIFY_PUBLISH" == "true" ]]; then args+=(--request-build); fi
+          python3 futures_pages_sync.py preview-data/official/futures/{IH,IF,IC,IM}.json "${args[@]}"

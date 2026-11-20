@@ -127,11 +127,35 @@ class Workflow(unittest.TestCase):
             self.assertIn('futures_close_update.py --mode '+mode,text)
             self.assertIn('cancel-in-progress: false',text)
             self.assertNotIn('git add .',text)
+            self.assertIn('pages: write',text)
+            self.assertIn('python3 futures_pages_sync.py',text)
         text=(root/'.github/workflows/preview-data.yml').read_text()
         self.assertEqual(text.count("if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true"),5)
         # Exact UTC slots -> 15:35..17:55, old 17:40, evening fallbacks.
         slots=[7*60+m for m in [35,45,55]]+[h*60+m for h in [8,9] for m in [5,15,25,35,45,55]]
         local=[m+8*60 for m in slots]
         self.assertEqual(local,list(range(15*60+35,18*60,10)))
+
+class PagesPublishing(unittest.TestCase):
+    def test_matching_data_does_not_request_build(self):
+        import futures_pages_sync as p
+        with patch('builtins.print'):
+            result=p.main(['data/ic_strategy.json'],check=lambda paths:True,request=lambda:self.fail('no duplicate build'))
+        self.assertEqual(result,0)
+
+    def test_mismatch_requests_once_and_verifies(self):
+        import futures_pages_sync as p
+        checks=iter([False,False,True]);requests=[];clock=iter([0,1,2]);delays=[]
+        with patch('builtins.print'):
+            result=p.main(['data/ic_strategy.json'],check=lambda paths:next(checks),request=lambda:requests.append(1) or 'queued',sleep=delays.append,clock=lambda:next(clock))
+        self.assertEqual(result,0);self.assertEqual(requests,[1]);self.assertEqual(delays,[12,10])
+        with self.assertRaises(ValueError):p.main(['data/holdings.json'],check=lambda paths:True)
+
+    def test_public_bytes_are_compared_exactly(self):
+        import futures_pages_sync as p
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);(root/'data').mkdir();(root/'data/ic_strategy.json').write_bytes(b'{"latest":"2026-11-20"}')
+            self.assertTrue(p.served(['data/ic_strategy.json'],root,lambda u:b'{"latest":"2026-11-20"}'))
+            self.assertFalse(p.served(['data/ic_strategy.json'],root,lambda u:b'{"latest":"2026-11-19"}'))
 
 if __name__=='__main__':unittest.main()
