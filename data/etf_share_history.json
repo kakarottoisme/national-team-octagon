@@ -37232,6 +37232,74 @@
     "stat_date": "2026-11-19",
     "tot_vol_wan": "4385562.81"
    }
+  },
+  "2026-11-20": {
+   "510050": {
+    "sec_name": "上证50ETF",
+    "source": "sse",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "2413416.68"
+   },
+   "510180": {
+    "sec_name": "上证180ETF",
+    "source": "sse",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "446055.77"
+   },
+   "510300": {
+    "sec_name": "沪深300ETF华泰柏瑞",
+    "source": "sse",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "5518488.77"
+   },
+   "510310": {
+    "sec_name": "沪深300ETF易方达",
+    "source": "sse",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "2846134.4"
+   },
+   "510330": {
+    "sec_name": "沪深300ETF华夏",
+    "source": "sse",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "1995234.98"
+   },
+   "510500": {
+    "sec_name": "中证500ETF南方",
+    "source": "sse",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "1213016.86"
+   },
+   "512100": {
+    "sec_name": "中证1000ETF南方",
+    "source": "sse",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "2400121.76"
+   },
+   "512500": {
+    "sec_name": "中证500ETF华夏",
+    "source": "sse",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "196480.88"
+   },
+   "560010": {
+    "sec_name": "中证1000ETF广发",
+    "source": "sse",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "262662.17"
+   },
+   "588000": {
+    "sec_name": "科创50ETF",
+    "source": "sse",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "10362866.82"
+   },
+   "588080": {
+    "sec_name": "科创板50ETF易方达",
+    "source": "sse",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "4646562.81"
+   }
   }
  },
  "quotes": {
@@ -74573,5 +74641,5 @@
   }
  },
  "schema": "etf-share-flows-1",
- "updated_at": "2026-11-20T15:56:07+08:00"
+ "updated_at": "2026-11-21T06:21:22+08:00"
 }
