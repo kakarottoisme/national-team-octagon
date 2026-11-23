@@ -47,7 +47,7 @@ class AutomationTests(unittest.TestCase):
         fake=types.SimpleNamespace(margin=lambda:{'2026-11-17':100},IDX={},ak=types.SimpleNamespace(stock_margin_sse=lambda **kw:empty))
         with tempfile.TemporaryDirectory() as t:
             root=Path(t);(root/'data').mkdir();(root/'data/margin_balance.json').write_text(json.dumps({'margin':{'2026-11-17':100}}))
-            with patch.object(a,'ROOT',root),patch.dict(sys.modules,{'margin':fake}),patch.object(a,'commit_files') as push:
+            with patch.object(a,'ROOT',root),patch.dict(sys.modules,{'margin':fake}),patch.object(a,'verify_archive_pages'),patch.object(a,'commit_files') as push:
                 r=a.margin(dt.datetime(2026,11,18,16,35,tzinfo=c.TZ),{})
                 self.assertFalse(r['notify']);push.assert_not_called()
     def test_live_health_dedupe(self):

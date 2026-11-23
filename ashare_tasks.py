@@ -295,54 +295,137 @@ def archive(now, state, timing=None):
     return {'notify':True,'message':f"{date}｜估算合计{summary['合计']:.2f}亿元｜上证{summary['上证涨跌幅']:+.2f}%",'link':PAGE,'sources':['https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=sh510050',REPO+'/blob/main/data/history.json']}
 
 
-def margin(now, state):
-    if state.get('margin_success_day')==now.date().isoformat():
-        return {'notify':False,'reason':'本次交易日已完成新数据更新'}
+def previous_trading_day(day):
+    day -= dt.timedelta(days=1)
+    while not is_trading_day(day):
+        day -= dt.timedelta(days=1)
+    return day
+
+
+def margin_missing(payload, expected):
+    """Check actual data and six indices; never trust a run-day success flag."""
     import margin as producer
-    path=ROOT/'data/margin_balance.json'
-    old=json.loads(path.read_text())
-    old_latest=max(old.get('margin',{}),default='')
-    with contextlib.redirect_stdout(io.StringIO()):
-        # Macro feeds can lag for weeks. Retain stored history, supplement the
-        # recent SSE dates with same-date SZSE official values (亿元).
-        rows=dict(old.get('margin',{}))
-        start=(dt.date.fromisoformat(old_latest)-dt.timedelta(days=7)).strftime('%Y%m%d') if old_latest else (now.date()-dt.timedelta(days=14)).strftime('%Y%m%d')
-        recent=producer.ak.stock_margin_sse(start_date=start,end_date=now.strftime('%Y%m%d'))
-        for record in recent.to_dict('records'):
-            day=dt.datetime.strptime(str(record['信用交易日期']),'%Y%m%d').date().isoformat()
-            if day <= old_latest or day > now.date().isoformat():
-                continue
-            sz=producer.ak.stock_margin_szse(date=day.replace('-',''))
-            if sz is None or len(sz)==0:
-                continue
-            rows[day]=round(number(record['融资融券余额'])/1e8+number(sz['融资融券余额'].iloc[0]),2)
-    rows=dict(sorted(rows.items()))
-    if not rows:
-        raise ValueError('沪深两融余额来源为空')
-    latest=max(rows)
-    if latest<=old_latest:
-        return {'notify':False,'reason':'交易所尚无更新交易日'}
-    if latest>now.date().isoformat() or not is_trading_day(dt.date.fromisoformat(latest)):
-        raise ValueError('两融来源日期无效')
-    dates=sorted(rows)
-    if len(dates)<2:
-        raise ValueError('缺少较前一交易日变化基准')
-    for k,v in rows.items():
-        if not math.isfinite(number(v)) or number(v)<=0:
-            raise ValueError('两融余额无效')
-    if any(k not in rows for k in old.get('margin',{})):
-        raise ValueError('两融来源缺少既有历史，停止覆盖')
-    indices={k:producer.idx(c) for k,c in producer.IDX.items()}
-    if any(latest not in values for values in indices.values()):
-        raise ValueError('相关指数同日收盘缺失，停止覆盖')
-    out={'updated':now.strftime('%Y-%m-%d %H:%M'),'codes':producer.IDX,'margin':rows,'index':indices}
-    write_json_atomic(path,out,ensure_ascii=False,separators=(',',':'))
-    pushed=commit_files(['data/margin_balance.json'],f'margin {latest}')
-    if not pushed:
-        return {'notify':False,'reason':'无变化'}
-    state['margin_success_day']=now.date().isoformat()
-    change=rows[latest]-rows[dates[-2]]
-    return {'notify':True,'message':f'{latest}｜两融余额{rows[latest]:.2f}亿元｜较前一交易日{change:+.2f}亿元','link':PAGE+'margin.html','sources':[REPO+'/blob/main/data/margin_balance.json']}
+    rows = payload.get('margin', {})
+    # Check recent internal holes as well as the last expected disclosure day.
+    start = max(min(rows, default=expected),
+                (dt.date.fromisoformat(expected)-dt.timedelta(days=20)).isoformat())
+    day = dt.date.fromisoformat(start)
+    missing = []
+    while day.isoformat() <= expected:
+        key = day.isoformat()
+        if is_trading_day(day):
+            if key not in rows or not math.isfinite(number(rows[key])) or number(rows[key]) <= 0:
+                missing.append(key + '余额')
+            elif any(key not in payload.get('index', {}).get(name, {}) or
+                     number(payload['index'][name][key]) <= 0 for name in producer.IDX):
+                missing.append(key + '指数')
+        day += dt.timedelta(days=1)
+    return missing
+
+
+def build_margin_update(old, now, expected):
+    """Build only missing official dates, retaining every existing stored value."""
+    import margin as producer
+    import copy
+    out = copy.deepcopy(old)
+    rows = out.setdefault('margin', {})
+    start = max(min(rows, default=expected),
+                (dt.date.fromisoformat(expected)-dt.timedelta(days=20)).isoformat())
+    recent = producer.ak.stock_margin_sse(start_date=start.replace('-',''),
+                                         end_date=expected.replace('-',''))
+    sources = out.setdefault('margin_sources', {})
+    for record in recent.to_dict('records'):
+        day = dt.datetime.strptime(str(record['信用交易日期']), '%Y%m%d').date().isoformat()
+        if day in rows or day > expected or not is_trading_day(dt.date.fromisoformat(day)):
+            continue
+        sz = producer.szse_official(day)
+        sh = number(record['融资融券余额']) / 1e8
+        if sz['date'] != day or sh <= 0 or number(sz['balance_yi']) <= 0:
+            raise ValueError('沪深两融同日校验失败，未写入')
+        rows[day] = round(sh + number(sz['balance_yi']), 2)
+        sources[day] = {'date':day, 'sse_balance_yi':sh,
+                        'szse_balance_yi':sz['balance_yi'],
+                        'sse_source':'https://www.sse.com.cn/market/othersdata/margin/sum/',
+                        'szse_source':sz['source_url'], 'collected_at':now.isoformat()}
+    indices = out.setdefault('index', {})
+    # Append missing index dates only. Never silently revise stored history.
+    for name, code in producer.IDX.items():
+        stored = indices.setdefault(name, {})
+        needed = [day for day in rows if start <= day <= expected and day not in stored]
+        if needed:
+            fetched = producer.idx(code)
+            for day in needed:
+                if day in fetched:
+                    stored[day] = number(fetched[day])
+    rows = dict(sorted(rows.items()))
+    if rows and (any(number(v) <= 0 for v in rows.values()) or max(rows) > now.date().isoformat()):
+        raise ValueError('两融余额或数据日期无效')
+    out['margin'] = rows
+    # Partial candidates stay in memory, not in production.
+    if margin_missing(out, expected):
+        return None
+    baseline = previous_trading_day(dt.date.fromisoformat(expected)).isoformat()
+    if baseline not in rows:
+        raise ValueError('缺少前一交易日变化基准，未写入')
+    out['codes'] = producer.IDX
+    out['updated'] = now.strftime('%Y-%m-%d %H:%M')
+    return out
+
+
+def margin(now, state, final=False):
+    expected = previous_trading_day(now.date()).isoformat()
+    path = ROOT/'data/margin_balance.json'
+    old = json.loads(path.read_text())
+    if not margin_missing(old, expected):
+        verify_archive_pages(['data/margin_balance.json'])
+        state['margin_success_data_date'] = expected
+        state.pop('margin_success_day', None)
+        return {'notify':False, 'status':'success', 'data_date':expected, 'reason':'目标数据日已齐全'}
+    out = build_margin_update(old, now, expected)
+    if out is None:
+        missing = margin_missing(old, expected)
+        if final:
+            raise ValueError(f'披露后补查结束仍缺两融数据：{", ".join(missing)}；最新入库{max(old.get("margin",{}),default="无")}')
+        return {'notify':False, 'status':'pending', 'data_date':expected,
+                'reason':'目标数据日尚未齐全，需继续补查'}
+    write_json_atomic(path, out, ensure_ascii=False, separators=(',',':'))
+    commit_files(['data/margin_balance.json'], f'margin {expected}')
+    verify_archive_pages(['data/margin_balance.json'])
+    # Both Git push and public Pages bytes are checked before success.
+    state['margin_success_data_date'] = expected
+    state.pop('margin_success_day', None)
+    return {'notify':False, 'status':'success', 'data_date':expected, 'reason':'官方同日数据已入库'}
+
+
+def data_audit(now, state):
+    """Independent read-only final check, even when collection never started."""
+    expected = previous_trading_day(now.date()).isoformat()
+    payload = json.loads((ROOT/'data/margin_balance.json').read_text())
+    missing = margin_missing(payload, expected)
+    date = now.date().isoformat()
+    history = json.loads((ROOT/'data/history.json').read_text())
+    minute_path = ROOT/f'data/minutes/{date}.json'
+    if date not in history or not minute_path.exists():
+        missing.append(date + '八宫格日终存档（缺日或错过采集窗口）')
+    else:
+        minute = json.loads(minute_path.read_text())
+        if minute.get('date') != date:
+            missing.append(date + '八宫格存档日期不匹配')
+    if missing:
+        raise ValueError('日终核对发现缺档：' + '，'.join(missing))
+    return {'notify':False, 'status':'success', 'reason':'两融目标日和当日八宫格均已入库'}
+
+
+def failure_result(task, now, state, reason):
+    # Only reserve the dedupe marker for a final alert, never a pending retry.
+    key = 'failure_notified_' + task
+    day = now.date().isoformat()
+    send = state.get(key) != day
+    if send:
+        state[key] = day
+    return {'notify':send, 'status':'failed', 'message':task+'：'+reason,
+            'sources':[REPO+'/blob/main/data/margin_balance.json',
+                       REPO+'/blob/main/data/history.json']}
 
 
 def live_health(now,state):
@@ -361,56 +444,85 @@ def live_health(now,state):
     return {'notify':True,'message':'盘中行情连续多次检查仍未更新，数据已停更超过20分钟；云端采集或推送可能延迟/失败。','sources':[REPO+'/blob/main/data/live.json']}
 
 
+def execute_task(task, now, state, final=False, timing=None):
+    """Window failures are business failures, not silent successful exits."""
+    minute = now.hour*60 + now.minute
+    windows = {'ic':[(882,887)], 'archive':[(910,930)],
+               'margin':[(540,580)], 'data-audit':[(1080,1439)],
+               'live-health':[(575,695),(805,905)]}
+    try:
+        if not is_trading_day(now.date()):
+            return {'notify':False,'reason':'非交易日'}
+        if task != 'archive' and not any(a <= minute <= b for a,b in windows[task]):
+            if task in ('archive','margin','data-audit'):
+                return failure_result(task, now, state, '错过授权采集/核对窗口，未采集；请核对数据日期')
+            return {'notify':False,'reason':'不在授权窗口'}
+        if task == 'ic': return ic(now)
+        if task == 'archive':
+            if archive_mode(now) is None:
+                return failure_result(task, now, state, '错过授权窗口，未采集')
+            result = archive(now,state,timing)
+            if minute > 930:
+                warning = failure_result(task,now,state,'错过15:10–15:30实时采集窗口；'+result.get('reason','已核对Git收盘快照'))
+                warning['status'] = 'warning'
+                return {**result, **warning}
+            return result
+        if task == 'margin': return margin(now,state, final or minute >= 565)
+        if task == 'data-audit': return data_audit(now,state)
+        return live_health(now,state)
+    except Exception as exc:
+        reason = str(exc) if isinstance(exc,ValueError) else type(exc).__name__+'（来源或执行失败）'
+        if task in ('archive','margin','data-audit'):
+            # Keep retryable early failures pending; no alert dedupe consumed.
+            retry_before = 565 if task == 'margin' else 922
+            if not final and task != 'data-audit' and minute < retry_before:
+                return {'notify':False,'status':'pending','reason':reason}
+            return failure_result(task, now, state, reason)
+        if task == 'live-health':
+            state['live_failures'] = state.get('live_failures',0)+1
+            send = state['live_failures'] >= 3 and state.get('live_warned_day') != now.date().isoformat()
+            if send: state['live_warned_day'] = now.date().isoformat()
+        else:
+            send = state.get('error_notified') != now.date().isoformat()
+            if send: state['error_notified'] = now.date().isoformat()
+        return {'notify':send,'message':task+'：'+reason}
+
+
 def main():
     p=argparse.ArgumentParser()
-    p.add_argument('task',choices=['ic','archive','margin','live-health'])
+    p.add_argument('task',choices=['ic','archive','margin','data-audit','live-health'])
     p.add_argument('--state-dir',required=True)
+    p.add_argument('--final',action='store_true')
     args=p.parse_args()
     now=dt.datetime.now(TZ)
-    minute=now.hour*60+now.minute
-    windows={'ic':[(882,887)],'archive':[(910,930)],'margin':[(990,1020)],'live-health':[(575,695),(805,905)]}
-    if args.task!='archive' and not any(a<=minute<=b for a,b in windows[args.task]):
-        print(json.dumps({'notify':False,'reason':'不在授权窗口'},ensure_ascii=False));return
-    if args.task=='archive' and archive_mode(now) is None:
-        print(json.dumps({'notify':False,'reason':'不在授权窗口'},ensure_ascii=False));return
     directory=Path(args.state_dir);directory.mkdir(parents=True,exist_ok=True)
     started=time.monotonic()
     timing={'planned_at':now.replace(hour=15,minute=12,second=0,microsecond=0).isoformat(),'python_entered_at':now.isoformat(),'entry_offset_seconds':int((now-now.replace(hour=15,minute=12,second=0,microsecond=0)).total_seconds()),'task_received_at':os.environ.get('ARCHIVE_TASK_RECEIVED_AT'),'wrapper_started_at':os.environ.get('ARCHIVE_WRAPPER_STARTED_AT'),'checkout_ready_at':os.environ.get('ARCHIVE_CHECKOUT_READY_AT'),'clone_seconds':os.environ.get('ARCHIVE_CLONE_SECONDS')}
     with (directory/'lock').open('a') as lock:
         lock_started=time.monotonic()
-        if args.task in ('archive','margin'):
+        if args.task in ('archive','margin','data-audit'):
             fcntl.flock(lock,fcntl.LOCK_EX)
         timing['lock_wait_seconds']=round(time.monotonic()-lock_started,3)
         timing['lock_acquired_at']=dt.datetime.now(TZ).isoformat()
         path=directory/(args.task+'.json')
         state=json.loads(path.read_text()) if path.exists() else {}
-        try:
-            if not is_trading_day(now.date()):
-                result={'notify':False,'reason':'非交易日'}
-            elif args.task=='ic': result=ic(now)
-            elif args.task=='archive':
-                # Re-evaluate after waiting for the lock; never fetch past 15:30.
-                result=archive(dt.datetime.now(TZ),state,timing)
-            elif args.task=='margin': result=margin(now,state)
-            else: result=live_health(now,state)
-        except Exception as exc:
-            # No fabricated numbers; deduplicate failures once per task per date.
-            if args.task=='live-health':
-                state['live_failures']=state.get('live_failures',0)+1
-                send=state['live_failures']>=3 and state.get('live_warned_day')!=now.date().isoformat()
-                if send: state['live_warned_day']=now.date().isoformat()
-            else:
-                send=state.get('error_notified')!=now.date().isoformat()
-                if send: state['error_notified']=now.date().isoformat()
-            # Avoid echoing credentials from git/HTTP exceptions.
-            reason=str(exc) if isinstance(exc,ValueError) else type(exc).__name__+'（来源或执行失败）'
-            result={'notify':send,'message':args.task+'：'+reason}
+        now=dt.datetime.now(TZ)  # Re-evaluate after lock wait; no source fetch past deadline.
+        result=execute_task(args.task,now,state,args.final,timing)
+        if args.task in ('archive','margin','data-audit'):
+            state['last_attempt'] = {'at':now.isoformat(), 'task':args.task,
+                                     'status':result.get('status','success' if not result.get('notify') else 'reported'),
+                                     'data_date':result.get('data_date'),
+                                     'reason':result.get('reason') or result.get('message'),
+                                     'notify':result.get('notify',False)}
         if args.task=='archive':
             timing.update(finished_at=dt.datetime.now(TZ).isoformat(),execution_seconds=round(time.monotonic()-started,3),business_state=result.get('state',result.get('reason','failed')),notify=result.get('notify',False))
             state['last_execution']=timing
             with (directory/'archive-runs.jsonl').open('a',encoding='utf-8') as audit:
                 audit.write(json.dumps(timing,ensure_ascii=False)+'\n')
         write_json_atomic(path,state,ensure_ascii=False,indent=2)
+        if 'last_attempt' in state and args.task in ('archive','margin','data-audit'):
+            with (directory/(args.task+'-attempts.jsonl')).open('a') as journal:
+                journal.write(json.dumps(state['last_attempt'],ensure_ascii=False)+'\n')
         print(json.dumps(result,ensure_ascii=False))
 
 if __name__=='__main__':

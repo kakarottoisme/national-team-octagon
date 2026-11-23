@@ -84,6 +84,28 @@ def margin() -> dict[str, float]:
     return {k: total[k] for k in sorted(total)}
 
 
+def szse_official(day: str, fetch=None) -> dict:
+    """Accept only the date named by the exchange, not the requested date."""
+    import urllib.parse
+    import urllib.request
+    params = {'SHOWTYPE':'JSON', 'CATALOGID':'1837_xxpl', 'txtDate':day, 'tab1PAGENO':'1'}
+    url = 'https://www.szse.cn/api/report/ShowReport/data?' + urllib.parse.urlencode(params)
+    if fetch is None:
+        def fetch(url):
+            request = urllib.request.Request(url, headers={'User-Agent':'Mozilla/5.0','Referer':'https://www.szse.cn/'})
+            with urllib.request.urlopen(request, timeout=25) as response:
+                return json.load(response)
+    report = fetch(url)[0]
+    actual = report.get('metadata', {}).get('subname')
+    if actual != day:
+        raise ValueError(f'深交所两融统计日不匹配：期望{day}，实际{actual}，未写入')
+    records = report.get('data') or []
+    if len(records) != 1:
+        raise ValueError(f'深交所{day}两融汇总缺失，未写入')
+    value = float(str(records[0]['jrrzrjye']).replace(',', ''))
+    return {'date':actual, 'balance_yi':value, 'source_url':url}
+
+
 def idx(code: str) -> dict[str, float]:
     df = ak.stock_zh_index_daily(symbol=code)
     return {

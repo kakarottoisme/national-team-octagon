@@ -3,7 +3,7 @@
 set -euo pipefail
 TASK="${1:?task required}"
 STATE="${2:?absolute state directory required}"
-case "$TASK" in ic|archive|margin|live-health|live-recover|ic-signal) ;; *) exit 2;; esac
+case "$TASK" in ic|archive|margin|live-health|live-recover|ic-signal|data-audit) ;; *) exit 2;; esac
 case "$STATE" in /*) ;; *) exit 2;; esac
 export GIT_TERMINAL_PROMPT=0
 if [[ "$TASK" == archive ]]; then
@@ -29,11 +29,14 @@ if [[ "$TASK" == archive ]]; then
   export ARCHIVE_CLONE_SECONDS="$((SECONDS-CLONE_START))"
 fi
 PYTHON=python3
-if [[ "$TASK" == margin ]]; then
+if [[ "$TASK" == margin || "$TASK" == data-audit ]]; then
   python3 -m venv "$STATE/margin-env"
   PYTHON="$STATE/margin-env/bin/python"
   "$PYTHON" -c 'import akshare,pandas; assert akshare.__version__ == "1.18.97"' 2>/dev/null || "$PYTHON" -m pip install --quiet 'akshare==1.18.97' pandas
 fi
 SCRIPT=ashare_tasks.py
 case "$TASK" in live-recover|ic-signal) SCRIPT=ashare_observers.py;; esac
-"$PYTHON" "$RUN/repo/$SCRIPT" "$TASK" --state-dir "$STATE"
+# Only the retry controller may explicitly mark the last attempt final.
+EXTRA=()
+if [[ "${3:-}" == --final ]]; then EXTRA=(--final); fi
+"$PYTHON" "$RUN/repo/$SCRIPT" "$TASK" --state-dir "$STATE" "${EXTRA[@]}"

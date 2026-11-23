@@ -17,7 +17,7 @@
 
 ### 两融余额
 `margin.html` 读 `data/margin_balance.json`。
-`margin.py` 通过 akshare/pandas 取沪深融资融券余额及六个指数日收盘；深市缺失日按交易所接口补齐。每次全量拉，不改变原数据源/时间口径。两融值亿元，指数点位；缺少同日值不能当零或用各自最近日期拼成比较。
+`margin.py` 通过 akshare/pandas 取沪深融资融券余额及六个指数日收盘；深市缺失日按交易所接口补齐。手工全量入口保留，云端`ashare_tasks.py`日更只追加缺日期，既有历史逐值不覆盖。2026-11-23授权改为次一交易日09:05/15/25核对前一交易日，SSE信用交易日期+SZSE metadata.subname同日验证，成功标记为数据日。18:05只读data-audit核对前日两融和当日八宫格缺档；窗口迟到/最终缺日不再静默。两融值亿元，指数点位；缺少同日值不能当零或用各自最近日期拼成比较。
 
 ### 期指持仓
 `futures-preview.html` 读 `data/ic_strategy.json`、本人 `data/holdings.json`、`preview-data/official/snapshot-latest.json`、`preview-data/official/futures/{IH,IF,IC,IM}.json` 等官方历史。
