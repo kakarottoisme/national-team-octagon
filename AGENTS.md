@@ -79,6 +79,20 @@ python3 -m unittest tests.test_dashboard_ui tests.test_ic_strategy
 
 发布就是把核对过的提交推到 `main`。Pages 随后构建。不要 force push，不要为了发布再跑一遍全量抓取。
 
+## 小修改快速路径
+
+文案、颜色、间距、单页图表显示使用本节，不套全库排障。数据源、公式、账户、权限和工作流变更不属小改，仍按各自门禁执行。
+
+1. 一次同步main；只读本页与当前目标文件、需要的对应规范，不重复全量读AGENTS/BACKEND/AUTOMATION。先确认这次保留/改动范围，再一次完成补丁。
+2. 保存本次base SHA，执行 `python3 check_ui_patch.py check --base <base>`。入口只选择改动相关测试；遇到data/、后台脚本或workflow变更立即拒绝快路。禁止为让旧冻结基线通过而重录fixture。
+3. 真实入口 `dashboard.html#目标页` 验证一个关键交互；纯文案无需四Tab巡检。图表/布局才加桌面与390窄屏，同一浏览器调用一次完成同一状态的读数与截图。跨导航/交互仍先观察再行动。
+4. 确认后一次commit→fetch/rebase→push（不用force）；只stage本次文件。`python3 check_ui_patch.py verify --commit <发布SHA>` 合并等待Pages和线上文件逐字核验，不再单独反复list/watch/API。后续行情提交已包含本次代码时接受后代部署，不等待被取消的旧run，也不再触发额外build。
+5. 已发布后只验线上原入口一次，不重复本地已完成的历史与手机全套；无新增界面或运行逻辑的文档/检查器修改不打开浏览器、不另给预览链接。交付一句改动+入口，阻塞才汇报。
+
+浏览器窄屏参数已确认：`bu.cdp('Emulation.setDeviceMetricsOverride',width=390,height=844,deviceScaleFactor=1,mobile=False)`，同次等待1秒再读布局/截图；不要传参数对象当session_id、不要尝试多种猜测签名。导航可能恢复默认尺寸，需要时重新设一次。截图工具结果不是自动展示，查看真实截图后再判断。
+
+快路只减少重复检查，不降低数值真实性、历史保留、用户实际入口验证、并发保护和部署完成标准。目标是减少工具往返与重复发布，不承诺固定分钟数。
+
 ## 硬规则
 
 - 不编造数字、日期、价格或成交。
