@@ -74,8 +74,8 @@ class AutomationTests(unittest.TestCase):
         clocks.extend(f'15{m:02d}' for m in range(6, 31))
         rows = [f'{t} 2.5 {i+1} {(i+1)*100000001}' for i,t in enumerate(clocks)]
         if falling:
-            i = clocks.index('1523')
-            rows[i] = f'1523 2.5 {i+1} 1'
+            i = clocks.index('1459')
+            rows[i] = f'1459 2.5 {i+1} 1'
         return {'data':{code:{'data':{'date':date,'data':rows},'qt':{code:['0','name',code,'2.5','2.4']}}}}
 
     def test_archive_retries_full_corrected_response(self):
@@ -84,10 +84,12 @@ class AutomationTests(unittest.TestCase):
         from unittest.mock import Mock
         fetch=Mock(side_effect=[bad,good])
         with patch.object(a.time,'sleep') as sleep:
-            self.assertIs(a.fetch_archive_source(fetch,url,'2026-11-19'),good)
+            self.assertEqual(a.fetch_archive_source(fetch,url,'2026-11-19'),
+                             a.validate_archive_source(good,url,'2026-11-19'))
             sleep.assert_called_once_with(15)
         self.assertEqual(fetch.call_count,2)
-        self.assertEqual(bad['data']['sh510050']['data']['data'][-8].split()[3],'1')
+        self.assertEqual(next(r for r in bad['data']['sh510050']['data']['data']
+                              if r.startswith('1459 ')).split()[3],'1')
 
     def test_archive_persistent_bad_data_never_writes(self):
         import archive
@@ -108,7 +110,8 @@ class AutomationTests(unittest.TestCase):
         good=self.archive_response()
         fetch=Mock(side_effect=[HTTPError(url,503,'temporary',{},None),good])
         with patch.object(a.time,'sleep') as sleep:
-            self.assertIs(a.fetch_archive_source(fetch,url,'2026-11-19'),good)
+            self.assertEqual(a.fetch_archive_source(fetch,url,'2026-11-19'),
+                             a.validate_archive_source(good,url,'2026-11-19'))
             sleep.assert_called_once_with(15)
         for status in (401,403,404):
             fetch=Mock(side_effect=HTTPError(url,status,'blocked',{},None))
@@ -131,7 +134,8 @@ class AutomationTests(unittest.TestCase):
         from backend_common import ETF_UNIVERSE
         kline={'data':{'sh000001':{'day':[['2026-11-18',0,100],['2026-11-19',0,99]]}}}
         def good(url):
-            return copy.deepcopy(kline) if '/minute/query' not in url else self.archive_response(url.rsplit('=',1)[1])
+            return copy.deepcopy(kline) if '/minute/query' not in url else a.validate_archive_source(
+                self.archive_response(url.rsplit('=',1)[1]),url,'2026-11-19')
         expected=archive.build_archive(fetch=good)
         bad_count={}
         def once_bad(url):
@@ -143,6 +147,60 @@ class AutomationTests(unittest.TestCase):
         self.assertEqual(json.dumps(actual,ensure_ascii=False),json.dumps(expected,ensure_ascii=False))
         self.assertEqual(set(bad_count),{code for _,code in ETF_UNIVERSE})
         self.assertTrue(all(n==2 for n in bad_count.values()))
+
+    def test_post_close_correction_is_outside_archive_session(self):
+        import copy
+        from unittest.mock import Mock
+        url='https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=sh510050'
+        raw=self.archive_response()
+        raw['data']['sh510050']['data']['data'][-1]='1530 2.5 999 1'
+        before=copy.deepcopy(raw);fetch=Mock(return_value=raw)
+        with patch.object(a.time,'sleep') as sleep:
+            result=a.fetch_archive_source(fetch,url,'2026-11-19')
+        self.assertEqual(raw,before)
+        self.assertEqual(fetch.call_count,1);sleep.assert_not_called()
+        rows=result['data']['sh510050']['data']['data']
+        self.assertEqual(len(rows),242);self.assertTrue(rows[-1].startswith('1500 '))
+        self.assertEqual(rows,[r for r in before['data']['sh510050']['data']['data']
+                               if '0930'<=r.split()[0]<='1130' or '1300'<=r.split()[0]<='1500'])
+
+    def test_missing_close_not_replaced_by_later_quote(self):
+        url='https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=sh510050'
+        for tick in ('0930','1050','1300','1459','1500'):
+            raw=self.archive_response()
+            raw['data']['sh510050']['data']['data']=[r for r in raw['data']['sh510050']['data']['data']
+                                                   if r.split()[0]!=tick]
+            with self.assertRaisesRegex(ValueError,'不完整'):
+                a.validate_archive_source(raw,url,'2026-11-19')
+
+    def test_bad_session_points_never_removed_or_clamped(self):
+        import copy
+        url='https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=sh510050'
+        for tick in ('0930','1050','1459','1500'):
+            raw=self.archive_response()
+            rows=raw['data']['sh510050']['data']['data'];i=next(i for i,r in enumerate(rows) if r.startswith(tick+' '))
+            rows[i]=tick+' 2.5 1 -1';before=copy.deepcopy(raw)
+            with self.assertRaises(ValueError):a.validate_archive_source(raw,url,'2026-11-19')
+            self.assertEqual(raw,before)
+        raw=self.archive_response();rows=raw['data']['sh510050']['data']['data'];rows.insert(1,rows[0])
+        with self.assertRaisesRegex(ValueError,'顺序或时间无效'):
+            a.validate_archive_source(raw,url,'2026-11-19')
+        raw=self.archive_response();raw['data']['sh510050']['qt']['sh510050']=[]
+        with self.assertRaisesRegex(ValueError,'前日收盘基准缺失'):
+            a.validate_archive_source(raw,url,'2026-11-19')
+
+    def test_session_threshold_and_precision_unchanged(self):
+        from backend_common import parse_minutes,estimated_large_minutes
+        url='https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=sh510050'
+        raw=self.archive_response();rows=raw['data']['sh510050']['data']['data']
+        cumulative=0
+        for i,row in enumerate(rows):
+            cumulative+=(100000000,100010000,17640000)[i] if i<3 else 0
+            rows[i]=row.rsplit(' ',1)[0]+' '+str(cumulative)
+        selected=a.validate_archive_source(raw,url,'2026-11-19')['data']['sh510050']
+        minute=parse_minutes(selected,'sh510050')
+        self.assertEqual(minute['a'][:3],[1.0,1.0001,0.1764])
+        self.assertEqual(estimated_large_minutes(minute['a']),1.0)
 
     def test_expiry_and_scope(self):
         self.assertEqual(a.contract_expiry('IC2612'),dt.date(2026,12,18))

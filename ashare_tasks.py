@@ -172,19 +172,49 @@ class ArchiveSourcePending(ValueError):
 
 def validate_archive_source(raw, url, date):
     if '/minute/query' in url:
+        # Tencent keeps appending quotes after 15:00, including cumulative
+        # turnover corrections. They are not regular-session minute bars.
+        # Select the entire defined session BEFORE validation and differencing;
+        # never omit an invalid in-session point or mutate the source response.
+        import copy
         code = url.rsplit('=', 1)[1]
         payload = raw['data'][code]['data']
         if payload['date'] != date.replace('-', ''):
             raise ValueError(f'{code} 分时不是目标交易日，未写入')
-        times = [r.split()[0] for r in payload['data']]
-        if len(times) < 200 or max(times) < '1500':
+        required = [f'{m//60:02d}{m%60:02d}'
+                    for start, end in ((570, 690), (780, 900))
+                    for m in range(start, end + 1)]
+        session = []
+        previous_tick = None
+        for row in payload['data']:
+            fields = row.split()
+            tick = fields[0] if fields else ''
+            if (not re.fullmatch(r'\d{4}', tick) or
+                    int(tick[:2]) > 23 or int(tick[2:]) > 59 or
+                    (previous_tick is not None and tick <= previous_tick)):
+                raise ArchiveSourcePending(f'{code} 分时顺序或时间无效，未写入')
+            previous_tick = tick
+            if '0930' <= tick <= '1130' or '1300' <= tick <= '1500':
+                if len(fields) != 4:
+                    raise ArchiveSourcePending(f'{code} 交易分钟字段不完整，未写入')
+                session.append(row)
+        if [r.split()[0] for r in session] != required:
             raise ArchiveSourcePending(f'{code} 当日收盘分时不完整，未写入')
         previous = 0.
-        for row in payload['data']:
-            amount = number(row.split()[3])
+        for row in session:
+            fields = row.split()
+            price, volume, amount = map(number, fields[1:4])
+            if price <= 0 or volume < 0 or amount < 0:
+                raise ArchiveSourcePending(f'{code} 交易分钟数值无效，未写入')
             if amount < previous:
-                raise ArchiveSourcePending(f'{code} 累计成交额倒退，未写入')
+                raise ArchiveSourcePending(f'{code} 交易时段累计成交额倒退，未写入')
             previous = amount
+        quote = raw['data'][code].get('qt', {}).get(code, [])
+        if len(quote) < 5 or number(quote[4]) <= 0:
+            raise ArchiveSourcePending(f'{code} 前日收盘基准缺失，未写入')
+        result = copy.deepcopy(raw)
+        result['data'][code]['data']['data'] = session
+        return result
     else:
         k = raw['data']['sh000001']
         rows = k.get('day') or k.get('qfqday') or []
