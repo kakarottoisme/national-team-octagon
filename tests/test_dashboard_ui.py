@@ -212,7 +212,7 @@ assert.equal(nextObservationDate(null,null,[]),null);
     def test_dashboard_preserves_explicit_release_version(self):
         source = (ROOT / 'dashboard.html').read_text(encoding='utf-8')
         code = source.split('const requestedVersion=',1)[1].split('function mount(',1)[0]
-        for search, expected in [('?v=ic20-release','ic20-release'),('','pct-axis-20261123'),('?v=bad%2Fpath','pct-axis-20261123')]:
+        for search, expected in [('?v=ic20-release','ic20-release'),('','tooltip-side-20261123'),('?v=bad%2Fpath','tooltip-side-20261123')]:
             stub = "const assert=require('assert');const location={search:" + repr(search) + "};const requestedVersion=" + code + "assert.equal(version," + repr(expected) + ");"
             result = subprocess.run(['node','-'],input=stub,text=True,capture_output=True)
             self.assertEqual(result.returncode,0,result.stderr)

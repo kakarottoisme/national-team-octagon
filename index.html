@@ -274,7 +274,8 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 /* Compact tooltip rows; appended to body, not clipped by chart/card overflow. */
 .chart-hover-head{font-size:13px;font-weight:600;margin-bottom:6px;color:#1f2733}
 .chart-hover-row{display:flex;justify-content:space-between;align-items:baseline;gap:20px;line-height:24px;font-size:13px}
-.chart-hover-row span{color:#606c7c}.chart-hover-row b{font-weight:500;color:#1f2733;font-variant-numeric:tabular-nums}
+.chart-hover-row span{color:#606c7c;overflow-wrap:anywhere}.chart-hover-row b{font-weight:500;color:#1f2733;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chart-hover-narrow .chart-hover-row{flex-direction:column;align-items:flex-start;gap:0;line-height:20px;padding-bottom:5px}.chart-hover-narrow .chart-hover-row:last-child{padding-bottom:0}
 </style><link rel="stylesheet" href="dashboard-shell.css"></head><body data-ui-version="3" class="ui-page" data-ui-view="funds">
 <!-- ===== 顶栏 ===== -->
 <header class="top"><div class="wrap shell-head"><div class="brand"><span class="mark" aria-hidden="true"><img src="favicon.svg?v=ui-2" width="38" height="38" alt=""></span><div class="brand-copy"><h1>资金观察</h1><div class="crumb" title="宽基 ETF · 盘中活跃度与主动买卖方向">宽基 ETF · 盘中活跃度与主动买卖方向</div></div></div><div class="ctl">
@@ -363,26 +364,25 @@ function pointNumber(value,digits,suffix=''){const v=uiNumber(value);return v==n
 function matchedIndexSource(i,m){const source=(view==='live'?LIVE?.index_minutes:m.index_minutes)?.[INDEX_CODES[i]];return source&&String(source.date).replace(/-/g,'')===String(m.date||LIVE?.date||'').replace(/-/g,'')?source:null}
 function matchedIndexValues(i,m,times){const source=matchedIndexSource(i,m);if(!source)return times.map(()=>null);const byTime=new Map((source.t||[]).map((t,k)=>[String(t).replace(/\D/g,''),uiNumber(source.p?.[k])]));return times.map(t=>byTime.get(t.replace(/\D/g,''))??null)}
 function indexPointField(i,m,times,name){const source=matchedIndexSource(i,m),interval=Number(source?.interval_minutes)||1,data=matchedIndexValues(i,m,times);return {name:name+'指数'+(source?' · '+interval+'分钟':''),data,format:v=>v==null?(source?(interval===5?'无5分钟点':'该分钟缺数据'):(view==='live'?'指数源未取到':'当日未存档')):pointNumber(v,2,' 点')}}
-function hoverPosition(plot,point,size){
- const r=plot.getBoundingClientRect(),width=size.contentSize[0],height=size.contentSize[1],gap=12,pad=8;
- const vw=document.documentElement.clientWidth||innerWidth,vh=innerHeight,px=r.left+point[0],py=r.top+point[1];
- const clamp=(v,lo,hi)=>Math.max(lo,Math.min(v,hi));
+function hoverPosition(plot,point,size,dom){
+ const r=plot.getBoundingClientRect(),gap=12,pad=8,vw=document.documentElement.clientWidth||innerWidth,vh=innerHeight;
+ const px=r.left+point[0],py=r.top+point[1],clamp=(v,lo,hi)=>Math.max(lo,Math.min(v,hi));
+ let width=size.contentSize[0],height=size.contentSize[1];
+ if(dom){dom.classList.remove('chart-hover-narrow');dom.style.boxSizing='border-box';dom.style.maxWidth=(vw-pad*2)+'px';dom.style.whiteSpace='normal';width=dom.getBoundingClientRect().width;height=dom.getBoundingClientRect().height}
  const left=Math.max(pad,r.left+pad),right=Math.min(vw-pad,r.right-pad),top=Math.max(pad,r.top+pad),bottom=Math.min(vh-pad,r.bottom-pad);
- const fits=(x,y,l,t,rr,b)=>x>=l&&y>=t&&x+width<=rr&&y+height<=b;
- // Stay close to the pointer and inside this chart whenever there is room.
- if(width<=right-left&&height<=bottom-top){
-  const y=clamp(py-height/2,top,bottom-height),x=clamp(px-width/2,left,right-width);
-  const inside=[[px+gap,y],[px-width-gap,y],[x,py-height-gap],[x,py+gap]];
-  const found=inside.find(([x,y])=>fits(x,y,left,top,right,bottom));
-  if(found)return [found[0]-r.left,found[1]-r.top];
+ const chartSides=[{side:'right',space:right-px-gap},{side:'left',space:px-gap-left}];
+ const viewportSides=[{side:'right',space:vw-pad-px-gap},{side:'left',space:px-gap-pad}];
+ // Never center over the selected vertical line, even on a narrow screen.
+ let choice=chartSides.find(s=>s.space>=width),inside=!!choice&&height<=bottom-top;
+ if(!choice)choice=viewportSides.find(s=>s.space>=width);
+ if(!choice){
+  choice=viewportSides.reduce((a,b)=>a.space>=b.space?a:b);
+  const available=Math.max(1,choice.space);width=Math.min(width,available);
+  if(dom){dom.classList.toggle('chart-hover-narrow',available<230);dom.style.maxWidth=available+'px';const measured=dom.getBoundingClientRect();width=measured.width;height=measured.height}
  }
- // Only overflow the chart when needed; keep the same small pointer gap.
- const y=clamp(py-height/2,pad,vh-height-pad),x=clamp(px-width/2,pad,vw-width-pad);
- const outside=[[px+gap,y],[px-width-gap,y],[x,py-height-gap],[x,py+gap]];
- const found=outside.find(([x,y])=>fits(x,y,pad,pad,vw-pad,vh-pad));
- if(found)return [found[0]-r.left,found[1]-r.top];
- const nearest=outside.map(([x,y])=>{const cx=clamp(x,pad,vw-width-pad),cy=clamp(y,pad,vh-height-pad);return {x:cx,y:cy,shift:(cx-x)**2+(cy-y)**2}}).sort((a,b)=>a.shift-b.shift)[0];
- return [nearest.x-r.left,nearest.y-r.top];
+ const x=choice.side==='right'?px+gap:px-gap-width;
+ const y=clamp(py-height/2,inside?top:pad,(inside?bottom:vh-pad)-height);
+ return [x-r.left,y-r.top];
 }
 function compactHover(chart,times,fields){
  const plot=chart.getDom();let selected=times.length-1;
@@ -391,7 +391,7 @@ function compactHover(chart,times,fields){
  plot.onblur=()=>chart.dispatchAction({type:'hideTip'});
  return {trigger:'axis',triggerOn:'mousemove|click',renderMode:'html',appendToBody:true,confine:false,enterable:false,transitionDuration:0,hideDelay:60,
   backgroundColor:'#fff',borderColor:'#e0e5ed',borderWidth:1,padding:[9,12],textStyle:{fontFamily:'PingFang SC,Microsoft YaHei,system-ui,sans-serif',fontSize:13,color:'#1f2733'},extraCssText:'z-index:70;pointer-events:none;border-radius:9px;box-shadow:0 5px 20px rgba(31,39,51,.12);max-width:calc(100vw - 16px);',axisPointer:{type:'line',snap:true,lineStyle:{color:'#aebbc9',width:1}},
-  position:(point,params,dom,rect,size)=>hoverPosition(plot,point,size),
+  position:(point,params,dom,rect,size)=>{const p=Array.isArray(params)?params[0]:params,index=pointIndex(p?.dataIndex,times),lineX=index==null?null:chart.convertToPixel({xAxisIndex:0},index);return hoverPosition(plot,[Number.isFinite(lineX)?lineX:point[0],point[1]],size,dom)},
   formatter:params=>{const p=Array.isArray(params)?params[0]:params;const index=pointIndex(p?.dataIndex,times);if(index==null)return '';selected=index;return '<div class="chart-hover-head">'+uiEsc(times[index])+'</div>'+fields.map(f=>'<div class="chart-hover-row"><span>'+uiEsc(f.name)+'</span><b>'+uiEsc(f.format(f.data[index]))+'</b></div>').join('')}
  };
 }

@@ -23,7 +23,7 @@ const assert=require('assert');const uiNumber=v=>v==null||v===''||!Number.isFini
 let LIVE={date:'20261118',index_minutes:{sh000688:{date:'20261118',t:['0930','0932'],p:[1234.56,1235]}}},view='live';
 const document={documentElement:{clientWidth:1000}},innerWidth=1000,innerHeight=800;
 let actions=[];const plot={dataset:{},getBoundingClientRect(){return {left:100,right:400,top:200,bottom:440,width:300}},setAttribute(){}};
-const chart={getDom(){return plot},dispatchAction(a){actions.push(a)}};
+const chart={getDom(){return plot},convertToPixel(){return 80},dispatchAction(a){actions.push(a)}};
 """
         checks="""
 assert.deepStrictEqual(matchedIndexValues(6,{date:'20261118'},['09:30','09:31']),[1234.56,null]);
@@ -38,10 +38,21 @@ const opt=compactHover(chart,['09:30','09:31'],fields);let html=opt.formatter([{
 assert.equal(pointNumber(null,2),'—');assert.equal(pointNumber(0,2),'0.00');
 let pos=hoverPosition(plot,[20,100],{contentSize:[180,140]});assert.equal(pos[0],32);assert.equal(pos[1],30); // 12px beside pointer, inside chart
 pos=hoverPosition(plot,[280,100],{contentSize:[180,140]});assert.equal(pos[0],88); // flip left while staying inside
-const narrow={getBoundingClientRect(){return {left:21,right:369,top:220,bottom:464,width:348}}};document.documentElement.clientWidth=390;pos=hoverPosition(narrow,[170,165],{contentSize:[180,140]});assert.equal(pos[1],13);assert(pos[0]+21>=29);assert(pos[0]+21+180<=361); // above pointer, still inside
-const small={getBoundingClientRect(){return {left:400,right:620,top:220,bottom:464,width:220}}};document.documentElement.clientWidth=1000;pos=hoverPosition(small,[160,100],{contentSize:[180,200]});assert.equal(pos[0],172); // only overflow when no in-chart placement fits
+const narrow={getBoundingClientRect(){return {left:21,right:369,top:220,bottom:464,width:348}}};document.documentElement.clientWidth=390;pos=hoverPosition(narrow,[170,165],{contentSize:[180,140]});assert.equal(pos[0],182); // right of line, narrowed rather than centered above it
+const small={getBoundingClientRect(){return {left:400,right:620,top:220,bottom:464,width:220}}};document.documentElement.clientWidth=1000;pos=hoverPosition(small,[160,100],{contentSize:[180,200]});assert.equal(pos[0],172); // only overflow when no in-chart side fits
 const edge={getBoundingClientRect(){return {left:770,right:990,top:550,bottom:790,width:220}}};pos=hoverPosition(edge,[210,220],{contentSize:[240,260]});assert.equal(pos[0],-42);assert(pos[1]+550>=8);assert(pos[1]+550+260<=792);
-document.documentElement.clientWidth=390;pos=hoverPosition(narrow,[170,100],{contentSize:[180,140]});assert(pos[0]+21>=8);assert(pos[0]+21+180<=382);assert(pos[1]+220>=8);assert(pos[1]+220+140<=792); // narrow viewport, adjacent overflow rather than distant chart edge
+const classes=new Set(),dom={style:{},classList:{remove(k){classes.delete(k)},toggle(k,v){if(v)classes.add(k);else classes.delete(k)}},getBoundingClientRect(){return {width:Math.min(288,parseFloat(this.style.maxWidth)||288),height:classes.has('chart-hover-narrow')?235:140}}};
+document.documentElement.clientWidth=390;
+for(const x of [0,30,100,170,240,330,347]){
+ pos=hoverPosition(narrow,[x,100],{contentSize:[288,140]},dom);const width=dom.getBoundingClientRect().width;
+ assert(pos[0]>=x+12-0.01||pos[0]+width<=x-12+0.01,'tooltip crossed pointer at '+x);
+ assert(pos[0]+21>=8-0.01);assert(pos[0]+21+width<=382+0.01);assert(pos[1]+220>=8);assert(pos[1]+220+dom.getBoundingClientRect().height<=792);
+}
+// ECharts snaps the line to a category: position must use that line, not raw mouse x.
+document.documentElement.clientWidth=1000;
+pos=opt.position([30,100],[{dataIndex:0}],null,null,{contentSize:[180,140]});assert.equal(pos[0],92);
+// Moving to a roomy card restores normal width and horizontal rows.
+pos=hoverPosition(plot,[20,100],{contentSize:[288,140]},dom);assert(!classes.has('chart-hover-narrow'));assert.equal(dom.getBoundingClientRect().width,288);
 plot.onkeydown({key:'Home',preventDefault(){}});assert.equal(actions.at(-1).dataIndex,0);plot.onkeydown({key:'ArrowRight',preventDefault(){}});assert.equal(actions.at(-1).dataIndex,1);
 """
         result=subprocess.run(['node','-e',fake+code+checks],capture_output=True,text=True)
