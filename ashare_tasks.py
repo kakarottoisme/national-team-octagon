@@ -269,8 +269,15 @@ def archive(now, state, timing=None):
     if state.get('archive_success') == date and date in history and saved.exists():
         return {'notify':False,'reason':'当日已存档','state':'already_archived'}
     import archive as producer
+    source_started=time.monotonic()
+    def windowed_fetch(url):
+        # Keep the original request window even between slow retries.
+        current=now+dt.timedelta(seconds=time.monotonic()-source_started)
+        if archive_mode(current)!='live_source' or current.date()!=now.date():
+            raise ValueError('实时抓源窗口已结束，停止请求；后续仅允许Git收盘快照补档')
+        return producer.g(url)
     def validated(url):
-        return fetch_archive_source(producer.g, url, date)
+        return fetch_archive_source(windowed_fetch,url,date)
     started=time.monotonic()
     day,summary,minutes = producer.build_archive(fetch=validated)
     if timing is not None:timing['collect_seconds']=round(time.monotonic()-started,3)

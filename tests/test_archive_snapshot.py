@@ -103,6 +103,16 @@ class RestoreSnapshot(unittest.TestCase):
             summary,minutes=r.from_git('/tmp','2026-11-20')
             self.assertEqual(summary,valid['estimates']);self.assertEqual(minutes['archive_provenance']['source_commit'],'good')
 
+    def test_source_retry_crossing_close_window_stops_quote_requests(self):
+        import archive
+        from urllib.error import URLError
+        from tests.test_ashare_tasks import AutomationTests
+        ticks=iter([0,0,0,61])
+        with patch.object(a.time,'monotonic',side_effect=lambda:next(ticks)),patch.object(a.time,'sleep'),patch.object(archive,'g',side_effect=URLError('temporary')) as fetch:
+            with self.assertRaisesRegex(ValueError,'实时抓源窗口已结束'):
+                a.archive(dt.datetime(2026,11,20,15,30),{})
+            self.assertEqual(fetch.call_count,1)
+
     def test_main_late_records_business_state_and_clock(self):
         import sys,io
         class Fixed(dt.datetime):
