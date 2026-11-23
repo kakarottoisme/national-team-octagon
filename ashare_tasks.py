@@ -212,14 +212,68 @@ def fetch_archive_source(fetch, url, date):
     raise ValueError('分时来源连续读取失败，未写入')
 
 
-def archive(now, state):
+def verify_archive_pages(paths, timeout=180):
+    """Read published JSON only; no quote fetch, build dispatch or permission changes."""
+    expected={p:(ROOT/p).read_bytes() for p in paths}
+    deadline=time.monotonic()+timeout
+    while True:
+        matches=True
+        for p,raw in expected.items():
+            try:
+                request=urllib.request.Request(PAGE+p+'?archive_verify='+str(time.time_ns()),headers={'Cache-Control':'no-cache'})
+                with urllib.request.urlopen(request,timeout=12) as response:
+                    if response.read()!=raw:matches=False
+            except Exception:matches=False
+        if matches:return
+        if time.monotonic()>=deadline:raise ValueError('归档已提交但Pages尚未验证发布，不重新抓取或重复提交')
+        time.sleep(5)
+
+
+def archive_mode(now):
+    minute=now.hour*60+now.minute
+    if 910<=minute<=930:return 'live_source'
+    if minute>930:return 'git_snapshot'
+    return None
+
+
+def archive(now, state, timing=None):
     date = now.date().isoformat()
-    if state.get('archive_success') == date:
-        return {'notify':False,'reason':'当日已存档'}
+    mode=archive_mode(now)
+    if mode is None:return {'notify':False,'reason':'不在授权窗口','state':'outside_window'}
+    if timing is not None:timing['mode']=mode
+    history=json.loads((ROOT/'data/history.json').read_text())
+    saved=ROOT/f'data/minutes/{date}.json'
+    if mode=='git_snapshot':
+        # Late execution reads immutable Git observations only, never Tencent.
+        if date in history and saved.exists():
+            if json.loads(saved.read_text()).get('date')!=date:raise ValueError('已存档日期不匹配，停止自动覆盖')
+            verify_archive_pages(['data/history.json',f'data/minutes/{date}.json'])
+            state['archive_success']=date
+            return {'notify':False,'reason':'当日已存档','state':'already_archived','mode':mode}
+        if date in history or saved.exists():raise ValueError('当日已有不完整存档，停止自动覆盖，请核查')
+        import restore_archive_snapshot as recovery
+        started=time.monotonic()
+        summary,minutes=recovery.from_git(ROOT,date)
+        if timing is not None:timing['snapshot_seconds']=round(time.monotonic()-started,3)
+        recovery.apply_missing(ROOT/'data',date,summary,minutes)
+        started=time.monotonic()
+        pushed=commit_files(['data/history.json',f'data/minutes/{date}.json'],f'archive {date} from preserved close snapshot')
+        if timing is not None:timing['publish_seconds']=round(time.monotonic()-started,3)
+        if not pushed:return {'notify':False,'reason':'无变化','state':'no_change','mode':mode}
+        started=time.monotonic()
+        verify_archive_pages(['data/history.json',f'data/minutes/{date}.json'])
+        if timing is not None:timing['pages_seconds']=round(time.monotonic()-started,3)
+        state['archive_success']=date
+        state.pop('archive_failure',None)
+        return {'notify':False,'reason':'晚到补档成功','state':'archived','mode':mode,'sources':[minutes['archive_provenance']['source_url']]}
+    if state.get('archive_success') == date and date in history and saved.exists():
+        return {'notify':False,'reason':'当日已存档','state':'already_archived'}
     import archive as producer
     def validated(url):
         return fetch_archive_source(producer.g, url, date)
+    started=time.monotonic()
     day,summary,minutes = producer.build_archive(fetch=validated)
+    if timing is not None:timing['collect_seconds']=round(time.monotonic()-started,3)
     if day!=date or '上证收盘' not in summary or '上证涨跌幅' not in summary:
         raise ValueError('上证当日收盘或涨跌幅缺失，未存档')
     for key in summary:
@@ -231,7 +285,9 @@ def archive(now, state):
     history[date]=summary
     write_json_atomic(ROOT/'data/history.json',dict(sorted(history.items())),ensure_ascii=False,indent=1)
     write_json_atomic(ROOT/f'data/minutes/{date}.json',minutes,separators=(',',':'))
+    started=time.monotonic()
     pushed=commit_files(['data/history.json',f'data/minutes/{date}.json'],f'archive {date}')
+    if timing is not None:timing['publish_seconds']=round(time.monotonic()-started,3)
     if not pushed:
         return {'notify':False,'reason':'无变化'}
     state['archive_success']=date
@@ -313,19 +369,28 @@ def main():
     now=dt.datetime.now(TZ)
     minute=now.hour*60+now.minute
     windows={'ic':[(882,887)],'archive':[(910,930)],'margin':[(990,1020)],'live-health':[(575,695),(805,905)]}
-    if not any(a<=minute<=b for a,b in windows[args.task]):
+    if args.task!='archive' and not any(a<=minute<=b for a,b in windows[args.task]):
+        print(json.dumps({'notify':False,'reason':'不在授权窗口'},ensure_ascii=False));return
+    if args.task=='archive' and archive_mode(now) is None:
         print(json.dumps({'notify':False,'reason':'不在授权窗口'},ensure_ascii=False));return
     directory=Path(args.state_dir);directory.mkdir(parents=True,exist_ok=True)
+    started=time.monotonic()
+    timing={'planned_at':now.replace(hour=15,minute=12,second=0,microsecond=0).isoformat(),'python_entered_at':now.isoformat(),'entry_offset_seconds':int((now-now.replace(hour=15,minute=12,second=0,microsecond=0)).total_seconds()),'task_received_at':os.environ.get('ARCHIVE_TASK_RECEIVED_AT'),'wrapper_started_at':os.environ.get('ARCHIVE_WRAPPER_STARTED_AT'),'checkout_ready_at':os.environ.get('ARCHIVE_CHECKOUT_READY_AT'),'clone_seconds':os.environ.get('ARCHIVE_CLONE_SECONDS')}
     with (directory/'lock').open('a') as lock:
+        lock_started=time.monotonic()
         if args.task in ('archive','margin'):
             fcntl.flock(lock,fcntl.LOCK_EX)
+        timing['lock_wait_seconds']=round(time.monotonic()-lock_started,3)
+        timing['lock_acquired_at']=dt.datetime.now(TZ).isoformat()
         path=directory/(args.task+'.json')
         state=json.loads(path.read_text()) if path.exists() else {}
         try:
             if not is_trading_day(now.date()):
                 result={'notify':False,'reason':'非交易日'}
             elif args.task=='ic': result=ic(now)
-            elif args.task=='archive': result=archive(now,state)
+            elif args.task=='archive':
+                # Re-evaluate after waiting for the lock; never fetch past 15:30.
+                result=archive(dt.datetime.now(TZ),state,timing)
             elif args.task=='margin': result=margin(now,state)
             else: result=live_health(now,state)
         except Exception as exc:
@@ -340,6 +405,11 @@ def main():
             # Avoid echoing credentials from git/HTTP exceptions.
             reason=str(exc) if isinstance(exc,ValueError) else type(exc).__name__+'（来源或执行失败）'
             result={'notify':send,'message':args.task+'：'+reason}
+        if args.task=='archive':
+            timing.update(finished_at=dt.datetime.now(TZ).isoformat(),execution_seconds=round(time.monotonic()-started,3),business_state=result.get('state',result.get('reason','failed')),notify=result.get('notify',False))
+            state['last_execution']=timing
+            with (directory/'archive-runs.jsonl').open('a',encoding='utf-8') as audit:
+                audit.write(json.dumps(timing,ensure_ascii=False)+'\n')
         write_json_atomic(path,state,ensure_ascii=False,indent=2)
         print(json.dumps(result,ensure_ascii=False))
 

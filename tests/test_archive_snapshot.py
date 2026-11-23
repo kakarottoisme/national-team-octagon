@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+import datetime as dt
+from unittest.mock import patch
+import ashare_tasks as a
 from backend_common import ETF_UNIVERSE, estimated_large_minutes
 from backfill_index_minutes import expected_times
 from index_quotes import INDEX_UNIVERSE
@@ -57,5 +60,59 @@ class RestoreSnapshot(unittest.TestCase):
             self.assertEqual(json.loads((root/'history.json').read_text())['2026-11-19'],prior['2026-11-19'])
             self.assertFalse(r.apply_missing(root,'2026-11-20',summary,minutes))
             with self.assertRaises(ValueError):r.apply_missing(root,'2026-11-20',{},minutes)
+
+    def test_archive_clock_boundary_no_quote_fetch_when_late(self):
+        for clock,mode in [('15:09',None),('15:10','live_source'),('15:30','live_source'),('15:31','git_snapshot'),('23:59','git_snapshot')]:
+            now=dt.datetime.fromisoformat('2026-11-20T'+clock)
+            self.assertEqual(a.archive_mode(now),mode)
+
+    def test_late_recovery_only_expected_paths_and_silent_success(self):
+        summary,minutes=r.build(self.sample(),'2026-11-20',{'source_url':'https://example.com/preserved'})
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t);(root/'data').mkdir();(root/'data/history.json').write_text('{"2026-11-19":{"合计":42}}')
+            state={};timing={}
+            with patch.object(a,'ROOT',root),patch.object(r,'from_git',return_value=(summary,minutes)) as source,patch.object(a,'commit_files',return_value=True) as push,patch.object(a,'verify_archive_pages') as publish_check,patch('archive.g',side_effect=AssertionError('No quote fetch')):
+                out=a.archive(dt.datetime(2026,11,20,15,35),state,timing)
+                self.assertFalse(out['notify']);self.assertEqual(out['state'],'archived');self.assertEqual(state['archive_success'],'2026-11-20')
+                source.assert_called_once_with(root,'2026-11-20')
+                self.assertEqual(push.call_args.args[0],['data/history.json','data/minutes/2026-11-20.json'])
+                again=a.archive(dt.datetime(2026,11,20,20),state)
+                self.assertEqual(again['state'],'already_archived');self.assertEqual(source.call_count,1);self.assertEqual(push.call_count,1)
+                self.assertIn('snapshot_seconds',timing);self.assertIn('publish_seconds',timing)
+
+    def test_late_invalid_source_and_partial_existing_archive_never_writes(self):
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t);(root/'data').mkdir();h=root/'data/history.json';h.write_text('{}')
+            with patch.object(a,'ROOT',root),patch.object(r,'from_git',side_effect=ValueError('no valid source')),patch.object(a,'commit_files') as push:
+                with self.assertRaises(ValueError):a.archive(dt.datetime(2026,11,20,15,35),{})
+                self.assertEqual(h.read_text(),'{}');push.assert_not_called()
+            h.write_text('{"2026-11-20":{}}')
+            with patch.object(a,'ROOT',root),patch.object(r,'from_git') as source:
+                with self.assertRaises(ValueError):a.archive(dt.datetime(2026,11,20,15,35),{})
+                source.assert_not_called()
+
+    def test_git_candidate_rejects_partial_then_uses_previous_valid_same_day(self):
+        valid=self.sample();bad=copy.deepcopy(valid);bad['etfs']['sh510050']['a'][1]=-1
+        def fake(cmd,**kw):
+            op=cmd[3]
+            if op=='rev-parse':return b'false\n'
+            if op=='log':return b'bad\ngood\n'
+            if op=='show':return json.dumps(bad if cmd[4].startswith('bad:') else valid).encode()
+            raise AssertionError(cmd)
+        with patch.object(r.subprocess,'check_output',side_effect=fake):
+            summary,minutes=r.from_git('/tmp','2026-11-20')
+            self.assertEqual(summary,valid['estimates']);self.assertEqual(minutes['archive_provenance']['source_commit'],'good')
+
+    def test_main_late_records_business_state_and_clock(self):
+        import sys,io
+        class Fixed(dt.datetime):
+            @classmethod
+            def now(cls,tz=None):return cls(2026,11,20,15,35,36,tzinfo=tz)
+        with tempfile.TemporaryDirectory() as t,patch.object(a.dt,'datetime',Fixed),patch.object(a,'is_trading_day',return_value=True),patch.object(a,'archive',return_value={'notify':False,'state':'already_archived'}) as work,patch.object(sys,'argv',['x','archive','--state-dir',t]),patch('sys.stdout',new_callable=io.StringIO):
+            a.main()
+            self.assertEqual(work.call_count,1)
+            audit=json.loads((Path(t)/'archive-runs.jsonl').read_text())
+            self.assertEqual(audit['business_state'],'already_archived');self.assertEqual(audit['entry_offset_seconds'],1416)
+            self.assertIn('execution_seconds',audit);self.assertIn('lock_wait_seconds',audit)
 
 if __name__=='__main__':unittest.main()

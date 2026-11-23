@@ -78,6 +78,31 @@ def apply_missing(directory,date,summary,minutes):
     return True
 
 
+def from_git(root, date):
+    """Find the newest valid same-day preserved close; deepen only that day's history.
+
+    Reading Git history is not a quote fetch. Do not fall back to another date or
+    edit the observation when a series is invalid. Candidates remain immutable.
+    """
+    root=Path(root);date=canonical_date(date)
+    def git(*args):
+        return subprocess.check_output(['git','-C',str(root),*args],stderr=subprocess.PIPE)
+    if git('rev-parse','--is-shallow-repository').strip()==b'true':
+        git('fetch','--quiet','--shallow-since='+date+'T00:00:00+08:00','origin','main')
+    commits=git('log','--format=%H','--since='+date+'T00:00:00+08:00','--until='+date+'T23:59:59+08:00','HEAD','--','data/live.json').decode().splitlines()
+    for commit in commits:
+        raw=git('show',commit+':data/live.json')
+        try:
+            snapshot=json.loads(raw)
+            if canonical_date(snapshot.get('date',''))!=date:continue
+            provenance={'kind':'preserved_live_snapshot','source_commit':commit,'source_url':'https://github.com/kakarottoisme/national-team-octagon/commit/'+commit,'snapshot_updated':snapshot['updated'],'snapshot_sha256':hashlib.sha256(raw).hexdigest(),'note':'Newest validated complete same-day close snapshot; no quote fetch or interpolation'}
+            summary,minutes=build(snapshot,date,provenance)
+            return summary,minutes
+        except (ValueError,TypeError,KeyError,OverflowError):
+            continue
+    raise ValueError('没有可验证的当日完整Git收盘快照，未补档；缺点不补0、不借用其他日期')
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--snapshot-commit',required=True);p.add_argument('--date',required=True)

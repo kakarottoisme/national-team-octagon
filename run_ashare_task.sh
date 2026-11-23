@@ -6,6 +6,9 @@ STATE="${2:?absolute state directory required}"
 case "$TASK" in ic|archive|margin|live-health|live-recover|ic-signal) ;; *) exit 2;; esac
 case "$STATE" in /*) ;; *) exit 2;; esac
 export GIT_TERMINAL_PROMPT=0
+if [[ "$TASK" == archive ]]; then
+  export ARCHIVE_WRAPPER_STARTED_AT="$(TZ=Asia/Shanghai date -Iseconds)"
+fi
 mkdir -p "$STATE"
 RUN=$(mktemp -d "$STATE/run.XXXXXX")
 cleanup() {
@@ -19,7 +22,12 @@ cleanup() {
 }
 trap cleanup EXIT
 # No credential/token copied into command arguments or output.
+CLONE_START=$SECONDS
 git clone --quiet --depth 20 https://github.com/kakarottoisme/national-team-octagon.git "$RUN/repo"
+if [[ "$TASK" == archive ]]; then
+  export ARCHIVE_CHECKOUT_READY_AT="$(TZ=Asia/Shanghai date -Iseconds)"
+  export ARCHIVE_CLONE_SECONDS="$((SECONDS-CLONE_START))"
+fi
 PYTHON=python3
 if [[ "$TASK" == margin ]]; then
   python3 -m venv "$STATE/margin-env"
