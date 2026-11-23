@@ -8,6 +8,8 @@
 - `fetch_live.py`：腾讯七 ETF 分时和上证日线；腾讯上证失败时东财兜底；只生成 live
 - `index_quotes.py`：仅供悬浮展示的七个对应指数分时。`fetch_live.main` 可选附加 `index_minutes`，8秒超时并行、单源失败不阻断ETF。前端严格同日同分钟匹配，不反推指数
 - `archive.py`：收盘后抓取当天ETF分时，追加 history；默认一起保存同日完整指数1分钟记录，来源失败时保留已存完整指数或同日live缓存，不拿其他日期替代。`include_indices=False`保留旧字节输出
+- `restore_archive_snapshot.py`：只用于人工恢复缺失历史，不抓行情、不接入日更、不改任何调度。指定已存在的Git提交，从其中 `data/live.json` 严格验证同日15:00后快照、七ETF完整原始分钟/非负成交额、七指数完整1分钟端点及上证同日收盘/前日基准；日度估算现算并与原快照一致后才允许追加。已有日期不覆盖，保存来源提交与SHA256；原ETF t/p/a/pre及指数端点不改、不插值。用法 `python3 restore_archive_snapshot.py --snapshot-commit <SHA> --date <YYYY-MM-DD>` 先检查，明确恢复后加 `--apply`。只写history.json和该日期minutes，提交和Pages验证另行执行。
+  - 2026-11-20缺档恢复：当日实时数据曾发布，最后完整收盘快照提交为 `5c90371d067a575d37aecda16e3f41b8bbca9c14`（15:01:29）；此前history止于11-19且没有11-20的minute文件，从该原始快照追加恢复，七ETF/七指数各242个原生点。排查时定时工具显示八宫格日终存档最近运行时间为11-20 15:35:36，晚于任务与脚本共同限定的15:30，任务状态执行成功不代表归档业务成功。窗口外被原规则静默跳过；此次未扩大抓源窗口、未改定时配置。长期避免延迟漏档需另行授权，可从已保存且严格校验的Git收盘快照补档，不应把今天分时当旧日。
 - `backfill_index_minutes.py`：只给已存在的ETF日期档补充顶层`index_minutes`，不改ETF、日汇总、持仓或策略。新浪历史1分钟必须完整才采用，否则取完整5分钟端点（48点/日）；不插值。每只附`date/interval_minutes/price_type/source/source_url/collected_at/interpolated`，回补全部覆盖后才写入；命令`python3 backfill_index_minutes.py --staging-dir <目录> --apply`。悬浮标签明示1/5分钟，5分钟非端点显示“无5分钟点”
 - `index.html` 七ETF涨跌幅图使用 `sharedPctAxis`：同日七只最大绝对涨跌幅、10%留白、向外取整，最小±0.5%，上下对称，五刻度；实时及历史各计算一次再传七图。`etfPercentSeries`保留原三位小数，缺值为null。删除隐藏价格序列，悬浮框仍从原p读取价格；不改成交额、MACD、数据或任务。
 - `preview-tools/turnover_baseline.py`：20 完整交易日、48 个同时点均值，供盘中成交额比较
