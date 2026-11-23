@@ -318,7 +318,7 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
     <div class="mstep"><i>2</i><b>主动净买入</b> —— 方向：主动买更猛还是主动卖更猛，只是方向线索。</div>
     <div class="mstep"><i>3</i><b>大额分钟 / 尾盘</b> —— 成交是不是集中在少数几分钟、最后半小时有没有放量。</div>
    </div>
-   <div class="mf"><div class="fn">同时点倍数</div><div class="fd"><span class="lf">先看这个：今天热不热、比平时热多少。</span>当日累计成交额 ÷（过去 20 个完整交易日全天均额 × 该只此刻平均已走完的比例）。1 倍左右算平常，明显放大才叫活跃；11:30 的半天不会直接拿去跟全天均额比。卡里第二行同时给出「合计额 ÷ 20 日同时点基准」和收盘后的尾盘占比，倍数怎么来的一眼能对上。<em>≠ 买卖力量对比，也不能说明是谁在成交</em></div></div><div class="mf"><div class="fn">大额分钟成交额</div><div class="fd"><span class="lf">成交是不是集中在「单分钟超过 1 亿」的那几分钟。</span>单分钟成交额 &gt; 1 亿的那些分钟，把它们的成交额加起来。阈值一改数字就变，所以这是阈值口径，不是总量口径。<em>≠ 大单，≠ 机构痕迹</em></div></div><div class="mf"><div class="fn">主动净买入（推算）</div><div class="fd"><span class="lf">方向：主动买更猛，还是主动卖更猛。</span>逐笔成交落在卖方报价（外盘）还是买方报价（内盘），据此推算主动买减主动卖。它只是方向线索，一二级套利与做市双边报价会稀释它。<em>≠ 资金净流入，≠ ETF 申赎，不含大宗与协议转让，不代表任何机构身份</em></div></div><div class="mf"><div class="fn">尾盘占比</div><div class="fd"><span class="lf">收盘后才有：最后半小时成交是不是异常放大。</span>14:30–15:00 的成交额占全天多少，并与 20 日同一区间均值对照；盘中显示「—」，因为收盘前分母（全天）还没定。<em>≠ 尾盘抢筹或砸盘</em></div></div><div class="mf"><div class="fn">已归档天数</div><div class="fd"><span class="lf">本地存档攒了几天，决定「历史对比」能看多长。</span>本地存了多少天日度记录（data/history.json）。<em>只表示「存档几天」，不是数据源覆盖长度</em></div></div><div class="mf"><div class="fn">七只合计成交额</div><div class="fd"><span class="lf">不再是单独一张卡，现在是倍数卡的分子。</span>这 7 只 ETF 在二级市场一共成交了多少钱（截至所标时刻）。<em>≠ 申购赎回金额，≠ 资金净流入，≠ 机构买入量</em></div></div><div class="mf"><div class="fn">上证收盘</div><div class="fd"><span class="lf">大盘背景，已从首屏移走，只留在下面的日度汇总表里。</span>上证综指当日收盘点位与涨跌幅，与 ETF 名单没有对应关系。<em>不作为 ETF 资金判断的依据</em></div></div><div class="mf"><div class="fn">图内元素</div><div class="fd"><span class="lf">分时图里的线、柱分别是什么。</span>涨跌幅线 = 相对昨收的涨跌幅%，<em>不是价格本身</em>；蓝柱 = 单分钟成交额 &gt; 1 亿的分钟，<em>只标「这一分钟大」，不标买卖方向</em>；MACD(12,26,9) = 价格动量辅助线，<em>不做买卖信号</em>。</div></div>
+   <div class="mf"><div class="fn">同时点倍数</div><div class="fd"><span class="lf">先看这个：今天热不热、比平时热多少。</span>当日累计成交额 ÷（过去 20 个完整交易日全天均额 × 该只此刻平均已走完的比例）。1 倍左右算平常，明显放大才叫活跃；11:30 的半天不会直接拿去跟全天均额比。卡里第二行同时给出「合计额 ÷ 20 日同时点基准」和收盘后的尾盘占比，倍数怎么来的一眼能对上。<em>≠ 买卖力量对比，也不能说明是谁在成交</em></div></div><div class="mf"><div class="fn">大额分钟成交额</div><div class="fd"><span class="lf">成交是不是集中在「单分钟超过 1 亿」的那几分钟。</span>单分钟成交额 &gt; 1 亿的那些分钟，把它们的成交额加起来。阈值一改数字就变，所以这是阈值口径，不是总量口径。<em>≠ 大单，≠ 机构痕迹</em></div></div><div class="mf"><div class="fn">主动净买入（推算）</div><div class="fd"><span class="lf">方向：主动买更猛，还是主动卖更猛。</span>逐笔成交落在卖方报价（外盘）还是买方报价（内盘），据此推算主动买减主动卖。它只是方向线索，一二级套利与做市双边报价会稀释它。<em>≠ 资金净流入，≠ ETF 申赎，不含大宗与协议转让，不代表任何机构身份</em></div></div><div class="mf"><div class="fn">尾盘占比</div><div class="fd"><span class="lf">收盘后才有：最后半小时成交是不是异常放大。</span>14:30–15:00 的成交额占全天多少，并与 20 日同一区间均值对照；盘中显示「—」，因为收盘前分母（全天）还没定。<em>≠ 尾盘抢筹或砸盘</em></div></div><div class="mf"><div class="fn">已归档天数</div><div class="fd"><span class="lf">本地存档攒了几天，决定「历史对比」能看多长。</span>本地存了多少天日度记录（data/history.json）。<em>只表示「存档几天」，不是数据源覆盖长度</em></div></div><div class="mf"><div class="fn">七只合计成交额</div><div class="fd"><span class="lf">不再是单独一张卡，现在是倍数卡的分子。</span>这 7 只 ETF 在二级市场一共成交了多少钱（截至所标时刻）。<em>≠ 申购赎回金额，≠ 资金净流入，≠ 机构买入量</em></div></div><div class="mf"><div class="fn">上证收盘</div><div class="fd"><span class="lf">大盘背景，已从首屏移走，只留在下面的日度汇总表里。</span>上证综指当日收盘点位与涨跌幅，与 ETF 名单没有对应关系。<em>不作为 ETF 资金判断的依据</em></div></div><div class="mf"><div class="fn">图内元素</div><div class="fd"><span class="lf">分时图里的线、柱分别是什么。</span>涨跌幅线 = 相对昨收的涨跌幅%，<em>不是价格本身</em>；七图共用同日涨跌幅尺度，零线居中，上下对称，按最大绝对涨跌幅留10%空间后向外取整，最小范围为±0.5%；价格只在悬浮框展示；蓝柱 = 单分钟成交额 &gt; 1 亿的分钟，<em>只标「这一分钟大」，不标买卖方向</em>；MACD(12,26,9) = 价格动量辅助线，<em>不做买卖信号</em>。</div></div>
    <div class="mmore">
     <h4>公式</h4>
     <ul>
@@ -464,8 +464,26 @@ function coverageRatio(a){
  return{est:+est.toFixed(3),total:+total.toFixed(3),ratio,n:valid.length,bad,incomplete:bad>0};
 }
 function head(n,code,est,pct,ratio,coverage,tm){const cov='大额分钟占比 '+(coverage&&coverage.ratio!=null?coverage.ratio+'%':'—');const tip='大额分钟成交额 = 单分钟成交额>1亿的合计'+(coverage?' · 截至 '+coverage.lastT+' · 有效'+coverage.n+'分钟':'')+(tm?' · 同时点基准 '+tm.avg.toFixed(1)+'亿 × 已走完 '+tm.prog+'%':'');return '<span class="nm">'+n+'</span><span class="cd">'+code+'</span>'+(pct!=null?'<span class="pc">'+(pct>=0?'+':'')+pct.toFixed(2)+'%</span>':'')+'<div class="es"><span class="k">大额</span><span class="v">'+(est!=null?(+est).toFixed(2):'—')+'</span><span class="u">亿</span></div>'+'<div class="m1" title="'+tip+'">'+cov+(tm?' · 同时点 <b style="color:var(--ink-2)">'+tm.x.toFixed(2)+'×</b>':'')+'</div>'}
-function drawEtf(i,m){const [n,code]=E[i];if(!m||!Array.isArray(m.t)||!Array.isArray(m.p)||!Array.isArray(m.a)||!m.p.length){noMin(i,null);return null}document.getElementById("n"+i).style.display="none";const t=m.t.map(s=>s.slice(0,2)+":"+s.slice(2)),p=m.p,a=m.a;
- const pre=(m.pre!=null&&m.pre>0)?+m.pre:(p[0]||1);const pct=p.map(v=>+((v/pre-1)*100).toFixed(3));
+/* ===== Shared ETF percentage axis: prices never enter this scale ===== */
+function etfPercentSeries(m){
+ const prices=Array.isArray(m?.p)?m.p:[];
+ const pre=uiNumber(m?.pre)>0?uiNumber(m.pre):(uiNumber(prices[0])>0?uiNumber(prices[0]):null);
+ return prices.map(value=>{const price=uiNumber(value);return pre&&price>0?+((price/pre-1)*100).toFixed(3):null});
+}
+function sharedPctAxis(series,date){
+ const day=String(date||'').replace(/-/g,'');let maxAbs=0;
+ for(const m of series){
+  if(!m||(day&&m.date&&String(m.date).replace(/-/g,'')!==day))continue;
+  for(const v of etfPercentSeries(m))if(v!=null)maxAbs=Math.max(maxAbs,Math.abs(v));
+ }
+ // Same-day seven-chart scale: 10% headroom, round outward, at least ±0.5%.
+ const needed=Math.max(0.5,maxAbs*1.1),step=0.5;
+ const limit=+(Math.ceil((needed-1e-10)/step)*step).toFixed(8);
+ return {min:-limit,max:limit,interval:limit/2};
+}
+/* ===== End shared ETF percentage axis ===== */
+function drawEtf(i,m,pctAxis=sharedPctAxis([m])){const [n,code]=E[i];if(!m||!Array.isArray(m.t)||!Array.isArray(m.p)||!Array.isArray(m.a)||!m.p.length){noMin(i,null);return null}document.getElementById("n"+i).style.display="none";const t=m.t.map(s=>s.slice(0,2)+":"+s.slice(2)),p=m.p,a=m.a;
+ const pct=etfPercentSeries(m);
  const cr=coverageRatio(a);
  cr.lastT=t.length?(''+t[t.length-1]).slice(0,5):null;
  cr.incomplete=cr.incomplete||(t.length!==a.length);
@@ -480,7 +498,7 @@ function drawEtf(i,m){const [n,code]=E[i];if(!m||!Array.isArray(m.t)||!Array.isA
  charts[i].setOption({backgroundColor:"transparent",animation:false,tooltip,axisPointer:{link:[{xAxisIndex:"all"}]},
   grid:[{top:6,height:"52%",left:44,right:8},{top:"62%",height:"16%",left:44,right:8},{top:"82%",height:"9%",left:44,right:8}],
   xAxis:[ax(0),ax(1),ax(2)],yAxis:[
-   ya(0,{scale:true,splitNumber:3,splitLine:{lineStyle:{color:V.grid}},axisLabel:{fontSize:10,color:V.axis,showMinLabel:false,formatter:v=>v.toFixed(2)+"%"}}),
+   ya(0,{scale:true,...pctAxis,splitNumber:4,splitLine:{show:true,lineStyle:{color:V.grid}},axisLabel:{fontSize:10,color:V.axis,showMinLabel:true,showMaxLabel:true,formatter:v=>v.toFixed(2)+"%"}}),
    // 每个标的按当前分钟成交额自适应上限，留10%呼吸空间；零基线和1亿参考线保留。
    ya(1,{min:0,max:extent=>Math.max(extent.max,1)*1.1,axisLabel:{fontSize:10,color:V.axis,formatter:v=>Number(v.toFixed(2))+"亿",showMinLabel:false,showMaxLabel:false}}),
    ya(2,{axisLabel:{show:false}})],
@@ -489,8 +507,7 @@ function drawEtf(i,m){const [n,code]=E[i];if(!m||!Array.isArray(m.t)||!Array.isA
   {name:"成交额(亿)",type:"bar",xAxisIndex:1,yAxisIndex:1,barCategoryGap:"15%",data:a.map(v=>({value:uiNumber(v),itemStyle:{color:v>1?V.barHi:V.barLo}})),markLine:{symbol:"none",silent:true,label:{show:false},lineStyle:{color:V.thr,type:"dashed",width:1},data:[{yAxis:1}]}},
   {name:"MACD",type:"bar",xAxisIndex:2,yAxisIndex:2,data:mac.map(v=>({value:+v.toFixed(5),itemStyle:{color:v>=0?V.macP:V.macN}}))},
   {name:"DIF",type:"line",xAxisIndex:2,yAxisIndex:2,data:dif.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:V.dif,width:1}},
-  {name:"DEA",type:"line",xAxisIndex:2,yAxisIndex:2,data:dea.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:V.dea,width:1}},
-  {name:"价格",type:"line",data:p,showSymbol:false,lineStyle:{width:0},itemStyle:{opacity:0},tooltip:{valueFormatter:v=>v}}]},true);
+  {name:"DEA",type:"line",xAxisIndex:2,yAxisIndex:2,data:dea.map(v=>+v.toFixed(5)),showSymbol:false,lineStyle:{color:V.dea,width:1}}]},true);
  return est}
 function noMin(i,est){const [n,code]=E[i];if(charts[i])charts[i].clear();document.getElementById("t"+i).innerHTML=head(n,code.slice(2),est!=null?est:null,null,null,null);const x=document.getElementById("n"+i);x.style.display="flex";x.textContent="该日分时未存档，仅显示汇总"}
 async function sseRows(){if(view=="live"&&LIVE&&LIVE.sse){SSEK=LIVE.sse;return SSEK}if(!SSEK||view=="live"){const k=(await j("https://proxy.finance.qq.com/ifzqgtimg/appstock/app/newfqkline/get?param=sh000001,day,,,60,qfq")).data.sh000001;SSEK=(k.day||k.qfqday)}return SSEK}
@@ -571,8 +588,8 @@ async function refresh(){
    const ms=E.map(e=>LIVE.etfs?.[e[1]]),raw=String(LIVE.date||ms.find(x=>x?.date)?.date||'');
    if(!raw)throw new Error('行情缺少日期');
    TODAY=raw.includes('-')?raw:raw.slice(0,4)+'-'+raw.slice(4,6)+'-'+raw.slice(6);
-   const o={};let sum=0,count=0;
-   ms.forEach((m,i)=>{const v=drawEtf(i,m);o[E[i][0]]=v==null?null:+v.toFixed(2);if(v!=null){sum+=v;count++}});
+   const o={};let sum=0,count=0;const pctAxis=sharedPctAxis(ms,TODAY);
+   ms.forEach((m,i)=>{const v=drawEtf(i,m,pctAxis);o[E[i][0]]=v==null?null:+v.toFixed(2);if(v!=null){sum+=v;count++}});
    o['合计']=count?+sum.toFixed(2):null;
    const ix=rows.findIndex(x=>x[0]===TODAY);if(ix>=0&&uiNumber(rows[ix][2])!=null){o['上证收盘']=+rows[ix][2];if(ix>0&&rows[ix-1][2]>0)o['上证涨跌幅']=+((rows[ix][2]/rows[ix-1][2]-1)*100).toFixed(2)}
    H[TODAY]={...H[TODAY],...o};fillSel();drawSum(rows,TODAY);table(TODAY);
@@ -583,7 +600,8 @@ async function refresh(){
   }else{
    const d=requestView,h=H[d]||{};let m=null;try{m=await j('./data/minutes/'+d+'.json')}catch(e){}
    if(view!==requestView)return;
-   E.forEach((e,i)=>{const x=m?.etfs?.[e[1]];x?drawEtf(i,{...x,date:m.date||d,index_minutes:m.index_minutes}):noMin(i,h[e[0]])});
+   const pctAxis=sharedPctAxis(E.map(e=>m?.etfs?.[e[1]]),m?.date||d);
+   E.forEach((e,i)=>{const x=m?.etfs?.[e[1]];x?drawEtf(i,{...x,date:m.date||d,index_minutes:m.index_minutes},pctAxis):noMin(i,h[e[0]])});
    bn.style.display=!m?'block':'none';bn.textContent=d+'：分时未存档，仅显示当日汇总，缺失曲线不补造。';
    drawSum(Object.keys(H).sort().map(x=>[x,0,H[x]['上证收盘']]),d);table(d);chartStatusSnapshot={view:d};renderMarketStatus();
   }

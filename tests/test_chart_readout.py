@@ -47,6 +47,30 @@ plot.onkeydown({key:'Home',preventDefault(){}});assert.equal(actions.at(-1).data
         result=subprocess.run(['node','-e',fake+code+checks],capture_output=True,text=True)
         self.assertEqual(result.returncode,0,result.stderr)
 
+    def test_shared_percentage_axis_ignores_price_level_and_invalid_points(self):
+        source=(ROOT/'index.html').read_text()
+        code=source.split('/* ===== Shared ETF percentage axis: prices never enter this scale ===== */',1)[1].split('/* ===== End shared ETF percentage axis ===== */',1)[0]
+        fake="const assert=require('assert');const uiNumber=v=>v==null||v===''||!Number.isFinite(+v)?null:+v;"
+        checks="""
+const day='2026-11-23';
+const series=[{date:'20261123',pre:100,p:[99,99.5]},{date:day,pre:6,p:[6.06,5.88]},{date:day,pre:1,p:[.96,null,NaN,Infinity]}];
+const before=JSON.stringify(series),axis=sharedPctAxis(series,day);
+assert.deepStrictEqual(axis,{min:-4.5,max:4.5,interval:2.25});assert.equal(JSON.stringify(series),before);
+assert.deepStrictEqual(sharedPctAxis([{pre:6000,p:[6060,5880]}]),sharedPctAxis([{pre:6,p:[6.06,5.88]}]));
+assert.deepStrictEqual(sharedPctAxis([{pre:1,p:[1,1]}]),{min:-.5,max:.5,interval:.25});
+assert.deepStrictEqual(sharedPctAxis([]),{min:-.5,max:.5,interval:.25});
+assert.deepStrictEqual(etfPercentSeries({pre:1,p:[null,'',NaN,Infinity,0,-1]}),[null,null,null,null,null,null]);
+assert.deepStrictEqual(sharedPctAxis([{date:'20261122',pre:1,p:[2]},...series],day),axis);
+const newer=sharedPctAxis([...series,{date:day,pre:1,p:[.9]}],day);assert(newer.max>=11);assert.equal(newer.min,-newer.max);
+"""
+        result=subprocess.run(['node','-'],input=fake+code+checks,capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertIn('sharedPctAxis(ms,TODAY)',source)
+        self.assertIn("sharedPctAxis(E.map(e=>m?.etfs?.[e[1]]),m?.date||d)",source)
+        self.assertIn('drawEtf(i,m,pctAxis)',source)
+        self.assertNotIn('{name:"价格",type:"line",data:p',source)
+        self.assertIn("name:'ETF价格',data:p",source)
+
     def test_real_index_date_parser_and_optional_failure(self):
         import sys;sys.path.insert(0,str(ROOT))
         from index_quotes import parse_index_minutes,fetch_index_minutes

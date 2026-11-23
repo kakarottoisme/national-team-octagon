@@ -9,6 +9,7 @@
 - `index_quotes.py`：仅供悬浮展示的七个对应指数分时。`fetch_live.main` 可选附加 `index_minutes`，8秒超时并行、单源失败不阻断ETF。前端严格同日同分钟匹配，不反推指数
 - `archive.py`：收盘后抓取当天ETF分时，追加 history；默认一起保存同日完整指数1分钟记录，来源失败时保留已存完整指数或同日live缓存，不拿其他日期替代。`include_indices=False`保留旧字节输出
 - `backfill_index_minutes.py`：只给已存在的ETF日期档补充顶层`index_minutes`，不改ETF、日汇总、持仓或策略。新浪历史1分钟必须完整才采用，否则取完整5分钟端点（48点/日）；不插值。每只附`date/interval_minutes/price_type/source/source_url/collected_at/interpolated`，回补全部覆盖后才写入；命令`python3 backfill_index_minutes.py --staging-dir <目录> --apply`。悬浮标签明示1/5分钟，5分钟非端点显示“无5分钟点”
+- `index.html` 七ETF涨跌幅图使用 `sharedPctAxis`：同日七只最大绝对涨跌幅、10%留白、向外取整，最小±0.5%，上下对称，五刻度；实时及历史各计算一次再传七图。`etfPercentSeries`保留原三位小数，缺值为null。删除隐藏价格序列，悬浮框仍从原p读取价格；不改成交额、MACD、数据或任务。
 - `preview-tools/turnover_baseline.py`：20 完整交易日、48 个同时点均值，供盘中成交额比较
 - `preview-tools/turnover_history.py`：新浪60分钟K按日累加、配合本地 live 进行一致性检查
 
