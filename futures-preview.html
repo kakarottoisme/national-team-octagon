@@ -254,8 +254,8 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
   <dt>品种</dt><dd>中证500股指期货（IC），只做多，不叠加期权。合约乘数 200 元/点。</dd>
   <dt>信号</dt><dd>正式信号用中证500指数收盘。盘中可在约 14:50 用实时价预判，14:57 前下单。若价格距触发线约 0.15% 以内，以收盘后再核对的结果为准。</dd>
   <dt>网格腿 A</dt><dd>收盘 ≤6500 为 2 手，≤6000 为 4 手，≤5500 为 6 手，≤5250 为 8 手，≤5000 为 10 手，否则 0。</dd>
-  <dt>趋势腿 B</dt><dd>收盘高于 MA250×1.01 为 +2，低于 MA250×0.99 为 0，落在两条线之间则维持前一日状态。MA250 是含当日收盘的 250 日简单移动平均。</dd>
-  <dt>贴水腿 C</dt><dd>近月最后交易日的前一交易日收盘，看新近月的年化贴水：不低于 10% 为 +2，低于 3% 为 −2，介于其间为 0。一旦确定，保持到下一次换月。</dd>
+  <dt>趋势腿 B</dt><dd>收盘高于 MA250×1.01 加 2 手，低于 MA250×0.99 减 2 手（撤出趋势加仓），落在两条线之间则维持前一日状态。MA250 是含当日收盘的 250 日简单移动平均。</dd>
+  <dt>贴水腿 C</dt><dd>近月最后交易日的前一交易日收盘，看新近月的年化贴水：不低于 10% 加 2 手，低于 3% 减 2 手，介于其间不加不减。一旦确定，保持到下一次换月。</dd>
   <dt>盈利覆盖加仓 D</dt><dd>D 腿（盈利覆盖加仓）：自上次 D 撤出以来累计盈利的 50% 够付 1 手保证金（按 12%）即加 1 手，最多 4 手，总手数不超过 10；收盘跌破 MA250×0.99 或底仓归零时 D 全撤。</dd>
   <dt>合计</dt><dd>底仓 = A + B + C，限制在 0 到 10 手。建议手数 = 底仓 + D，不超过 10 手。</dd>
   <dt>年化贴水</dt><dd>(指数收盘 − 期货收盘) / 指数收盘 × 365 / 距最后交易日的日历天数。</dd>
@@ -844,8 +844,8 @@ function validateLocalAccount(h){
   const lotbar='<div class="lotbar"><div class="track" aria-hidden="true">'+((+day.leg_c<0||(+day.leg_a)+(+day.leg_b)+(+day.leg_c)>10)?seg(total,'a'):posLots.map(function(p){return seg(p[1],p[2]);}).join(''))+'</div><div class="key">'+posLots.map(function(p){return '<span>'+p[0]+' <b>'+(p[0]==='D'&&dUnknown?'—':cTile(p[1]))+'</b></span>';}).join('')+'<span>上限 <b>10</b></span></div></div>';
   const legRow='<div class="leg-row">'
    +leg('a','A 网格', esc(day.leg_a), blk('规则','',aTable)+blk('现状', num(day.index_close,3), '中证500收盘')+blk('下次变化','',aNext))
-   +leg('b','B 趋势', esc(day.leg_b), blk('规则','','&gt;MA250×1.01 加 2 手<br>&lt;MA250×0.99 撤')+blk('MA250（250日均线）', num(day.ma250,2), '上轨 '+num(day.ma_upper,2)+' · 下轨 '+num(day.ma_lower,2)+' · 趋势'+(day.b_open?'打开':'关闭')+rail)+blk('下次变化', bTrig, ''))
-   +leg('c','C 贴水', esc(cTile(day.leg_c)), blk('规则','','≥10%：C = +2 手<br>&lt;3%：C = −2 手<br>3% ≤ 贴水 <10% 为 0；判定后保持到下次换月')+blk('现状', pct(day.c_basis), '来自 '+(day.c_set_on?String(day.c_set_on).slice(5):'—')+' '+(day.c_contract||'')+(nxt&&nxt.basis!=null?' · 今日 '+nxt.code+' '+pct(nxt.basis):''))+blk('下次变化', (day.next_roll?String(day.next_roll).slice(5):'—')+' 判定', ''))
+   +leg('b','B 趋势', esc(day.leg_b), blk('规则','','&gt;MA250×1.01 加 2 手<br>&lt;MA250×0.99 减 2 手')+blk('MA250（250日均线）', num(day.ma250,2), '上轨 '+num(day.ma_upper,2)+' · 下轨 '+num(day.ma_lower,2)+' · 趋势'+(day.b_open?'打开':'关闭')+rail)+blk('下次变化', bTrig, ''))
+   +leg('c','C 贴水', esc(cTile(day.leg_c)), blk('规则','','≥10% 加 2 手<br>&lt;3% 减 2 手<br>3% ≤ 贴水 <10% 不加不减；判定后保持到下次换月')+blk('现状', pct(day.c_basis), '来自 '+(day.c_set_on?String(day.c_set_on).slice(5):'—')+' '+(day.c_contract||'')+(nxt&&nxt.basis!=null?' · 今日 '+nxt.code+' '+pct(nxt.basis):''))+blk('下次变化', (day.next_roll?String(day.next_roll).slice(5):'—')+' 判定', ''))
    +leg('d','D 盈利加仓', dUnknown?'—':esc(legD), blk('规则','','盈利 50% 够 1 手 12% 保证金即加 1 手，最多 4 手<br>跌破 MA250×0.99 或底仓归零全撤')+blk('现状', wan2(shownModel.pnl), dUnknown?(accountMissing?'持仓未加载':'净盈亏账本待补'):(dState+(shownModel.live?' · 净盈亏':' · 回测')))+blk('下次变化', accountMissing?'持仓未加载':shownModel.blocked?shownModel.blocked:(shownModel.need==null?'已达上限或不适用':('再赚 '+wan2(shownModel.need))), (shownModel.live&&snap.px!=null?'按持仓 '+(snap.code||'')+' '+num(snap.px,1):dPrice)+dMeter+'撤出线 '+num(day.ma_lower,2)))
    +'</div>';
   const known={grid_down:1,grid_up:1,trend_on:1,trend_off:1,basis:1};

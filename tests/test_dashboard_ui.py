@@ -91,6 +91,15 @@ class DashboardContract(unittest.TestCase):
                 self.assertIn('href="' + target + '"', text)
         self.assertEqual(len(set(blocks)), 1)
 
+    def test_futures_bc_rules_use_matching_chinese_actions(self):
+        text = self.sources["futures-preview.html"]
+        self.assertIn('&gt;MA250×1.01 加 2 手<br>&lt;MA250×0.99 减 2 手', text)
+        self.assertIn('≥10% 加 2 手<br>&lt;3% 减 2 手<br>3% ≤ 贴水 <10% 不加不减', text)
+        self.assertNotIn('C = +2 手', text)
+        self.assertNotIn('C = −2 手', text)
+        self.assertIn('低于 MA250×0.99 减 2 手（撤出趋势加仓）', text)
+        self.assertIn('不低于 10% 加 2 手，低于 3% 减 2 手，介于其间不加不减', text)
+
     def test_funds_indicator_dom_order(self):
         t = self.sources["index.html"]
         kpis = re.search(r'<div class="kpis">(.*?)\n</div>', t, re.S).group(1)
