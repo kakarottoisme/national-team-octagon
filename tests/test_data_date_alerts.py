@@ -68,11 +68,12 @@ class DataDateTests(unittest.TestCase):
             r=a.execute_task('archive',NOW.replace(hour=15,minute=35),state)
             self.assertTrue(r['notify']);self.assertEqual(r['status'],'failed');self.assertEqual(fetch.call_count,1)
             self.assertFalse(a.execute_task('archive',NOW.replace(hour=15,minute=36),state)['notify'])
-    def test_late_recovery_still_reports_missed_window(self):
-        with patch.object(a,'archive',return_value={'notify':False,'reason':'晚到补档成功'}):
-            r=a.execute_task('archive',NOW.replace(hour=15,minute=35),{})
-            self.assertTrue(r['notify']);self.assertEqual(r['status'],'warning')
-            self.assertIn('晚到补档成功',r['message'])
+    def test_late_recovery_silent_without_alert_dedupe(self):
+        state={}
+        with patch.object(a,'archive',return_value={'notify':False,'reason':'晚到补档成功','state':'archived'}):
+            r=a.execute_task('archive',NOW.replace(hour=15,minute=35),state)
+            self.assertFalse(r['notify']);self.assertEqual(r['state'],'archived')
+            self.assertNotIn('failure_notified_archive',state)
     def test_margin_window_missed_alert(self):
         with patch.object(a,'margin') as fetch:
             r=a.execute_task('margin',NOW.replace(hour=9,minute=45),{})

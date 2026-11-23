@@ -113,6 +113,73 @@ class RestoreSnapshot(unittest.TestCase):
                 a.archive(dt.datetime(2026,11,20,15,30),{})
             self.assertEqual(fetch.call_count,1)
 
+    def test_source_failures_follow_1522_then_1531_without_alert(self):
+        state={}
+        with patch.object(a,'archive',side_effect=a.ArchiveSourcePending('交易分钟缺失')):
+            first=a.execute_task('archive',dt.datetime(2026,11,20,15,12,tzinfo=a.TZ),state)
+            second=a.execute_task('archive',dt.datetime(2026,11,20,15,22,tzinfo=a.TZ),state,final=True)
+        self.assertFalse(first['notify']);self.assertFalse(second['notify'])
+        self.assertEqual(first['followup_at'],'2026-11-20T15:22:00+08:00')
+        self.assertEqual(second['followup_at'],'2026-11-20T15:31:00+08:00')
+        self.assertEqual(second['next_mode'],'git_snapshot')
+        self.assertNotIn('failure_notified_archive',state)
+        with patch.object(a,'archive',return_value={'notify':False,'state':'archived'}):
+            recovered=a.execute_task('archive',dt.datetime(2026,11,20,15,31,tzinfo=a.TZ),state,final=True)
+        self.assertFalse(recovered['notify']);self.assertNotIn('archive_source_pending',state)
+        self.assertNotIn('failure_notified_archive',state)
+
+    def test_final_snapshot_failure_preserves_source_reason_daily_dedupe(self):
+        state={};now=dt.datetime(2026,11,20,15,22,tzinfo=a.TZ)
+        with patch.object(a,'archive',side_effect=a.ArchiveSourcePending('累计成交额倒退')):
+            a.execute_task('archive',now,state,final=True)
+        with patch.object(a,'archive',side_effect=ValueError('没有完整Git快照')):
+            result=a.execute_task('archive',now.replace(minute=31),state,final=True)
+            again=a.execute_task('archive',now.replace(minute=32),state,final=True)
+        self.assertTrue(result['notify']);self.assertFalse(again['notify'])
+        self.assertIn('累计成交额倒退',result['message']);self.assertIn('没有完整Git快照',result['message'])
+
+    def test_preopen_and_nontrading_day_never_collect(self):
+        with patch.object(a,'archive') as collect:
+            for now in (dt.datetime(2026,11,20,15,9,tzinfo=a.TZ),dt.datetime(2026,11,21,15,31,tzinfo=a.TZ)):
+                self.assertFalse(a.execute_task('archive',now,{})['notify'])
+            collect.assert_not_called()
+
+    def test_auth_error_final_not_followup(self):
+        from urllib.error import HTTPError
+        state={}
+        with patch.object(a,'archive',side_effect=HTTPError('https://example.com',403,'auth',{},None)):
+            out=a.execute_task('archive',dt.datetime(2026,11,20,15,12,tzinfo=a.TZ),state)
+        self.assertTrue(out['notify']);self.assertNotIn('followup_at',out)
+
+    def test_publication_error_final_and_unknown_push_never_rebuilt(self):
+        summary,minutes=r.build(self.sample(),'2026-11-20',{'source_url':'https://example.com/preserved'})
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t);(root/'data').mkdir();(root/'data/history.json').write_text('{}')
+            state={};now=dt.datetime(2026,11,20,15,31,tzinfo=a.TZ)
+            with patch.object(a,'ROOT',root),patch.object(r,'from_git',return_value=(summary,minutes)),patch.object(a,'commit_files',side_effect=ValueError('推送结果未知')):
+                out=a.execute_task('archive',now,state,final=True)
+            self.assertTrue(out['notify']);self.assertNotIn('followup_at',out)
+            self.assertEqual(state['archive_publication_pending'],'2026-11-20')
+            # New checkout cannot find a remote archive: never create a second commit.
+            (root/'data/history.json').write_text('{}');(root/'data/minutes/2026-11-20.json').unlink()
+            with patch.object(a,'ROOT',root),patch.object(r,'from_git') as source,patch.object(a,'commit_files') as push:
+                again=a.execute_task('archive',now.replace(minute=32),state,final=True)
+                self.assertFalse(again['notify']);source.assert_not_called();push.assert_not_called()
+
+    def test_pushed_but_pages_pending_rechecks_only_publish(self):
+        summary,minutes=r.build(self.sample(),'2026-11-20',{'source_url':'https://example.com/preserved'})
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t);(root/'data').mkdir();(root/'data/history.json').write_text('{}')
+            state={};now=dt.datetime(2026,11,20,15,31,tzinfo=a.TZ)
+            with patch.object(a,'ROOT',root),patch.object(r,'from_git',return_value=(summary,minutes)),patch.object(a,'commit_files',return_value=True),patch.object(a,'verify_archive_pages',side_effect=ValueError('Pages未更新')):
+                out=a.execute_task('archive',now,state,final=True)
+            self.assertTrue(out['notify']);self.assertNotIn('archive_success',state)
+            with patch.object(a,'ROOT',root),patch.object(r,'from_git') as source,patch.object(a,'commit_files') as push,patch.object(a,'verify_archive_pages') as verify:
+                out=a.execute_task('archive',now.replace(minute=32),state,final=True)
+                self.assertFalse(out['notify']);self.assertEqual(out['state'],'already_archived')
+                source.assert_not_called();push.assert_not_called();verify.assert_called_once()
+            self.assertNotIn('archive_publication_pending',state)
+
     def test_main_late_records_business_state_and_clock(self):
         import sys,io
         class Fixed(dt.datetime):

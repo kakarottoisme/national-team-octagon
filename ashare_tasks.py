@@ -170,6 +170,30 @@ class ArchiveSourcePending(ValueError):
     """Same-day source is incomplete or being corrected; never usable as-is."""
 
 
+class ArchivePublicationError(ValueError):
+    """A write/push may have happened; never retry by rebuilding the archive."""
+
+
+def publish_archive(paths, title, state, date, timing=None):
+    # This marker survives a handled exception in main. A later isolated clone
+    # must verify the remote result, not rebuild missing/uncertain publication.
+    state['archive_publication_pending'] = date
+    started = time.monotonic()
+    try:
+        pushed = commit_files(paths, title)
+        if timing is not None:
+            timing['publish_seconds'] = round(time.monotonic() - started, 3)
+        started = time.monotonic()
+        verify_archive_pages(paths)
+        if timing is not None:
+            timing['pages_seconds'] = round(time.monotonic() - started, 3)
+    except Exception as exc:
+        reason = str(exc) if isinstance(exc, ValueError) else type(exc).__name__
+        raise ArchivePublicationError('归档提交/发布未完成确认，停止重新抓取或重复提交：' + reason) from exc
+    state.pop('archive_publication_pending', None)
+    return pushed
+
+
 def validate_archive_source(raw, url, date):
     if '/minute/query' in url:
         # Tencent keeps appending quotes after 15:00, including cumulative
@@ -273,6 +297,15 @@ def archive(now, state, timing=None):
     if timing is not None:timing['mode']=mode
     history=json.loads((ROOT/'data/history.json').read_text())
     saved=ROOT/f'data/minutes/{date}.json'
+    if state.get('archive_publication_pending') == date:
+        if date not in history or not saved.exists():
+            raise ArchivePublicationError('上次归档推送结果未明且远端缺少完整档，保留提交，禁止重抓或重复提交')
+        if json.loads(saved.read_text()).get('date') != date:
+            raise ArchivePublicationError('已提交归档日期不匹配，停止覆盖')
+        verify_archive_pages(['data/history.json', f'data/minutes/{date}.json'])
+        state.pop('archive_publication_pending', None)
+        state['archive_success'] = date
+        return {'notify':False,'state':'already_archived','reason':'已核验上次归档发布'}
     if mode=='git_snapshot':
         # Late execution reads immutable Git observations only, never Tencent.
         if date in history and saved.exists():
@@ -286,13 +319,9 @@ def archive(now, state, timing=None):
         summary,minutes=recovery.from_git(ROOT,date)
         if timing is not None:timing['snapshot_seconds']=round(time.monotonic()-started,3)
         recovery.apply_missing(ROOT/'data',date,summary,minutes)
-        started=time.monotonic()
-        pushed=commit_files(['data/history.json',f'data/minutes/{date}.json'],f'archive {date} from preserved close snapshot')
-        if timing is not None:timing['publish_seconds']=round(time.monotonic()-started,3)
+        pushed=publish_archive(['data/history.json',f'data/minutes/{date}.json'],
+                               f'archive {date} from preserved close snapshot',state,date,timing)
         if not pushed:return {'notify':False,'reason':'无变化','state':'no_change','mode':mode}
-        started=time.monotonic()
-        verify_archive_pages(['data/history.json',f'data/minutes/{date}.json'])
-        if timing is not None:timing['pages_seconds']=round(time.monotonic()-started,3)
         state['archive_success']=date
         state.pop('archive_failure',None)
         return {'notify':False,'reason':'晚到补档成功','state':'archived','mode':mode,'sources':[minutes['archive_provenance']['source_url']]}
@@ -309,12 +338,21 @@ def archive(now, state, timing=None):
     def validated(url):
         return fetch_archive_source(windowed_fetch,url,date)
     started=time.monotonic()
-    day,summary,minutes = producer.build_archive(fetch=validated)
-    if timing is not None:timing['collect_seconds']=round(time.monotonic()-started,3)
-    if day!=date or '上证收盘' not in summary or '上证涨跌幅' not in summary:
-        raise ValueError('上证当日收盘或涨跌幅缺失，未存档')
-    for key in summary:
-        number(summary[key])
+    try:
+        day,summary,minutes = producer.build_archive(fetch=validated)
+        if day!=date or '上证收盘' not in summary or '上证涨跌幅' not in summary:
+            raise ValueError('上证当日收盘或涨跌幅缺失，未存档')
+        for key in summary:
+            number(summary[key])
+    except urllib.error.HTTPError as exc:
+        if exc.code in (401,403):
+            raise  # Authorization failure is final; no repeated source requests.
+        raise ArchiveSourcePending('行情来源暂不可用（HTTP ' + str(exc.code) + '），未写入') from exc
+    except Exception as exc:
+        reason = str(exc) if isinstance(exc,ValueError) else type(exc).__name__+'（行情来源失败）'
+        raise ArchiveSourcePending(reason) from exc
+    finally:
+        if timing is not None:timing['collect_seconds']=round(time.monotonic()-started,3)
     history=json.loads((ROOT/'data/history.json').read_text())
     if date in history and history[date]==summary and (ROOT/f'data/minutes/{date}.json').exists():
         state['archive_success']=date
@@ -322,14 +360,15 @@ def archive(now, state, timing=None):
     history[date]=summary
     write_json_atomic(ROOT/'data/history.json',dict(sorted(history.items())),ensure_ascii=False,indent=1)
     write_json_atomic(ROOT/f'data/minutes/{date}.json',minutes,separators=(',',':'))
-    started=time.monotonic()
-    pushed=commit_files(['data/history.json',f'data/minutes/{date}.json'],f'archive {date}')
-    if timing is not None:timing['publish_seconds']=round(time.monotonic()-started,3)
+    pushed=publish_archive(['data/history.json',f'data/minutes/{date}.json'],
+                           f'archive {date}',state,date,timing)
     if not pushed:
-        return {'notify':False,'reason':'无变化'}
+        return {'notify':False,'reason':'无变化','state':'no_change'}
     state['archive_success']=date
     state.pop('archive_failure',None)
-    return {'notify':True,'message':f"{date}｜估算合计{summary['合计']:.2f}亿元｜上证{summary['上证涨跌幅']:+.2f}%",'link':PAGE,'sources':['https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=sh510050',REPO+'/blob/main/data/history.json']}
+    return {'notify':False,'reason':'当日存档成功','state':'archived',
+            'sources':['https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=sh510050',
+                       REPO+'/blob/main/data/history.json']}
 
 
 def previous_trading_day(day):
@@ -497,12 +536,9 @@ def execute_task(task, now, state, final=False, timing=None):
         if task == 'ic': return ic(now)
         if task == 'archive':
             if archive_mode(now) is None:
-                return failure_result(task, now, state, '错过授权窗口，未采集')
+                return {'notify':False,'state':'outside_window','reason':'不在授权窗口'}
             result = archive(now,state,timing)
-            if minute > 930:
-                warning = failure_result(task,now,state,'错过15:10–15:30实时采集窗口；'+result.get('reason','已核对Git收盘快照'))
-                warning['status'] = 'warning'
-                return {**result, **warning}
+            state.pop('archive_source_pending', None)
             return result
         if task == 'margin': return margin(now,state, final or minute >= 565)
         if task == 'data-audit': return data_audit(now,state)
@@ -510,10 +546,23 @@ def execute_task(task, now, state, final=False, timing=None):
     except Exception as exc:
         reason = str(exc) if isinstance(exc,ValueError) else type(exc).__name__+'（来源或执行失败）'
         if task in ('archive','margin','data-audit'):
-            # Keep retryable early failures pending; no alert dedupe consumed.
-            retry_before = 565 if task == 'margin' else 922
-            if not final and task != 'data-audit' and minute < retry_before:
+            if task == 'archive' and isinstance(exc, ArchiveSourcePending) and archive_mode(now) == 'live_source':
+                followup = now.replace(hour=15, minute=22 if minute < 922 and not final else 31,
+                                       second=0, microsecond=0)
+                state['archive_source_pending'] = {'date':now.date().isoformat(),
+                                                    'reason':reason,'followup_at':followup.isoformat()}
+                return {'notify':False,'status':'pending','state':'source_pending',
+                        'reason':reason,'followup_at':followup.isoformat(),
+                        'next_mode':'live_source' if followup.minute == 22 else 'git_snapshot'}
+            # Non-source archive errors (authorization/publication/invalid state)
+            # are final. Never use snapshot recovery to replay unknown writes.
+            retry_before = 565
+            if task == 'margin' and not final and minute < retry_before:
                 return {'notify':False,'status':'pending','reason':reason}
+            if task == 'archive' and archive_mode(now) == 'git_snapshot':
+                prior = state.get('archive_source_pending', {})
+                if prior.get('date') == now.date().isoformat():
+                    reason = prior['reason'] + '；Git收盘快照补档失败：' + reason
             return failure_result(task, now, state, reason)
         if task == 'live-health':
             state['live_failures'] = state.get('live_failures',0)+1
