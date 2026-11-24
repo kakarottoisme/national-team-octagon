@@ -1,7 +1,5 @@
 {
- "blocked_dates": [
-  "2026-11-24"
- ],
+ "blocked_dates": [],
  "days": {
   "2025-06-03": {
    "159352": {
@@ -74887,97 +74885,109 @@
   },
   "2026-11-24": {
    "159352": {
-    "amount_yuan": "1861740963.300",
-    "close": "1.065",
+    "amount_yuan": "2818538781.300",
+    "close": "1.061",
     "source": "eastmoney_push2his",
-    "volume_hand": "17436413"
+    "volume_hand": "26443317"
    },
    "159629": {
-    "amount_yuan": "232686792.012",
-    "close": "2.473",
+    "amount_yuan": "358595447.112",
+    "close": "2.454",
     "source": "eastmoney_push2his",
-    "volume_hand": "934241"
+    "volume_hand": "1445532"
    },
    "159845": {
-    "amount_yuan": "916343326.840",
-    "close": "2.464",
+    "amount_yuan": "1310539060.340",
+    "close": "2.445",
     "source": "eastmoney_push2his",
-    "volume_hand": "3691384"
+    "volume_hand": "5296832"
    },
    "159915": {
-    "amount_yuan": "8751037145.468",
-    "close": "2.363",
+    "amount_yuan": "10962503130.704",
+    "close": "2.340",
     "source": "eastmoney_push2his",
-    "volume_hand": "36915585"
+    "volume_hand": "46317009"
    },
    "159919": {
-    "amount_yuan": "719181003.422",
-    "close": "4.244",
+    "amount_yuan": "1172728760.822",
+    "close": "4.227",
     "source": "eastmoney_push2his",
-    "volume_hand": "1695233"
+    "volume_hand": "2767238"
    },
    "159977": {
-    "amount_yuan": "412539284.150",
-    "close": "1.221",
+    "amount_yuan": "477001388.050",
+    "close": "1.215",
     "source": "eastmoney_push2his",
-    "volume_hand": "3355056"
+    "volume_hand": "3885191"
    },
    "510050": {
-    "amount_yuan": "718611657.000",
-    "close": "2.892",
+    "amount_yuan": "1332058264.000",
+    "close": "2.889",
     "source": "eastmoney_push2his",
-    "volume_hand": "2487760"
+    "volume_hand": "4612539"
    },
    "510180": {
-    "amount_yuan": "12589436.000",
-    "close": "3.639",
+    "amount_yuan": "26620923.000",
+    "close": "3.632",
     "source": "eastmoney_push2his",
-    "volume_hand": "34622"
+    "volume_hand": "73299"
    },
    "510300": {
-    "amount_yuan": "3550182140.000",
-    "close": "4.057",
+    "amount_yuan": "4285578320.000",
+    "close": "4.051",
     "source": "eastmoney_push2his",
-    "volume_hand": "8730360"
+    "volume_hand": "10545923"
    },
    "510310": {
-    "amount_yuan": "901732168.000",
-    "close": "3.943",
+    "amount_yuan": "1047645240.000",
+    "close": "3.936",
     "source": "eastmoney_push2his",
-    "volume_hand": "2282157"
+    "volume_hand": "2652729"
    },
    "510330": {
-    "amount_yuan": "505843138.000",
-    "close": "4.241",
+    "amount_yuan": "699898184.000",
+    "close": "4.228",
     "source": "eastmoney_push2his",
-    "volume_hand": "1193123"
+    "volume_hand": "1651834"
    },
    "510500": {
-    "amount_yuan": "1488310901.000",
-    "close": "6.242",
+    "amount_yuan": "2346698635.000",
+    "close": "6.211",
     "source": "eastmoney_push2his",
-    "volume_hand": "2370437"
+    "volume_hand": "3748664"
    },
    "512100": {
-    "amount_yuan": "2216523251.000",
-    "close": "2.401",
+    "amount_yuan": "3222390661.000",
+    "close": "2.382",
     "source": "eastmoney_push2his",
-    "volume_hand": "9155860"
+    "volume_hand": "13361033"
    },
    "512500": {
-    "amount_yuan": "191088272.000",
-    "close": "3.532",
+    "amount_yuan": "251295970.000",
+    "close": "3.516",
     "source": "eastmoney_push2his",
-    "volume_hand": "537796"
+    "volume_hand": "708594"
    },
    "560010": {
-    "amount_yuan": "871861159.000",
-    "close": "2.462",
+    "amount_yuan": "1222204308.000",
+    "close": "2.444",
     "source": "eastmoney_push2his",
-    "volume_hand": "3514538"
+    "volume_hand": "4940148"
+   },
+   "588000": {
+    "amount_yuan": "8388741144.000",
+    "close": "1.333",
+    "source": "eastmoney_push2his",
+    "volume_hand": "62568119"
+   },
+   "588080": {
+    "amount_yuan": "2505617657.000",
+    "close": "1.291",
+    "source": "eastmoney_push2his",
+    "volume_hand": "19299640"
    }
   }
  },
  "schema": "etf-share-flows-1",
- "updated_at": "2026-11-24T10:54:02+08:00"
+ "updated_at": "2026-11-24T11:51:11+08:00"
 }

@@ -360,8 +360,7 @@
    17,
    17,
    17,
-   17,
-   0
+   17
   ],
   "cumulative_yi": [
    null,
@@ -723,8 +722,7 @@
    "-10715.3712",
    "-10211.2172",
    "-9285.2134",
-   "-9128.6722",
-   null
+   "-9128.6722"
   ],
   "inflow_yi": [
    null,
@@ -1086,13 +1084,12 @@
    "146.2161",
    "504.1540",
    "926.0038",
-   "156.5412",
-   null
+   "156.5412"
   ]
  },
  "as_of": "2026-11-23",
  "as_of_confirmed_by": "sse_stat_date+szse_size_date",
- "backfill_end": "2026-11-24",
+ "backfill_end": "2026-11-23",
  "backfill_start": "2025-06-03",
  "dates": [
   "2025-06-03",
@@ -1454,8 +1451,7 @@
   "2026-11-18",
   "2026-11-19",
   "2026-11-20",
-  "2026-11-23",
-  "2026-11-24"
+  "2026-11-23"
  ],
  "etfs": [
   {
@@ -1838,8 +1834,7 @@
     "496.8409",
     "515.4079",
     "551.8489",
-    "555.8719",
-    null
+    "555.8719"
    ],
    "share_source": "https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=2026-11-23",
    "shares_status": "official_confirmed",
@@ -2228,8 +2223,7 @@
     "269.7994",
     "273.5524",
     "284.6134",
-    "289.0054",
-    null
+    "289.0054"
    ],
    "share_source": "https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=2026-11-23",
    "shares_status": "official_confirmed",
@@ -2618,8 +2612,7 @@
     "174.6565",
     "197.4895",
     "199.5235",
-    "199.7035",
-    null
+    "199.7035"
    ],
    "share_source": "https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=2026-11-23",
    "shares_status": "official_confirmed",
@@ -3008,8 +3001,7 @@
     "141.9142",
     "161.8672",
     "215.6782",
-    "216.1462",
-    null
+    "216.1462"
    ],
    "share_source": "https://fund.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=fund_jjgm&TABKEY=tab1&txtDm=159919&txtStart=2026-11-23&txtEnd=2026-11-23&pageno=1",
    "shares_status": "official_confirmed",
@@ -3400,8 +3392,7 @@
     "164.7967",
     "166.6057",
     "241.3417",
-    "243.7897",
-    null
+    "243.7897"
    ],
    "share_source": "https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=2026-11-23",
    "shares_status": "official_confirmed",
@@ -3790,8 +3781,7 @@
     "44.6156",
     "44.6206",
     "44.6056",
-    "44.6056",
-    null
+    "44.6056"
    ],
    "share_source": "https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=2026-11-23",
    "shares_status": "official_confirmed",
@@ -4180,8 +4170,7 @@
     "94.2417",
     "106.7417",
     "121.3017",
-    "125.1017",
-    null
+    "125.1017"
    ],
    "share_source": "https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=2026-11-23",
    "shares_status": "official_confirmed",
@@ -4570,8 +4559,7 @@
     "19.7601",
     "19.6961",
     "19.6481",
-    "19.8401",
-    null
+    "19.8401"
    ],
    "share_source": "https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=2026-11-23",
    "shares_status": "official_confirmed",
@@ -4960,8 +4948,7 @@
     "183.6722",
     "205.7522",
     "240.0122",
-    "255.0122",
-    null
+    "255.0122"
    ],
    "share_source": "https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=2026-11-23",
    "shares_status": "official_confirmed",
@@ -5350,8 +5337,7 @@
     "26.5243",
     "24.7543",
     "23.8843",
-    "26.5543",
-    null
+    "26.5543"
    ],
    "share_source": "https://fund.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=fund_jjgm&TABKEY=tab1&txtDm=159845&txtStart=2026-11-23&txtEnd=2026-11-23&pageno=1",
    "shares_status": "official_confirmed",
@@ -5742,8 +5728,7 @@
     "28.9462",
     "27.6462",
     "26.2662",
-    "27.1862",
-    null
+    "27.1862"
    ],
    "share_source": "https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=2026-11-23",
    "shares_status": "official_confirmed",
@@ -6132,8 +6117,7 @@
     "8.2125",
     "8.1525",
     "7.9525",
-    "8.5125",
-    null
+    "8.5125"
    ],
    "share_source": "https://fund.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=fund_jjgm&TABKEY=tab1&txtDm=159629&txtStart=2026-11-23&txtEnd=2026-11-23&pageno=1",
    "shares_status": "official_confirmed",
@@ -6524,8 +6508,7 @@
     "1031.8767",
     "1024.3467",
     "1036.2867",
-    "1051.7067",
-    null
+    "1051.7067"
    ],
    "share_source": "https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=2026-11-23",
    "shares_status": "official_confirmed",
@@ -6914,8 +6897,7 @@
     "361.6963",
     "438.5563",
     "464.6563",
-    "467.6263",
-    null
+    "467.6263"
    ],
    "share_source": "https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=2026-11-23",
    "shares_status": "official_confirmed",
@@ -7304,8 +7286,7 @@
     "490.2045",
     "499.0745",
     "531.7445",
-    "539.1545",
-    null
+    "539.1545"
    ],
    "share_source": "https://fund.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=fund_jjgm&TABKEY=tab1&txtDm=159915&txtStart=2026-11-23&txtEnd=2026-11-23&pageno=1",
    "shares_status": "official_confirmed",
@@ -7696,8 +7677,7 @@
     "63.4987",
     "63.6387",
     "65.0987",
-    "65.9787",
-    null
+    "65.9787"
    ],
    "share_source": "https://fund.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=fund_jjgm&TABKEY=tab1&txtDm=159977&txtStart=2026-11-23&txtEnd=2026-11-23&pageno=1",
    "shares_status": "official_confirmed",
@@ -8088,8 +8068,7 @@
     "312.9010",
     "306.9010",
     "306.3010",
-    "310.5010",
-    null
+    "310.5010"
    ],
    "share_source": "https://fund.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=fund_jjgm&TABKEY=tab1&txtDm=159352&txtStart=2026-11-23&txtEnd=2026-11-23&pageno=1",
    "shares_status": "official_confirmed",
@@ -8101,7 +8080,7 @@
    "vwap": "1.0423"
   }
  ],
- "generated_at": "2026-11-24T10:54:02+08:00",
+ "generated_at": "2026-11-24T11:51:11+08:00",
  "method": "估算净流入 =（当日官方份额 − 前一官方交易日份额）× 当日成交均价；成交均价 = 成交额 / 成交量。这是全市场申购赎回，不能单独归因国家队，也不是资金观察页的分钟成交额代理。",
  "schema": "etf-share-flows-1",
  "summary": {
