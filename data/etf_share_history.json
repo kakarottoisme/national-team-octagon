@@ -1,5 +1,15 @@
 {
- "blocked_dates": [],
+ "blocked_dates": [
+  "2026-11-12",
+  "2026-11-13",
+  "2026-11-16",
+  "2026-11-17",
+  "2026-11-18",
+  "2026-11-19",
+  "2026-11-20",
+  "2026-11-23",
+  "2026-11-24"
+ ],
  "days": {
   "2025-06-03": {
    "159352": {
@@ -74798,6 +74808,12 @@
     "source": "eastmoney_push2his",
     "volume_hand": "1653809"
    },
+   "159977": {
+    "amount_yuan": "664209402.793",
+    "close": "1.192",
+    "source": "eastmoney_push2his",
+    "volume_hand": "5677187"
+   },
    "510050": {
     "amount_yuan": "3242980795.000",
     "close": "2.875",
@@ -74855,10 +74871,10 @@
   },
   "2026-11-24": {
    "159352": {
-    "amount_yuan": "1350834111.700",
-    "close": "1.067",
+    "amount_yuan": "1861740963.300",
+    "close": "1.065",
     "source": "eastmoney_push2his",
-    "volume_hand": "12646699"
+    "volume_hand": "17436413"
    },
    "159629": {
     "amount_yuan": "232686792.012",
@@ -74884,6 +74900,12 @@
     "source": "eastmoney_push2his",
     "volume_hand": "1695233"
    },
+   "159977": {
+    "amount_yuan": "412539284.150",
+    "close": "1.221",
+    "source": "eastmoney_push2his",
+    "volume_hand": "3355056"
+   },
    "510050": {
     "amount_yuan": "718611657.000",
     "close": "2.892",
@@ -74897,16 +74919,16 @@
     "volume_hand": "34622"
    },
    "510300": {
-    "amount_yuan": "3065535282.000",
-    "close": "4.066",
+    "amount_yuan": "3550182140.000",
+    "close": "4.057",
     "source": "eastmoney_push2his",
-    "volume_hand": "7538069"
+    "volume_hand": "8730360"
    },
    "510310": {
-    "amount_yuan": "800191771.000",
-    "close": "3.950",
+    "amount_yuan": "901732168.000",
+    "close": "3.943",
     "source": "eastmoney_push2his",
-    "volume_hand": "2025118"
+    "volume_hand": "2282157"
    },
    "510330": {
     "amount_yuan": "505843138.000",
@@ -74941,5 +74963,5 @@
   }
  },
  "schema": "etf-share-flows-1",
- "updated_at": "2026-11-24T10:33:42+08:00"
+ "updated_at": "2026-11-24T10:54:02+08:00"
 }
