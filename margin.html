@@ -172,7 +172,7 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 <div class="ctl-row funds-flow-controls"><div class="filter-group" role="group" aria-label="申赎观察区间"><button type="button" class="chip" data-flow-window="30" onclick="etfFlows.setSpan(30)">最近30天</button><button type="button" class="chip on" data-flow-window="90" onclick="etfFlows.setSpan(90)">最近90天</button><button type="button" class="chip" data-flow-window="1Y" onclick="etfFlows.setSpan('1Y')">最近1年</button><button type="button" class="chip" data-flow-window="3Y" onclick="etfFlows.setSpan('3Y')">最近3年</button><button type="button" class="chip" data-flow-window="ALL" onclick="etfFlows.setSpan('ALL')">全部</button></div></div>
 <div class="funds-flow-grid">
 <section class="panel"><div class="panel-head"><h2>合计申赎走势</h2></div><p class="funds-chart-note">17 只宽基 ETF · 蓝柱为当日估算，蓝灰线为全历史累计</p><div id="aggChart" class="ch funds-flow-chart"></div></section>
-<section class="panel"><div class="panel-head"><h2>单只 ETF 份额走势</h2><label class="inline-select" for="etfSelect">ETF <select id="etfSelect" onchange="etfFlows.drawOne()"></select></label></div><p class="funds-chart-note" id="oneFlowNote">按交易所确认日期展示份额；与合计图共用观察区间</p><div id="oneChart" class="ch funds-flow-chart"></div></section>
+<section class="panel"><div class="panel-head"><h2>单只 ETF 份额与指数走势</h2><label class="inline-select" for="etfSelect">ETF <select id="etfSelect" onchange="etfFlows.drawOne()"></select></label></div><p class="funds-chart-note" id="oneFlowNote">按交易所确认日期展示份额；与合计图共用观察区间</p><div id="oneChart" class="ch funds-flow-chart"></div></section>
 </div>
 
 
@@ -245,7 +245,7 @@ function drawMargin(){
 async function refreshMargin(){
  if(marginBusy)return;marginBusy=true;const rb=document.getElementById('rb');rb.disabled=true;rb.textContent='刷新中…';
  try{const d=await readJSON('data/margin_balance.json?t='+Date.now());if(!d.margin||!Object.keys(d.margin).length||!d.index)throw new Error('数据结构无效');marginData=d;const select=document.getElementById('marginIndex'),old=select.value||new URLSearchParams(location.search).get('index');select.replaceChildren();Object.keys(d.index).forEach(k=>{const opt=document.createElement('option');opt.value=k;opt.textContent=k;select.append(opt)});select.value=Object.keys(d.index).includes(old)?old:(d.index['沪深300']?'沪深300':Object.keys(d.index)[0]);const q=new URLSearchParams(location.search).get('range');if(['ALL','1Y','3Y','1','30','90'].includes(q))marginRange=q==='1'?'1Y':(['ALL','1Y','3Y'].includes(q)?q:+q);
- setMarginRange(marginRange);document.getElementById('st').textContent='余额截至 '+Object.keys(d.margin).sort().at(-1)+' · 数据包更新 '+d.updated+' · 日度披露，非实时';pageNotice('')
+ setMarginRange(marginRange);window.dispatchEvent(new Event('etf-index-ready'));document.getElementById('st').textContent='余额截至 '+Object.keys(d.margin).sort().at(-1)+' · 数据包更新 '+d.updated+' · 日度披露，非实时';pageNotice('')
  }catch(e){document.getElementById('st').textContent='刷新失败：'+e.message+'；保留上次可用数据';if(!marginData)document.getElementById('ch').textContent='暂未加载到数据，点击刷新重试';pageNotice('本次数据未更新成功，缺失不表示余额为零。')}
  finally{marginBusy=false;rb.disabled=false;rb.textContent='刷新'}
 }
@@ -303,8 +303,38 @@ function observeCharts(){document.querySelectorAll('.ch,#curveN,#curveR,.spark-c
 update();observeCharts();new MutationObserver(()=>{update();observeCharts()}).observe(main,{childList:true,subtree:true});
 if(!window.echarts)pageNotice('图表组件未加载，图形暂不可用；文字和表格仍可阅读。请联网刷新。');
 })();</script><script>
+/* ===== Exact benchmark mapping; index display never changes share-flow calculations ===== */
+const ETF_BENCHMARKS=Object.freeze({
+ '510300':['沪深300','sh000300'],'510310':['沪深300','sh000300'],'510330':['沪深300','sh000300'],'159919':['沪深300','sh000300'],
+ '510050':['上证50','sh000016'],'510180':['上证180','sh000010'],
+ '510500':['中证500','sh000905'],'512500':['中证500','sh000905'],
+ '512100':['中证1000','sh000852'],'159845':['中证1000','sh000852'],'560010':['中证1000','sh000852'],'159629':['中证1000','sh000852'],
+ '588000':['科创50','sh000688'],'588080':['科创50','sh000688'],
+ '159915':['创业板指','sz399006'],'159977':['创业板指','sz399006'],'159352':['中证A500','sh000510']
+});
+function benchmarkValues(code,dates,indices){
+ const key=ETF_BENCHMARKS[code]?.[0];return dates.map(date=>{const v=uiNumber(indices?.[key]?.[date]);return v!=null&&v>0?v:null});
+}
+function validateIndexRows(rows,end){
+ if(!Array.isArray(rows))throw new Error('指数响应无效');const out={};
+ for(const row of rows){const day=String(row?.day||'').slice(0,10),value=uiNumber(row?.close);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||day>end||value==null||value<=0)continue;
+  if(Object.hasOwn(out,day)&&out[day]!==value)throw new Error('指数日期重复');out[day]=value;
+ }return out;
+}
+function readRecentIndex(symbol,end){
+ // Public JSONP read only, independent of data producers; no eval or local writes.
+ return new Promise((resolve,reject)=>{const callback='etfIndex_'+symbol+'_'+Math.random().toString(36).slice(2),script=document.createElement('script');
+ const clean=()=>{clearTimeout(timer);script.remove();delete window[callback]};
+ const timer=setTimeout(()=>{clean();reject(new Error('指数读取超时'))},12000);
+ window[callback]=rows=>{try{const values=validateIndexRows(rows,end);clean();if(!Object.keys(values).length)reject(new Error('指数为空'));else resolve(values)}catch(error){clean();reject(error)}};
+ script.onerror=()=>{clean();reject(new Error('指数读取失败'))};
+ script.src='https://quotes.sina.cn/cn/api/jsonp_v2.php/'+callback+'/CN_MarketDataService.getKLineData?symbol='+symbol+'&scale=240&ma=no&datalen=1023';
+ document.head.append(script);
+ });
+}
 /* ===== Funds ETF share section: isolated read-only state ===== */
-(()=>{let pack=null,aggChart=null,oneChart=null,span=90,busy=false;
+(()=>{let pack=null,aggChart=null,oneChart=null,span=90,busy=false,indexReference={},indexBusy=false;
 function money(v){const n=uiNumber(v);return n==null?'—':n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function shares(v){const n=uiNumber(v);return n==null?'—':n.toLocaleString('zh-CN',{minimumFractionDigits:4,maximumFractionDigits:4});}
 function px(v){const n=uiNumber(v);return n==null?'—':n.toLocaleString('zh-CN',{minimumFractionDigits:3,maximumFractionDigits:4});}
@@ -312,13 +342,38 @@ function setSpan(n){span=n;document.querySelectorAll('[data-flow-window]').forEa
 function windowSlice(){return observationWindow(pack.dates||[],span)}
 function axis(){return{type:'category',axisLabel:{color:'#606c7c',fontSize:12,hideOverlap:true},axisTick:{show:false},axisLine:{lineStyle:{color:'#e1e4e9'}}}}
 function drawAgg(){const el=document.getElementById('aggChart');if(!window.echarts){el.textContent='图表组件未加载，概览数值仍可查看';return}const slice=windowSlice();const inflow=(pack.aggregate&&pack.aggregate.inflow_yi||[]).slice(slice.offset).map(uiNumber);const cum=(pack.aggregate&&pack.aggregate.cumulative_yi||[]).slice(slice.offset).map(uiNumber);if(!aggChart)aggChart=echarts.init(el,null,{renderer:'svg'});const y=name=>({type:'value',name,scale:true,axisLabel:{fontSize:12,color:'#606c7c'},nameTextStyle:{fontSize:13,color:'#606c7c'},splitLine:{lineStyle:{color:'#eef1f4'}}});aggChart.setOption({backgroundColor:'transparent',animation:false,color:['#3d6a9e','#6b8aae'],tooltip:{trigger:'axis',confine:true,valueFormatter:v=>v==null?'未算出':Number(v).toLocaleString('zh-CN',{maximumFractionDigits:2})+' 亿元'},legend:{top:8,textStyle:{color:'#606c7c',fontSize:13}},grid:{left:12,right:16,top:42,bottom:24,containLabel:true},xAxis:Object.assign(axis(),{data:slice.dates}),yAxis:[y('当日（亿元）'),Object.assign(y('累计（亿元）'),{splitLine:{show:false}})],series:[{name:'当日估算净流入',type:'bar',yAxisIndex:0,data:inflow,itemStyle:{color:'#3d6a9e'}},{name:'累计',type:'line',yAxisIndex:1,data:cum,connectNulls:false,showSymbol:slice.dates.length===1,lineStyle:{width:2,color:'#6b8aae'}}]},true)}
-function drawOne(){const el=document.getElementById('oneChart');const code=document.getElementById('etfSelect').value;const etf=(pack.etfs||[]).find(x=>x.code===code);if(!window.echarts){el.textContent='图表组件未加载';return}if(!etf)return;const slice=windowSlice();const series=(etf.share_series||[]).slice(slice.offset).map(uiNumber);if(!oneChart)oneChart=echarts.init(el,null,{renderer:'svg'});oneChart.setOption({backgroundColor:'transparent',animation:false,color:['#3d6a9e'],tooltip:{trigger:'axis',confine:true,valueFormatter:v=>v==null?'无官方份额':Number(v).toLocaleString('zh-CN',{minimumFractionDigits:4,maximumFractionDigits:4})+' 亿份'},grid:{left:12,right:16,top:28,bottom:24,containLabel:true},xAxis:Object.assign(axis(),{data:slice.dates}),yAxis:{type:'value',name:'亿份',scale:true,axisLabel:{fontSize:12,color:'#606c7c'},splitLine:{lineStyle:{color:'#eef1f4'}},nameTextStyle:{fontSize:13,color:'#606c7c'}},series:[{name:etf.name,type:'line',data:series,connectNulls:false,showSymbol:series.filter(v=>v!=null).length<2,lineStyle:{width:2}}]},true);const u=new URL(location.href);u.searchParams.set('flow_code',code);u.searchParams.set('flow_window',String(span));history.replaceState(null,'',u);const v=uiNumber(etf.shares_yi);document.getElementById('oneFlowNote').textContent=(pack.as_of||'—')+' · '+etf.code+' · 最新 '+(v==null?'份额未确认':shares(v)+' 亿份')+'；图形只画交易所确认日'}
+function drawOne(){
+ if(!pack)return;const el=document.getElementById('oneChart'),code=document.getElementById('etfSelect').value,etf=(pack.etfs||[]).find(x=>x.code===code);
+ if(!window.echarts){el.textContent='图表组件未加载';return}if(!etf)return;
+ const slice=windowSlice(),series=(etf.share_series||[]).slice(slice.offset,slice.offset+slice.dates.length).map(uiNumber),benchmark=ETF_BENCHMARKS[code]?.[0];
+ const indices={...(marginData?.index||{}),...indexReference},indexSeries=benchmarkValues(code,slice.dates,indices),lastIndex=slice.dates.findLastIndex((date,i)=>indexSeries[i]!=null);
+ if(!oneChart)oneChart=echarts.init(el,null,{renderer:'svg'});
+ const y=(name,color)=>({type:'value',name,scale:true,axisLabel:{fontSize:12,color},nameTextStyle:{fontSize:13,color},splitLine:{lineStyle:{color:'#eef1f4'}}});
+ oneChart.setOption({backgroundColor:'transparent',animation:false,color:['#3d6a9e','#bd8547'],
+  tooltip:{trigger:'axis',confine:true,position:(point,params,dom,rect,size)=>{const gap=12,x=point[0]+gap+size.contentSize[0]<=size.viewSize[0]?point[0]+gap:point[0]-gap-size.contentSize[0];return[Math.max(0,x),Math.max(0,Math.min(point[1],size.viewSize[1]-size.contentSize[1]))]},
+   formatter:params=>{const rows=Array.isArray(params)?params:[params];return uiEsc(rows[0]?.axisValue||'')+'<br>'+rows.map(p=>{const v=uiNumber(p.value),isIndex=p.seriesIndex===1;return p.marker+uiEsc(p.seriesName)+'：'+(v==null?(isIndex?'缺指数数据':'无官方份额'):Number(v).toLocaleString('zh-CN',{minimumFractionDigits:isIndex?2:4,maximumFractionDigits:isIndex?2:4})+(isIndex?' 点':' 亿份'))}).join('<br>')}},
+  legend:{top:6,textStyle:{color:'#606c7c',fontSize:12},itemWidth:20,itemHeight:8},grid:{left:12,right:16,top:62,bottom:24,containLabel:true},
+  xAxis:Object.assign(axis(),{data:slice.dates}),yAxis:[y('份额（亿份）','#3d6a9e'),{...y('指数（点）','#bd8547'),position:'right',splitLine:{show:false}}],
+  series:[{name:'ETF份额',type:'line',yAxisIndex:0,data:series,connectNulls:false,showSymbol:series.filter(v=>v!=null).length<2,lineStyle:{width:2}},
+   {name:benchmark||'对应指数',type:'line',yAxisIndex:1,data:indexSeries,connectNulls:false,showSymbol:indexSeries.filter(v=>v!=null).length<2,lineStyle:{width:2,color:'#bd8547'}}]
+ },true);
+ const u=new URL(location.href);u.searchParams.set('flow_code',code);u.searchParams.set('flow_window',String(span));history.replaceState(null,'',u);
+ const v=uiNumber(etf.shares_yi),lag=lastIndex<0?' · 指数暂不可用':slice.dates[lastIndex]!==pack.as_of?' · 指数截至 '+slice.dates[lastIndex]:'';
+ document.getElementById('oneFlowNote').textContent=(pack.as_of||'—')+' · '+code+' · 份额 '+(v==null?'未确认':shares(v)+' 亿份')+' · 对照 '+(benchmark||'未配置指数')+lag;
+}
+async function refreshIndexReference(){
+ if(indexBusy||!pack)return;indexBusy=true;
+ try{const data=await readJSON('data/etf_index_reference.json?t='+Date.now());for(const [name,entry] of Object.entries(data.indices||{})){if(['上证180','中证A500'].includes(name))indexReference[name]=Object.fromEntries(Object.entries(entry.dates||{}).filter(([day,value])=>day<=pack.as_of&&uiNumber(value)>0))}drawOne()}catch(error){/* keep any previously confirmed index history */}
+ await Promise.allSettled([['上证180','sh000010'],['中证A500','sh000510']].map(async([name,symbol])=>{try{const rows=await readRecentIndex(symbol,pack.as_of);indexReference[name]={...(indexReference[name]||{}),...rows};drawOne()}catch(error){/* missing days remain null; never replace with ETF price */}}));
+ indexBusy=false;
+}
+addEventListener('etf-index-ready',()=>{if(pack)drawOne()});
 function renderKpis(){const s=pack.summary||{};const cards=[['当日估算净流入',money(s.inflow_1d_yi)+' 亿元'],['近 5 个交易日',money(s.inflow_5d_yi)+' 亿元'],['近 20 个交易日',money(s.inflow_20d_yi)+' 亿元'],['同日规模',s.aum_yi==null?'—':money(s.aum_yi)+' 亿元']];document.getElementById('flowKpis').innerHTML=cards.map(x=>'<div class="kpi"><div class="lb">'+uiEsc(x[0])+'</div><div class="vl">'+uiEsc(x[1])+'</div></div>').join('')}
 async function refreshFlows(){
  if(busy)return;busy=true;const rb=document.getElementById('flowRefresh');rb.disabled=true;rb.textContent='读取中…';
  try{const next=await readJSON('data/etf_share_flows.json?t='+Date.now());if(!next.etfs?.length||!next.dates?.length)throw new Error('份额数据为空');pack=next;
  const sel=document.getElementById('etfSelect'),q=new URLSearchParams(location.search),prev=sel.value||q.get('flow_code')||q.get('code')||'510300';sel.replaceChildren();(pack.etfs||[]).forEach(etf=>{const o=document.createElement('option');o.value=etf.code;o.textContent=etf.code+' '+etf.name;sel.append(o)});if([...sel.options].some(o=>o.value===prev))sel.value=prev;
- const w=q.get('flow_window')||q.get('window');if(w==='1')span='1Y';else if(['30','90'].includes(w))span=+w;else if(['ALL','1Y','3Y'].includes(w))span=w;setSpan(span);renderKpis();
+ const w=q.get('flow_window')||q.get('window');if(w==='1')span='1Y';else if(['30','90'].includes(w))span=+w;else if(['ALL','1Y','3Y'].includes(w))span=w;setSpan(span);renderKpis();refreshIndexReference();
  const degraded=pack.szse_snapshot?.date_status==='undated_fallback',u=pack.summary?.universe||17,n=pack.summary?.inflow_1d_covered||0;document.getElementById('flowStatus').textContent='统计日 '+(pack.as_of||'—')+' · '+u+' 只宽基 · 日度披露'+(degraded?' · 深市降级，未计入合计':'')+(n<u?' · 申赎覆盖 '+n+'/'+u+'，缺项未计入':'');
  }catch(err){document.getElementById('flowStatus').textContent='份额读取失败'+(pack?'，保留上次数据':'；点击刷新重试')+'，缺失不等于零'}finally{busy=false;rb.disabled=false;rb.textContent='刷新份额'}
 }
