@@ -311,7 +311,7 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 <div class="ui-mask" id="guideMask" hidden>
  <div class="ui-backdrop" onclick="closeGuide()"></div>
  <div class="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="gmTitle">
-  <div class="ui-modal-head"><div><h3 id="gmTitle">怎么读 · 字段含义与口径</h3><span class="sub">每项都写清「是什么 / ≠ 什么」；公式与局限在底部</span></div>
+  <div class="ui-modal-head"><div><h3 id="gmTitle">怎么读 · 字段含义与口径</h3></div>
    <button class="ui-close" type="button" id="guideClose" aria-label="关闭" onclick="closeGuide()">&#215;</button></div>
   <div class="ui-modal-body">
    <div class="msteps">
@@ -333,14 +333,6 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
     <ul>
      <li>悬浮框指数按同日同分钟匹配；回补的5分钟K线只在端点显示并标明“5分钟”，其余分钟不插值，不能与ETF成交额互换。</li>
      <li>分时曲线与同时点基准：20 个完整交易日（新浪 5 分钟 K，单次上限约 22 日）。</li>
-    </ul>
-    <h4>已知局限</h4>
-    <ul>
-     <li>三个数字口径不同，<b>不能相加</b>，也不能互相换算。</li>
-     <li>大宗交易与协议转让不在逐笔内外盘里，主动净买入天然缺这部分。</li>
-     <li>一二级套利、做市双边报价会稀释主动方向，数值不代表单边力量。</li>
-     <li>盘中数据由 GitHub Actions 约每 5 分钟写入（定时可能推迟），不是券商级实时；历史日是存档静态数据。</li>
-     <li>页面不含任何身份判断或「国家队」口径。</li>
     </ul>
    </div>
   </div>
