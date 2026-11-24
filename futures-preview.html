@@ -625,6 +625,21 @@ function validateLocalAccount(h){
   const raw=(+day?.leg_a||0)+(+day?.leg_b||0)+(+day?.leg_c||0);return raw<0||raw>10?'底仓限幅至 '+base+' + D'+(+d||0)+' = '+tot:legFormula(day?day.leg_a:0, day?day.leg_b:0, day?day.leg_c:0, d)+' = '+tot;
  }
  function abcText(day){const raw=(+day.leg_a||0)+(+day.leg_b||0)+(+day.leg_c||0);return raw<0||raw>10?'ABC 底仓限幅至 '+day.target:legFormula(day.leg_a,day.leg_b,day.leg_c,0).replace(/ \+ D0$/,'')+' = '+day.target;}
+ function cBasisReadout(day, latestDate){
+  const date=day.date?esc(day.date):'日期未提供';
+  const rows=day.contracts||[];
+  const current=rows.find(c=>c.code===day.c_contract);
+  const next=rows.find(c=>c.role==='next');
+  return {
+   decisionValue:pct(day.c_basis),
+   decisionNote:(day.c_set_on?esc(day.c_set_on):'日期未提供')+' · '+(day.c_contract?esc(day.c_contract):'合约未提供')+' · 保持至下次判定',
+   currentTitle:day.date===latestDate?'最新贴水':'当日贴水',
+   currentValue:pct(current?.basis),
+   currentNote:date+' 收盘 · '+(day.c_contract?esc(day.c_contract):'合约未提供')+(current?.basis==null?' · 该合约数据缺失':''),
+   nextValue:(day.next_roll?esc(day.next_roll):'日期未提供')+' 判定',
+   nextNote:next?esc(next.code)+' · '+date+' 收盘参考 '+pct(next.basis):'下次判定参考合约数据缺失'
+  };
+ }
  function liveAddon(base, accountPnl, price){
   const b=+base||0;
   if(accountPnl==null||price==null||!isFinite(+price)||b<=0) return {d:0, need:null};
@@ -802,9 +817,7 @@ function validateLocalAccount(h){
   const bTrig=!day.b_open&&day.trend_on_above!=null
    ?('下一收盘站上 '+num(day.trend_on_above,2)+' → 2 手')
    :(day.b_open&&day.trend_off_below!=null?('下一收盘跌破 '+num(day.trend_off_below,2)+' → 0'):'—');
-  const cState='当前来自 '+(day.c_set_on?esc(day.c_set_on):'—')+' '+(day.c_contract?esc(day.c_contract):'')+(day.c_basis==null?'':' '+pct(day.c_basis))
-   +'，下次判定 '+(day.next_roll?esc(day.next_roll):'—')
-   +(nxt&&nxt.basis!=null?'，今日 '+esc(nxt.code)+' 年化 '+pct(nxt.basis):'');
+  const cRead=cBasisReadout(day,latest.date);
   const dOrd=legD+1;
   const dPrice=dUnknown?'账本未核验':shownModel.live&&snap.px!=null?('按持仓 '+(snap.code?esc(snap.code):'')+' 最新价 '+num(snap.px,1)+' 的 12% 保证金'):(shownModel.live?'持仓最新价暂无':'回测估算');
   const dTrig=(shownModel.live&&snap.px==null)?'持仓最新价暂无'
@@ -845,7 +858,7 @@ function validateLocalAccount(h){
   const legRow='<div class="leg-row">'
    +leg('a','A 网格', esc(day.leg_a), blk('规则','',aTable)+blk('现状', num(day.index_close,3), '中证500收盘')+blk('下次变化','',aNext))
    +leg('b','B 趋势', esc(day.leg_b), blk('规则','','&gt;MA250×1.01 加 2 手<br>&lt;MA250×0.99 减 2 手')+blk('MA250（250日均线）', num(day.ma250,2), '上轨 '+num(day.ma_upper,2)+' · 下轨 '+num(day.ma_lower,2)+' · 趋势'+(day.b_open?'打开':'关闭')+rail)+blk('下次变化', bTrig, ''))
-   +leg('c','C 贴水', esc(cTile(day.leg_c)), blk('规则','','≥10% 加 2 手<br>&lt;3% 减 2 手<br>3% ≤ 贴水 <10% 不加不减；判定后保持到下次换月')+blk('现状', pct(day.c_basis), '来自 '+(day.c_set_on?String(day.c_set_on).slice(5):'—')+' '+(day.c_contract||'')+(nxt&&nxt.basis!=null?' · 今日 '+nxt.code+' '+pct(nxt.basis):''))+blk('下次变化', (day.next_roll?String(day.next_roll).slice(5):'—')+' 判定', ''))
+   +leg('c','C 贴水', esc(cTile(day.leg_c)), blk('规则','','≥10% 加 2 手<br>&lt;3% 减 2 手<br>3% ≤ 贴水 <10% 不加不减；判定后保持到下次换月')+blk('本轮判定',cRead.decisionValue,cRead.decisionNote)+blk(cRead.currentTitle,cRead.currentValue,cRead.currentNote)+blk('下次判定',cRead.nextValue,cRead.nextNote))
    +leg('d','D 盈利加仓', dUnknown?'—':esc(legD), blk('规则','','盈利 50% 够 1 手 12% 保证金即加 1 手，最多 4 手<br>跌破 MA250×0.99 或底仓归零全撤')+blk('现状', wan2(shownModel.pnl), dUnknown?(accountMissing?'持仓未加载':'净盈亏账本待补'):(dState+(shownModel.live?' · 净盈亏':' · 回测')))+blk('下次变化', accountMissing?'持仓未加载':shownModel.blocked?shownModel.blocked:(shownModel.need==null?'已达上限或不适用':('再赚 '+wan2(shownModel.need))), (shownModel.live&&snap.px!=null?'按持仓 '+(snap.code||'')+' '+num(snap.px,1):dPrice)+dMeter+'撤出线 '+num(day.ma_lower,2)))
    +'</div>';
   const known={grid_down:1,grid_up:1,trend_on:1,trend_off:1,basis:1};
