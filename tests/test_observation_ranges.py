@@ -11,11 +11,13 @@ class ObservationRanges(unittest.TestCase):
         return json.loads(subprocess.run(['node','-'],input=code,text=True,capture_output=True,check=True).stdout)
     def test_matching_five_choices(self):
         for attr in ['data-flow-window','data-range']:
-            self.assertEqual(re.findall(attr+r'="([^"]+)"',SOURCE),['30','90','1','3Y','ALL'])
-        for text in ['最近30天','最近90天','最近1天','最近3年','全部']:
+            self.assertEqual(re.findall(attr+r'="([^"]+)"',SOURCE),['30','90','1Y','3Y','ALL'])
+        for text in ['最近30天','最近90天','最近1年','最近3年','全部']:
             self.assertEqual(SOURCE.count('>'+text+'</button>'),2)
-    def test_one_day_ends_at_latest_not_request_date(self):
-        self.assertEqual(self.run_window(['2026-11-20','2026-11-23'],1),{'dates':['2026-11-23'],'offset':1})
+        self.assertNotIn('最近1天',SOURCE)
+    def test_one_year_ends_at_latest_not_request_date(self):
+        dates=['2025-11-22','2025-11-23','2026-01-01','2026-11-23']
+        self.assertEqual(self.run_window(dates,'1Y'),{'dates':dates[1:],'offset':1})
     def test_calendar_days_not_rows(self):
         dates=['2026-10-24','2026-10-25','2026-10-26','2026-11-20','2026-11-23']
         self.assertEqual(self.run_window(dates,30)['dates'],dates[1:])
@@ -28,20 +30,29 @@ class ObservationRanges(unittest.TestCase):
     def test_leap_year_clamps_february(self):
         dates=['2021-02-27','2021-02-28','2021-03-01','2024-02-29']
         self.assertEqual(self.run_window(dates,'3Y')['dates'],dates[1:])
+        dates=['2023-02-27','2023-02-28','2023-03-01','2024-02-29']
+        self.assertEqual(self.run_window(dates,'1Y')['dates'],dates[1:])
+    def test_short_history_is_not_extended(self):
+        dates=['2025-06-03','2026-11-23']
+        self.assertEqual(self.run_window(dates,'3Y')['dates'],dates)
     def test_empty_and_all(self):
-        self.assertEqual(self.run_window([],30),{'dates':[],'offset':0})
+        self.assertEqual(self.run_window([],'1Y'),{'dates':[],'offset':0})
         self.assertEqual(self.run_window(['2020-01-01','2026-11-23'],'ALL')['offset'],0)
     def test_section_dates_remain_independent(self):
-        dates=['2026-11-23','2026-11-24']
-        self.assertEqual(self.run_window(dates,1,'2026-11-23')['dates'],dates[:1])
+        dates=['2025-11-23','2025-11-24','2026-11-23','2026-11-24']
+        self.assertEqual(self.run_window(dates,'1Y','2026-11-23')['dates'],dates[:3])
         self.assertIn('observationWindow(pack.dates||[],span)',SOURCE)
     def test_defaults_and_restore(self):
         self.assertIn('marginRange=90',SOURCE)
         self.assertIn('span=90',SOURCE)
-        self.assertIn("['ALL','3Y','1','30','90'].includes(q)",SOURCE)
-        self.assertIn("['1','30','90'].includes(w)",SOURCE)
-        self.assertIn("['ALL','3Y'].includes(w)",SOURCE)
-    def test_single_day_points_and_all_scripts_parse(self):
+        self.assertIn("['ALL','1Y','3Y','1','30','90'].includes(q)",SOURCE)
+        self.assertIn("['ALL','1Y','3Y'].includes(q)",SOURCE)
+        self.assertIn("['30','90'].includes(w)",SOURCE)
+        self.assertIn("['ALL','1Y','3Y'].includes(w)",SOURCE)
+    def test_old_one_day_urls_migrate_to_year(self):
+        self.assertIn("marginRange=q==='1'?'1Y':",SOURCE)
+        self.assertIn("if(w==='1')span='1Y'",SOURCE)
+    def test_single_point_fallback_and_all_scripts_parse(self):
         self.assertIn('showSymbol:slice.dates.length===1',SOURCE)
         self.assertIn('showSymbol:marginDates.length===1',SOURCE)
         for script in re.findall(r'<script>(.*?)</script>',SOURCE,re.S):
