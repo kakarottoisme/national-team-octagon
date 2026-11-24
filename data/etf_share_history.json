@@ -1,13 +1,5 @@
 {
  "blocked_dates": [
-  "2026-11-12",
-  "2026-11-13",
-  "2026-11-16",
-  "2026-11-17",
-  "2026-11-18",
-  "2026-11-19",
-  "2026-11-20",
-  "2026-11-23",
   "2026-11-24"
  ],
  "days": {
@@ -37268,6 +37260,12 @@
     "stat_date": "2026-11-20",
     "tot_vol_wan": "5317445.49"
    },
+   "159919": {
+    "sec_name": "沪深300ETF嘉实",
+    "source": "szse_fund_jjgm",
+    "stat_date": "2026-11-20",
+    "tot_vol_wan": "2156781.66"
+   },
    "159977": {
     "sec_name": "创业板ETF天弘",
     "source": "szse_fund_jjgm",
@@ -37365,6 +37363,12 @@
     "source": "szse_fund_jjgm",
     "stat_date": "2026-11-23",
     "tot_vol_wan": "5391545.49"
+   },
+   "159919": {
+    "sec_name": "沪深300ETF嘉实",
+    "source": "szse_fund_jjgm",
+    "stat_date": "2026-11-23",
+    "tot_vol_wan": "2161461.66"
    },
    "159977": {
     "sec_name": "创业板ETF天弘",
@@ -74867,6 +74871,18 @@
     "close": "2.422",
     "source": "eastmoney_push2his",
     "volume_hand": "4286242"
+   },
+   "588000": {
+    "amount_yuan": "11115784078.000",
+    "close": "1.298",
+    "source": "eastmoney_push2his",
+    "volume_hand": "86900764"
+   },
+   "588080": {
+    "amount_yuan": "3149510035.000",
+    "close": "1.257",
+    "source": "eastmoney_push2his",
+    "volume_hand": "25465090"
    }
   },
   "2026-11-24": {

@@ -307,7 +307,7 @@ async function refreshFlows(){
  try{const next=await readJSON('data/etf_share_flows.json?t='+Date.now());if(!next.etfs?.length||!next.dates?.length)throw new Error('份额数据为空');pack=next;
  const sel=document.getElementById('etfSelect'),q=new URLSearchParams(location.search),prev=sel.value||q.get('flow_code')||q.get('code')||'510300';sel.replaceChildren();(pack.etfs||[]).forEach(etf=>{const o=document.createElement('option');o.value=etf.code;o.textContent=etf.code+' '+etf.name;sel.append(o)});if([...sel.options].some(o=>o.value===prev))sel.value=prev;
  const w=q.get('flow_window')||q.get('window');if(w==='60'||w==='120')span=+w;else if(w==='ALL')span='ALL';setSpan(span);renderKpis();
- const degraded=pack.szse_snapshot?.date_status==='undated_fallback';document.getElementById('flowStatus').textContent='统计日 '+(pack.as_of||'—')+' · '+(pack.summary?.universe||17)+' 只宽基 · 日度披露'+(degraded?' · 深市降级，未计入合计':'');
+ const degraded=pack.szse_snapshot?.date_status==='undated_fallback',u=pack.summary?.universe||17,n=pack.summary?.inflow_1d_covered||0;document.getElementById('flowStatus').textContent='统计日 '+(pack.as_of||'—')+' · '+u+' 只宽基 · 日度披露'+(degraded?' · 深市降级，未计入合计':'')+(n<u?' · 申赎覆盖 '+n+'/'+u+'，缺项未计入':'');
  }catch(err){document.getElementById('flowStatus').textContent='份额读取失败'+(pack?'，保留上次数据':'；点击刷新重试')+'，缺失不等于零'}finally{busy=false;rb.disabled=false;rb.textContent='刷新份额'}
 }
 window.etfFlows={setSpan,drawOne,refresh:refreshFlows};

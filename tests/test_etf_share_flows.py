@@ -170,6 +170,24 @@ class FlowTests(unittest.TestCase):
         self.assertIsNone(by["510050"]["delta_1d_yi"])
         self.assertIn("2026-11-18", flows["dates"])
 
+    def test_cached_official_day_is_not_invalidated_by_failed_reread(self):
+        history=self.history()
+        latest='2026-11-19'
+        for code in f.SH_CODES:
+            history['days'][latest][code]={'stat_date':latest,'tot_vol_wan':'1000','source':'sse'}
+        history['blocked_dates']=[latest]
+        original=json.loads(json.dumps(history))
+        flows=f.build_flows(history)
+        self.assertEqual(flows['as_of'],latest)
+        self.assertIsNotNone(flows['aggregate']['inflow_yi'][-1])
+        self.assertEqual(history,original)
+
+    def test_incomplete_cached_day_remains_blocked_and_values_not_filled(self):
+        history=self.history();history['blocked_dates']=['2026-11-19']
+        flows=f.build_flows(history)
+        self.assertEqual(flows['as_of'],'2026-11-18')
+        self.assertIsNone(flows['aggregate']['inflow_yi'][-1])
+
     def test_zero_volume_does_not_invent_vwap(self):
         history = self.history()
         history["quotes"]["2026-11-19"]["510050"]["volume_hand"] = "0"
@@ -186,6 +204,38 @@ class FlowTests(unittest.TestCase):
 
 
 class RecordTests(unittest.TestCase):
+    def test_failed_reread_keeps_cached_latest_and_freshness_exposes_gaps(self):
+        from unittest.mock import patch
+        from pathlib import Path
+        import tempfile,contextlib,io
+        latest='2026-11-23'
+        history=f.empty_history()
+        history['updated_at']='2026-11-23T23:40:00+08:00'
+        for d in ('2026-11-20',latest):
+            history['days'][d]={code:{'stat_date':d,'tot_vol_wan':'10000','source':'sse'} for code in f.SH_CODES}
+            history['quotes'][d]={code:{'close':'1','volume_hand':'100','amount_yuan':'10000'} for code in f.SH_CODES}
+        def failed(*args,**kwargs):raise RuntimeError('temporary source error')
+        def sz(*args,**kwargs):return {},['temporary sz error']
+        now=dt.datetime(2026,11,24,11,tzinfo=dt.timezone(dt.timedelta(hours=8)))
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);hp=root/'h.json';hp.write_text(json.dumps(history))
+            with patch.object(f,'HISTORY_PATH',hp),patch.object(f,'FLOWS_PATH',root/'f.json'),patch.object(f,'SZSE_PATH',root/'s.json'),patch.object(f,'fetch_sse',failed),patch.object(f,'fetch_kline',failed),patch.object(f,'pull_szse_dated',sz),patch.object(f,'fetch_szse',failed):
+                result=f.update_recent(lookback_days=4,now=now,sleep=lambda _:None)
+                self.assertEqual(result['as_of'],latest)
+                saved=json.loads(hp.read_text())
+                self.assertEqual(saved['days'],history['days'])
+                self.assertNotIn(latest,saved['blocked_dates'])
+                output=io.StringIO()
+                with contextlib.redirect_stdout(output):code=f.check_freshness(now)
+                status=json.loads(output.getvalue())
+                self.assertEqual(code,1)
+                self.assertEqual(status['expected_date'],latest)
+                self.assertEqual(set(status['missing_shares']),set(f.SZ_CODES))
+                for d in ('2026-11-20',latest):
+                    for c in f.SZ_CODES:saved['days'][d][c]={'stat_date':d,'tot_vol_wan':'10000','source':'szse_fund_jjgm'};saved['quotes'][d][c]={'close':'1','volume_hand':'100','amount_yuan':'10000'}
+                hp.write_text(json.dumps(saved));output=io.StringIO()
+                with contextlib.redirect_stdout(output):self.assertEqual(f.check_freshness(now),0)
+
     def test_snapshot_is_not_stamped_onto_a_trading_day(self):
         doc, changed = f.record_szse({"snapshots": []}, {"159915": {"scale_shares": "10", "name": "创业板", "nav": None}}, "2026-11-20T23:40:00+08:00")
         self.assertTrue(changed)

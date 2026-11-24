@@ -71,5 +71,8 @@ jobs:
               exit 1
             fi
           done
-          echo "::error::多次 push 失败"
           exit 1
+
+      - name: Check actual disclosure freshness after preserving fetched data
+        shell: bash
+        run: python3 etf_share_flows.py --check-freshness

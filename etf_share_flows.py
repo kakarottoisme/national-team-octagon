@@ -304,10 +304,25 @@ def sum_texts(values) -> str | None:
     return _q(sum((Decimal(item) for item in values), Decimal(0)), Q4)
 
 
+def effective_blocked_dates(history):
+    """A failed re-read must not invalidate an already complete dated SSE cache.
+
+    True unconfirmed-day holes remain blocking. Per-fund gaps still return null;
+    this does not fill values or rewrite any original dated observations.
+    """
+    blocked=set(history.get('blocked_dates') or [])
+    days=history.get('days') or {}
+    for day in tuple(blocked):
+        if all((days.get(day,{}).get(code) or {}).get('stat_date')==day and
+               wan_on(history,day,code) is not None for code in SH_CODES):
+            blocked.remove(day)
+    return blocked
+
+
 def build_flows(history, szse=None, generated_at=None) -> dict:
-    calendar = [day for day in calendar_dates(history) if day not in set(history.get("blocked_dates") or [])]
-    # 有缺口的失败日不作为 as_of，但会让跨过它的窗口失去「每日都有值」。
-    blocked = set(history.get("blocked_dates") or [])
+    blocked = effective_blocked_dates(history)
+    calendar = [day for day in calendar_dates(history) if day not in blocked]
+    # Failed reads without complete official cache remain genuine holes.
     full_calendar = calendar_dates(history)
     as_of = calendar[-1] if calendar else None
     etfs = []
@@ -693,9 +708,12 @@ def update_recent(lookback_days=12, get=http_get, sleep=time.sleep, now=None):
         try:
             count, shares = fetch_sse(text, get=get)
         except Exception:
-            history.setdefault("blocked_dates", [])
-            if text not in history["blocked_dates"]:
-                history["blocked_dates"].append(text)
+            # Retain previously confirmed complete same-day official shares.
+            complete=all(wan_on(history,text,code) is not None for code in SH_CODES)
+            if not complete:
+                history.setdefault("blocked_dates", [])
+                if text not in history["blocked_dates"]:
+                    history["blocked_dates"].append(text)
             continue
         if count == 0:
             history["blocked_dates"] = [item for item in history.get("blocked_dates") or [] if item != text]
@@ -747,11 +765,28 @@ def rebuild_only():
     return {"as_of": flows.get("as_of"), "changed": changed, "trading_days": flows.get("trading_days")}
 
 
+def check_freshness(now=None):
+    """Check disclosed business date, not the process exit or generated timestamp."""
+    from market_calendar import is_trading_day
+    clock=bj_now(now);expected=clock.date()
+    if clock.hour<15:expected-=dt.timedelta(days=1)
+    while not is_trading_day(expected):expected-=dt.timedelta(days=1)
+    day=expected.isoformat()
+    history=load_json(HISTORY_PATH,empty_history());flows=build_flows(history)
+    missing_shares=[code for code in BY_CODE if wan_on(history,day,code) is None]
+    missing_quotes=[code for code in BY_CODE if vwap_of((history.get('quotes',{}).get(day,{}) or {}).get(code)) is None]
+    out={'state':'ok' if flows.get('as_of')==day and not missing_shares and not missing_quotes else 'incomplete','expected_date':day,'as_of':flows.get('as_of'),'missing_shares':missing_shares,'missing_quotes':missing_quotes}
+    print(json.dumps(out,ensure_ascii=False))
+    return 0 if out['state']=='ok' else 1
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="宽基 ETF 份额与全市场申赎估算")
     parser.add_argument("--backfill", nargs=2, metavar=("BEG", "END"), help="YYYY-MM-DD YYYY-MM-DD，只补沪市官方份额")
     parser.add_argument("--rebuild", action="store_true", help="只按已有历史重算，不联网")
+    parser.add_argument('--check-freshness',action='store_true',help='检查应披露日缺份额/均价；不采集不写数据')
     args = parser.parse_args(argv)
+    if args.check_freshness:return check_freshness()
     if args.rebuild:
         result = rebuild_only()
     elif args.backfill:
