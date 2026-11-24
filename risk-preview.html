@@ -432,7 +432,9 @@ async function refresh(){
   let d=null;try{d=await readJSON('preview-data/global.json?t='+Date.now())}catch(e){}
   if(!d||!Array.isArray(d.metrics)){$('banner').style.display='block';$('banner').textContent='本次快照读取失败；保留上次可用结果，未更新成功。点击刷新重试';$('st').textContent='快照未加载';if(!DATA){$('grid').innerHTML='';$('groups').innerHTML='';$('curve').parentElement.hidden=true;$('sparks').hidden=true}return}
   DATA=d;$('banner').style.display='none';const query=new URLSearchParams(location.search).get('group');if(query==='全部'||LAYERS.some(l=>l[1]===query))cur=query;
-  let lastRun='—';try{const sj=await readJSON('preview-data/status.json?t='+Date.now());{const t=sj.last_run||sj.generated_at;if(t)lastRun=t.slice(0,16).replace('T',' ')}}catch(e){}
+  const runErrors=Array.isArray(d.errors)?d.errors:[];
+  $('banner').style.display=runErrors.length?'block':'none';if(runErrors.length)$('banner').textContent='部分数据源本次采集失败，已保留可用数据；失败源：'+runErrors.map(e=>String(e).split(':')[0]).join('、');
+  const attempted=d.generated_at;let lastRun='—';if(attempted){const stamp=new Date(attempted);if(!Number.isNaN(stamp.getTime()))lastRun=stamp.toLocaleString('sv-SE',{timeZone:'Asia/Shanghai',hour12:false}).slice(0,16)}
   $('st').textContent='最近采集 '+lastRun+' · 已可观察 '+d.metrics.filter(m=>m.status==='connected').length+' 项 · 完整目录 '+d.metrics.length+' 项';
   $('riskFoot').textContent='已接入 '+d.metrics.filter(isLicensed).length+' / '+d.metrics.length+' 项。数据日期、更新频率和来源见各指标详情。';
   renderGroups();render();
