@@ -67,7 +67,7 @@ h2{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
 .mx:hover{background:#f5f7fa;color:var(--ink)}
 .mbd{overflow:auto;padding:2px 18px 18px}
 .msteps{display:grid;gap:8px;padding:12px 0 4px}
-@media(min-width:700px){.msteps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:700px){.msteps{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .mstep{background:#fafbfc;border:1px solid var(--line-2);border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.7;color:var(--ink-2)}
 .mstep i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-style:normal;margin-right:5px}
 .mstep b{color:var(--ink);font-weight:600}
@@ -315,18 +315,19 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
    <button class="ui-close" type="button" id="guideClose" aria-label="关闭" onclick="closeGuide()">&#215;</button></div>
   <div class="ui-modal-body">
    <div class="msteps">
-    <div class="mstep"><i>1</i><b>同时点倍数</b> —— 今天热不热、比平时热多少。1 倍左右算平常，明显放大才叫活跃。</div>
-    <div class="mstep"><i>2</i><b>主动净买入</b> —— 方向：主动买更猛还是主动卖更猛，只是方向线索。</div>
-    <div class="mstep"><i>3</i><b>大额分钟 / 尾盘</b> —— 成交是不是集中在少数几分钟、最后半小时有没有放量。</div>
+    <div class="mstep"><i>1</i><b>大额分钟成交额</b> —— 单分钟成交额超过 1 亿的分钟，合计成交了多少。</div>
+    <div class="mstep"><i>2</i><b>主动净买入（推算）</b> —— 方向：主动买更猛还是主动卖更猛，只是方向线索。</div>
+    <div class="mstep"><i>3</i><b>同时点倍数</b> —— 今天热不热、比平时热多少。1 倍左右算平常，明显放大才叫活跃。</div>
+    <div class="mstep"><i>4</i><b>已归档天数</b> —— 已保存多少天日度记录，历史对比能看多长。</div>
    </div>
-   <div class="mf"><div class="fn">同时点倍数</div><div class="fd"><span class="lf">先看这个：今天热不热、比平时热多少。</span>当日累计成交额 ÷（过去 20 个完整交易日全天均额 × 该只此刻平均已走完的比例）。1 倍左右算平常，明显放大才叫活跃；11:30 的半天不会直接拿去跟全天均额比。卡里第二行同时给出「合计额 ÷ 20 日同时点基准」和收盘后的尾盘占比，倍数怎么来的一眼能对上。<em>≠ 买卖力量对比，也不能说明是谁在成交</em></div></div><div class="mf"><div class="fn">大额分钟成交额</div><div class="fd"><span class="lf">成交是不是集中在「单分钟超过 1 亿」的那几分钟。</span>单分钟成交额 &gt; 1 亿的那些分钟，把它们的成交额加起来。阈值一改数字就变，所以这是阈值口径，不是总量口径。<em>≠ 大单，≠ 机构痕迹</em></div></div><div class="mf"><div class="fn">主动净买入（推算）</div><div class="fd"><span class="lf">方向：主动买更猛，还是主动卖更猛。</span>逐笔成交落在卖方报价（外盘）还是买方报价（内盘），据此推算主动买减主动卖。它只是方向线索，一二级套利与做市双边报价会稀释它。<em>≠ 资金净流入，≠ ETF 申赎，不含大宗与协议转让，不代表任何机构身份</em></div></div><div class="mf"><div class="fn">尾盘占比</div><div class="fd"><span class="lf">收盘后才有：最后半小时成交是不是异常放大。</span>14:30–15:00 的成交额占全天多少，并与 20 日同一区间均值对照；盘中显示「—」，因为收盘前分母（全天）还没定。<em>≠ 尾盘抢筹或砸盘</em></div></div><div class="mf"><div class="fn">已归档天数</div><div class="fd"><span class="lf">本地存档攒了几天，决定「历史对比」能看多长。</span>本地存了多少天日度记录（data/history.json）。<em>只表示「存档几天」，不是数据源覆盖长度</em></div></div><div class="mf"><div class="fn">七只合计成交额</div><div class="fd"><span class="lf">不再是单独一张卡，现在是倍数卡的分子。</span>这 7 只 ETF 在二级市场一共成交了多少钱（截至所标时刻）。<em>≠ 申购赎回金额，≠ 资金净流入，≠ 机构买入量</em></div></div><div class="mf"><div class="fn">上证收盘</div><div class="fd"><span class="lf">大盘背景，已从首屏移走，只留在下面的日度汇总表里。</span>上证综指当日收盘点位与涨跌幅，与 ETF 名单没有对应关系。<em>不作为 ETF 资金判断的依据</em></div></div><div class="mf"><div class="fn">图内元素</div><div class="fd"><span class="lf">分时图里的线、柱分别是什么。</span>涨跌幅线 = 相对昨收的涨跌幅%，<em>不是价格本身</em>；七图共用同日涨跌幅尺度，零线居中，上下对称，按最大绝对涨跌幅留10%空间后向外取整，最小范围为±0.5%；价格只在悬浮框展示；蓝柱 = 单分钟成交额 &gt; 1 亿的分钟，<em>只标「这一分钟大」，不标买卖方向</em>；MACD(12,26,9) = 价格动量辅助线，<em>不做买卖信号</em>。</div></div>
+   <div class="mf"><div class="fn">大额分钟成交额</div><div class="fd"><span class="lf">成交是不是集中在「单分钟超过 1 亿」的那几分钟。</span>单分钟成交额 &gt; 1 亿的那些分钟，把它们的成交额加起来。阈值一改数字就变，所以这是阈值口径，不是总量口径。<em>≠ 大单，≠ 机构痕迹</em></div></div><div class="mf"><div class="fn">主动净买入（推算）</div><div class="fd"><span class="lf">方向：主动买更猛，还是主动卖更猛。</span>逐笔成交落在卖方报价（外盘）还是买方报价（内盘），据此推算主动买减主动卖。它只是方向线索，一二级套利与做市双边报价会稀释它。<em>≠ 资金净流入，≠ ETF 申赎，不含大宗与协议转让，不代表任何机构身份</em></div></div><div class="mf"><div class="fn">同时点倍数</div><div class="fd"><span class="lf">今天热不热、比平时热多少。</span>当日累计成交额 ÷（过去 20 个完整交易日全天均额 × 该只此刻平均已走完的比例）。1 倍左右算平常，明显放大才叫活跃；11:30 的半天不会直接拿去跟全天均额比。卡里第二行同时给出「合计额 ÷ 20 日同时点基准」和收盘后的尾盘占比，倍数怎么来的一眼能对上。<em>≠ 买卖力量对比，也不能说明是谁在成交</em></div></div><div class="mf"><div class="fn">已归档天数</div><div class="fd"><span class="lf">本地存档攒了几天，决定「历史对比」能看多长。</span>本地存了多少天日度记录（data/history.json）。<em>只表示「存档几天」，不是数据源覆盖长度</em></div></div><div class="mf"><div class="fn">尾盘占比</div><div class="fd"><span class="lf">收盘后才有：最后半小时成交是不是异常放大。</span>14:30–15:00 的成交额占全天多少，并与 20 日同一区间均值对照；盘中显示「—」，因为收盘前分母（全天）还没定。<em>≠ 尾盘抢筹或砸盘</em></div></div><div class="mf"><div class="fn">七只合计成交额</div><div class="fd"><span class="lf">不再是单独一张卡，现在是倍数卡的分子。</span>这 7 只 ETF 在二级市场一共成交了多少钱（截至所标时刻）。<em>≠ 申购赎回金额，≠ 资金净流入，≠ 机构买入量</em></div></div><div class="mf"><div class="fn">上证收盘</div><div class="fd"><span class="lf">大盘背景，已从首屏移走，只留在下面的日度汇总表里。</span>上证综指当日收盘点位与涨跌幅，与 ETF 名单没有对应关系。<em>不作为 ETF 资金判断的依据</em></div></div><div class="mf"><div class="fn">图内元素</div><div class="fd"><span class="lf">分时图里的线、柱分别是什么。</span>涨跌幅线 = 相对昨收的涨跌幅%，<em>不是价格本身</em>；七图共用同日涨跌幅尺度，零线居中，上下对称，按最大绝对涨跌幅留10%空间后向外取整，最小范围为±0.5%；价格只在悬浮框展示；蓝柱 = 单分钟成交额 &gt; 1 亿的分钟，<em>只标「这一分钟大」，不标买卖方向</em>；MACD(12,26,9) = 价格动量辅助线，<em>不做买卖信号</em>。</div></div>
    <div class="mmore">
     <h4>公式</h4>
     <ul>
-     <li>同时点倍数 = 当日累计成交额 ÷（20 日均额 × 该时点历史平均已走完比例）；比例逐只算，近期样本 47%–68%，所以不套统一系数。</li>
-     <li>主动净买入 =（外盘 − 内盘）/（外盘 + 内盘）× 累计成交额。</li>
-     <li>尾盘占比 = 14:30–15:00 成交额 ÷ 全天成交额，只在收盘后计算。</li>
      <li>大额分钟成交额 = 单分钟成交额 &gt; 1 亿的成交额之和。</li>
+     <li>主动净买入 =（外盘 − 内盘）/（外盘 + 内盘）× 累计成交额。</li>
+     <li>同时点倍数 = 当日累计成交额 ÷（20 日均额 × 该时点历史平均已走完比例）；比例逐只算，近期样本 47%–68%，所以不套统一系数。</li>
+     <li>尾盘占比 = 14:30–15:00 成交额 ÷ 全天成交额，只在收盘后计算。</li>
     </ul>
     <h4>样本与核对</h4>
     <ul>
