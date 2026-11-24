@@ -1,6 +1,6 @@
 {
   "schema_version": "2.1-safe",
-  "generated_at": "2026-11-20T22:22:03+00:00",
+  "generated_at": "2026-11-24T03:48:54+00:00",
   "data_status": "safe_public_with_attribution",
   "policy_notes": [
     "US Treasury data is public domain; Cboe index CSVs are public CDN downloads with attribution.",
@@ -14,46 +14,46 @@
       "ok": true,
       "degraded": false,
       "error": null,
-      "as_of": "2026-11-20",
-      "last_attempt_at": "2026-11-20T22:22:03+00:00"
+      "as_of": "2026-11-23",
+      "last_attempt_at": "2026-11-24T03:48:54+00:00"
     },
     "cboe": {},
     "public_macro": {
       "fetch_status": {
         "ust_10y_nominal": {
           "state": "ok",
-          "as_of": "2026-11-20",
-          "n": 722
+          "as_of": "2026-11-23",
+          "n": 723
         },
         "ust_curve_nominal": {
           "state": "ok",
-          "as_of": "2026-11-20",
-          "n": 722
+          "as_of": "2026-11-23",
+          "n": 723
         },
         "ust_10y_real": {
           "state": "ok",
-          "as_of": "2026-11-20",
-          "n": 722
+          "as_of": "2026-11-23",
+          "n": 723
         },
         "ust_curve_real": {
           "state": "ok",
-          "as_of": "2026-11-20",
-          "n": 722
+          "as_of": "2026-11-23",
+          "n": 723
         },
         "bei_10y": {
           "state": "ok",
-          "as_of": "2026-11-20",
-          "n": 722
+          "as_of": "2026-11-23",
+          "n": 723
         },
         "sofr": {
           "state": "ok",
-          "as_of": "2026-11-19",
+          "as_of": "2026-11-20",
           "n": 272
         },
         "acm_tp_10y": {
           "state": "ok",
-          "as_of": "2026-11-19",
-          "n": 16323
+          "as_of": "2026-11-20",
+          "n": 16324
         },
         "iorb": {
           "state": "error"
@@ -153,21 +153,21 @@
       "unit": "%",
       "status": "connected",
       "value": {
-        "1 Mo": 4.19,
-        "3 Mo": 4.32,
-        "6 Mo": 4.38,
-        "1 Yr": 4.51,
+        "1 Mo": 4.2,
+        "3 Mo": 4.37,
+        "6 Mo": 4.45,
+        "1 Yr": 4.57,
         "2 Yr": 4.63,
-        "3 Yr": 4.65,
-        "5 Yr": 4.71,
-        "7 Yr": 4.8,
+        "3 Yr": 4.69,
+        "5 Yr": 4.74,
+        "7 Yr": 4.81,
         "10 Yr": 4.92,
-        "20 Yr": 5.34,
-        "30 Yr": 5.31
+        "20 Yr": 5.33,
+        "30 Yr": 5.29
       },
-      "as_of": "2026-11-20",
+      "as_of": "2026-11-23",
       "as_of_raw": null,
-      "collected_at": "2026-11-21T06:19:00+08:00",
+      "collected_at": "2026-11-24T11:46:13+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -11720,6 +11720,22 @@
             "20 Yr": 5.34,
             "30 Yr": 5.31
           }
+        },
+        {
+          "date": "2026-11-23",
+          "value": {
+            "1 Mo": 4.2,
+            "3 Mo": 4.37,
+            "6 Mo": 4.45,
+            "1 Yr": 4.57,
+            "2 Yr": 4.63,
+            "3 Yr": 4.69,
+            "5 Yr": 4.74,
+            "7 Yr": 4.81,
+            "10 Yr": 4.92,
+            "20 Yr": 5.33,
+            "30 Yr": 5.29
+          }
         }
       ],
       "change": null,
@@ -11745,15 +11761,15 @@
       "unit": "%",
       "status": "connected",
       "value": {
-        "5 YR": 2.53,
-        "7 YR": 2.64,
-        "10 YR": 2.77,
-        "20 YR": 3.03,
+        "5 YR": 2.59,
+        "7 YR": 2.68,
+        "10 YR": 2.79,
+        "20 YR": 3.04,
         "30 YR": 3.17
       },
-      "as_of": "2026-11-20",
+      "as_of": "2026-11-23",
       "as_of_raw": null,
-      "collected_at": "2026-11-21T06:19:01+08:00",
+      "collected_at": "2026-11-24T11:46:18+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -18974,6 +18990,16 @@
             "20 YR": 3.03,
             "30 YR": 3.17
           }
+        },
+        {
+          "date": "2026-11-23",
+          "value": {
+            "5 YR": 2.59,
+            "7 YR": 2.68,
+            "10 YR": 2.79,
+            "20 YR": 3.04,
+            "30 YR": 3.17
+          }
         }
       ],
       "change": null,
@@ -19619,10 +19645,10 @@
       "layer": "S_slow_variables",
       "unit": "%",
       "status": "connected",
-      "value": 2.77,
-      "as_of": "2026-11-20",
+      "value": 2.79,
+      "as_of": "2026-11-23",
       "as_of_raw": null,
-      "collected_at": "2026-11-21T06:19:01+08:00",
+      "collected_at": "2026-11-24T11:46:18+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -22511,6 +22537,10 @@
         {
           "date": "2026-11-20",
           "value": 2.77
+        },
+        {
+          "date": "2026-11-23",
+          "value": 2.79
         }
       ],
       "change": null,
@@ -22538,10 +22568,10 @@
       "layer": "S_slow_variables",
       "unit": "%",
       "status": "connected",
-      "value": 0.696,
-      "as_of": "2026-11-19",
+      "value": 0.715,
+      "as_of": "2026-11-20",
       "as_of_raw": null,
-      "collected_at": "2026-11-21T06:19:03+08:00",
+      "collected_at": "2026-11-24T11:46:30+08:00",
       "history": [
         {
           "date": "2021-09-07",
@@ -27742,6 +27772,10 @@
         {
           "date": "2026-11-19",
           "value": 0.696
+        },
+        {
+          "date": "2026-11-20",
+          "value": 0.715
         }
       ],
       "change": null,
@@ -27792,10 +27826,10 @@
       "layer": "S_slow_variables",
       "unit": "%",
       "status": "connected",
-      "value": 3.91,
-      "as_of": "2026-11-19",
+      "value": 3.92,
+      "as_of": "2026-11-20",
       "as_of_raw": null,
-      "collected_at": "2026-11-21T06:19:01+08:00",
+      "collected_at": "2026-11-24T11:46:21+08:00",
       "history": [
         {
           "date": "2025-10-17",
@@ -28884,13 +28918,17 @@
         {
           "date": "2026-11-19",
           "value": 3.91
+        },
+        {
+          "date": "2026-11-20",
+          "value": 3.92
         }
       ],
       "change": null,
       "change_pct": null,
       "stale": false,
       "last_attempt_at": null,
-      "source_url": "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2025-10-17&endDate=2026-11-21",
+      "source_url": "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2025-10-20&endDate=2026-11-24",
       "link_url": "https://www.newyorkfed.org/markets/reference-rates/sofr",
       "license": "https://resources.newyorkfed.org/privacy/termsofuse",
       "license_status": "official_source",
@@ -28980,10 +29018,10 @@
       "layer": "S_slow_variables",
       "unit": "percent",
       "status": "connected",
-      "value": 2.15,
-      "as_of": "2026-11-20",
+      "value": 2.13,
+      "as_of": "2026-11-23",
       "as_of_raw": null,
-      "collected_at": "2026-11-21T06:19:01+08:00",
+      "collected_at": "2026-11-24T11:46:18+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -31872,6 +31910,10 @@
         {
           "date": "2026-11-20",
           "value": 2.15
+        },
+        {
+          "date": "2026-11-23",
+          "value": 2.13
         }
       ],
       "change": null,
