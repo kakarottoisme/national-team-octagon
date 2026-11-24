@@ -44,8 +44,9 @@ class FundsStructure(unittest.TestCase):
     def test_margin_financial_logic_unchanged(self):
         s=(ROOT/'margin.html').read_text()
         old=subprocess.run(['git','show','origin/main:margin.html'],cwd=ROOT,capture_output=True,text=True,check=True).stdout
-        a='let marginData=null';b="addEventListener('resize',()=>marginChart&&marginChart.resize());refreshMargin();"
-        self.assertEqual(s[s.index(a):s.index(b)].replace(",null,{renderer:'svg'}",''),old[old.index(a):old.index(b)])
+        # Window controls may change; balance calculations and series values may not.
+        a=' const latest=Object.keys(d.margin)';b=' const u=new URL(location.href);'
+        self.assertEqual(s[s.index(a):s.index(b)],old[old.index(a):old.index(b)])
     def test_vector_charts_and_date_controls_before_chart(self):
         s=(ROOT/'margin.html').read_text()
         self.assertEqual(s.count("{renderer:'svg'}"),3)
