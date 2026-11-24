@@ -440,7 +440,13 @@ async function liveEtfTx(code){const raw=(await j("https://web.ifzq.gtimg.cn/app
  d.data.forEach(s=>{const r=s.split(" ");t.push(r[0]);p.push(+r[1]);const am=+r[3];a.push((am-pa)/1e8);pa=am});let pre=p[0];try{pre=+raw.qt[code][4]}catch(e){}
  let ob=null,os_=null;try{ob=+raw.qt[code][7];os_=+raw.qt[code][8]}catch(e){}return {date:d.date,t,p,a,pre,amt:+(pa/1e8).toFixed(4),ob,os:os_,net_buy:(ob!=null&&os_!=null&&ob+os_>0)?+(((ob-os_)/(ob+os_))*(pa/1e8)).toFixed(3):null}}
 /* ===== 同时点对齐：当日到此刻的累计成交额 ÷ (20日均额 × 该时点历史平均进度) ===== */
-let BASE=null;
+let BASE=null,HIST_OVERVIEW={},HIST_MINUTES=null;
+async function loadHistoricalOverview(){try{const doc=await readJSON('data/historical_overview.json?t='+Date.now());HIST_OVERVIEW=doc.schema==='historical-overview-1'?(doc.days||{}):{}}catch(e){HIST_OVERVIEW={}}}
+function historicalKpi(cur){
+ const saved=HIST_OVERVIEW[cur]||{},packet=HIST_MINUTES&&String(HIST_MINUTES.date).replace(/-/g,'')===cur.replace(/-/g,'')?HIST_MINUTES:null;
+ const nets=E.map(e=>uiNumber(packet?.etfs?.[e[1]]?.net_buy)).filter(v=>v!=null);
+ return {net:nets.length===7?nets.reduce((a,b)=>a+b,0):uiNumber(saved.net_buy_yi),ratio:uiNumber(saved.same_time_ratio),total:uiNumber(saved.total_amt_yi),den:uiNumber(saved.same_time_den_yi)};
+}
 async function loadBaseline(){try{BASE=await readJSON('preview-data/turnover-baseline.json?t='+Date.now());window.BASE=BASE;if(typeof kpi==='function'&&TODAY)kpi(TODAY)}catch(e){}}
 
 function barIdx(t){const s=String(t).replace(/\D/g,''),hh=+s.slice(0,2),mm=+s.slice(2),m=hh*60+mm;
@@ -561,12 +567,19 @@ function kpi(cur){const h=H[cur]||{},f=v=>v==null?"—":(+v).toFixed(2);
   let l1=alignedTotal.toFixed(1)+" 亿 ÷ 20 日同时点基准 "+baseSum.toFixed(1)+" 亿 · "+dens.length+"/7 只";
   if(ap<99)l1+=" · 已完成 "+ap+"%";
   kBf.innerHTML=l1+(tailTxt?"<br>"+tailTxt:"");
- }else{kB.textContent="—";kBf.textContent="历史日不补算同时点；切回「最新行情」查看"}
+ }else{kB.textContent="—";kBf.textContent=""}
  if(nets.length){
   const nb=nets.reduce((a,b)=>a+b,0);
   kC.innerHTML=(nb>=0?"+":"")+nb.toFixed(1)+"<small>亿</small>";
   kCf.textContent="外盘−内盘推算 · "+nets.length+"/7 只 · 非净流入";
- }else{kC.textContent="—";kCf.textContent="逐笔方向需行情外盘/内盘字段"}
+ }else{kC.textContent="—";kCf.textContent=""}
+ if(view!=="live"){
+  const hist=historicalKpi(cur);
+  kC.innerHTML=hist.net==null?'—':(hist.net>=0?'+':'')+hist.net.toFixed(1)+'<small>亿</small>';
+  kCf.textContent=hist.net==null?'':'收盘外盘−内盘推算 · 7/7 只 · 非净流入';
+  kB.innerHTML=hist.ratio==null?'—':hist.ratio.toFixed(2)+'<small>×</small>';
+  kBf.textContent=hist.ratio==null?'':hist.total.toFixed(1)+' 亿 ÷ 前20日收盘基准 '+hist.den.toFixed(1)+' 亿 · 7/7 只';
+ }
  const c=h["上证涨跌幅"];document.getElementById("k1").innerHTML=h["合计"]!=null?f(h["合计"])+"<small>亿</small>":"—";
  const ks=Object.keys(H).filter(d=>d!==TODAY||ARCHIVED.has(d)).sort();document.getElementById("k4").innerHTML=ks.length+"<small>天</small>";document.getElementById("k4f").textContent=ks.length?ks[0]+" 起":"data/history.json"}
 let historyExpanded=false,historyCurrentDate=null;
@@ -599,8 +612,10 @@ async function refresh(){
    chartStatusSnapshot={view:'live',updated:LIVE.updated};renderMarketStatus();
    bn.style.display=stale||count<7?'block':'none';bn.textContent=(stale?'当前为最近可用行情，不是今天实时数据。 ':'')+(count<7?'仅 '+count+'/7 只有分时数据；合计为已观测部分，不代表七只完整总量。':'');
   }else{
+   await loadHistoricalOverview();
    const d=requestView,h=H[d]||{};let m=null;try{m=await j('./data/minutes/'+d+'.json')}catch(e){}
    if(view!==requestView)return;
+   HIST_MINUTES=m;
    const pctAxis=sharedPctAxis(E.map(e=>m?.etfs?.[e[1]]),m?.date||d);
    E.forEach((e,i)=>{const x=m?.etfs?.[e[1]];x?drawEtf(i,{...x,date:m.date||d,index_minutes:m.index_minutes},pctAxis):noMin(i,h[e[0]])});
    bn.style.display=!m?'block':'none';bn.textContent=d+'：分时未存档，仅显示当日汇总，缺失曲线不补造。';

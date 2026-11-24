@@ -14,6 +14,7 @@
 - `index.html` 七ETF涨跌幅图使用 `sharedPctAxis`：同日七只最大绝对涨跌幅、10%留白、向外取整，最小±0.5%，上下对称，五刻度；实时及历史各计算一次再传七图。`etfPercentSeries`保留原三位小数，缺值为null。删除隐藏价格序列，悬浮框仍从原p读取价格；不改成交额、MACD、数据或任务。
 - `preview-tools/turnover_baseline.py`：20 完整交易日、48 个同时点均值，供盘中成交额比较
 - `preview-tools/turnover_history.py`：新浪60分钟K按日累加、配合本地 live 进行一致性检查
+- `backfill_historical_overview.py`：只读Git中已保存同日完整收盘live快照及严格早于观察日的20日基线，生成`data/historical_overview.json`。仅补有原始值的历史概览，不改既有分钟档或history；日期/来源提交/SHA留在数据文件。资金观察历史页读取该包，或同日完整minute档的七只net_buy；无数据显示横杠、说明留空，不用当前滚动基线回算旧日。
 
 ### 两融余额
 `margin.html` 读 `data/margin_balance.json`。

@@ -21,5 +21,7 @@ class FundsGuideOrder(unittest.TestCase):
   self.assertTrue(formulas(text)[1].startswith('主动净买入'))
   self.assertTrue(formulas(text)[2].startswith('同时点倍数'))
   self.assertEqual(text.split('<div class="ui-mask" id="guideMask"',1)[0].replace('@media(min-width:700px){.msteps{grid-template-columns:repeat(4,minmax(0,1fr))}}','@media(min-width:700px){.msteps{grid-template-columns:repeat(3,minmax(0,1fr))}}'),before.split('<div class="ui-mask" id="guideMask"',1)[0])
-  self.assertEqual(text.split('<h4>样本与核对</h4>',1)[1],before.split('<h4>样本与核对</h4>',1)[1])
+  # This guard protects guide prose, not every later script on the page.
+  samples=lambda s:s.split('<h4>样本与核对</h4>',1)[1].split('<script',1)[0]
+  self.assertEqual(samples(text),samples(before))
 if __name__=='__main__':unittest.main()
