@@ -35,12 +35,22 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v5
         with:
+          ref: main # A delayed scheduled run must use current published state.
           fetch-depth: 20
           persist-credentials: true
 
       - name: Compute only new IC close days (pending sources keep previous)
+        id: compute
         shell: bash
-        run: python3 futures_close_update.py --mode strategy
+        run: |
+          set -euo pipefail
+          python3 futures_close_update.py --mode strategy | tee /tmp/ic-close-result.json
+          python3 - << 'PY'
+          import json, os
+          result = json.load(open('/tmp/ic-close-result.json'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('data_date=' + result['date'] + '\n')
+          PY
 
       - name: Commit data/ic_strategy.json when the signal changes
         shell: bash
@@ -98,8 +108,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERIFY_PUBLISH: ${{ inputs.verify_publish }}
+          EXPECTED_DATA_DATE: ${{ steps.compute.outputs.data_date }}
         shell: bash
         run: |
+          set -euo pipefail
+          python3 futures_close_update.py --mode strategy --verify-date "$EXPECTED_DATA_DATE"
           args=()
           if [[ "$VERIFY_PUBLISH" == "true" ]]; then args+=(--request-build); fi
           python3 futures_pages_sync.py data/ic_strategy.json "${args[@]}"
+          python3 futures_close_update.py --mode strategy --verify-date "$EXPECTED_DATA_DATE"

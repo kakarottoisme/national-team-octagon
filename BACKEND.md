@@ -26,7 +26,7 @@
 - `preview-tools/futures_history.py`：CFFEX 原始 CSV 严格验日期、前20会员并集、独立品种历史
 - `holdings.json`：本人配置，非模型仓位。采集器不应写它；缺净账本时前端不硬算 D
 - 会员持仓观察日与顶部 IC 信号日是两套独立日期；验证发布必须打开 `dashboard.html#futures-preview.html` 核对两处，不以四个会员 shard 更新代替信号更新。日期选择停在上一次最新日时，刷新跟随新最新日；明确选择的历史日仍保留。
-- `futures_close_update.py`：收盘后两种增量入口，members只追加已严格验日期的缺失四会员shard；strategy先验同日指数及四挂牌官方今收盘，再调用原引擎候选，仅追加新日且保留旧历史，已有当天不重算。独立于SSE/全球任务，不写账户。前台60秒可见重读及Tab恢复由dashboard可见消息驱动。
+- `futures_close_update.py`：两种增量入口，members仍按原收盘窗口只追加已严格验日期的缺失四会员shard。strategy在2026-11-24授权后按北京时间最近已收盘官方交易日补齐，延迟到凌晨/上午仍处理前日，过滤未收盘新日K；每个新增日验指数、MA250与四挂牌官方今收盘，再调用原引擎候选，仅追加新日且保留旧历史，已有目标日不重算。`ic-strategy.yml` checkout显式main；pending非零，不把旧数据已上线当成功；`--verify-date`只读验收预期数据日，Pages逐字一致后才完成。原schedule、members路径、SSE/全球任务、账户与策略公式不改。前台60秒可见重读及Tab恢复由dashboard可见消息驱动。
 
 ### 份额与申赎
 `margin.html` 中的独立 `etfFlows` 组件读 `data/etf_share_flows.json`，并入申赎两融 Tab，先申赎后两融。名单仍为 17 只宽基，包含 159352；概览、合计申赎柱/累计线、单只份额线按独立截止日展示，不与盘中成交混算。国家队持仓、ETF 明细从界面移除，原核验文件保留但页面不读。`etf-flows.html` 仅兼容旧链接跳转。

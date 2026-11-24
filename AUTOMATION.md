@@ -20,6 +20,7 @@
 - 后台：复用 `ic-strategy.yml` 与 `preview-data.yml`，北京15:35、15:45、15:55及16:05–17:55每10分钟补查。两条均20:10/22:10/23:30兜底；IC额外保留原17:40。GitHub schedule可能延迟，不能宣称官方发布后秒级同步。
 - 期指会员：`python3 futures_close_update.py --mode members` 独立拉CFFEX四CSV并严格验交易日，只增量缺失品种日；某源失败/未发布不覆盖，其他品种可独立完成。已经发布当天跳过。无需SSE/全球/成交额源。23:30保留原全量采集路径；手动默认仅期指，`full_refresh=true`才跑全量。
 - IC信号：`python3 futures_close_update.py --mode strategy` 同日指数日K与官方今收盘全部齐才调用原引擎候选。核验日期、250日均线、四挂牌今收盘/贴水及上次发布状态，仅追加新日，原历史逐条保持。已是当天不重算、不改updated、不提交。缺源等后续补查；旧状态不一致停止并留原文件，不自动重录历史。
+- 2026-11-24授权修复IC收盘跨日迟到：只调整 `futures_close_update.py --mode strategy` 和既有 `ic-strategy.yml` 的采集/验收链，不改原schedule、其他任务或策略公式。目标为北京时间最近已收盘官方交易日（15:30前向前找，周末/长假也按官方日历）；迟到凌晨/上午仍补前日，不拿执行当天未收盘日K当收盘。仅追加缺失信号，每个新增日同日指数、250日均线与四挂牌官方今收盘逐一校验，指数缺交易日或上次状态不一致停止，旧历史不改。checkout显式main；源pending返回非零且不继续旧数据发布验收。成功必须有expected data_date，latest与days最后一条一致、数据日期达标，推送后Pages逐字一致才验收，不以绿色进程/旧字节一致冒充新数据。已有目标日不重算、不空提交；2026-11-23缺日按真实源补齐。
 - 发布闭环：两条工作流以 `pages: write` 仅请求既有分支Pages构建，不改设置。`futures_pages_sync.py` 比较线上对应JSON与采集文件；不一致时请求 `/pages/builds`，最多等300秒再逐字核对，失败报错不假称上线；一致不重建。手动 `verify_publish=true` 用于实跑构建权限烟测，默认false。理由：GITHUB_TOKEN推送不自动触发Pages构建，官方文档 https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site 。
 - 两条沿用各自concurrency和显式git stage，不写 `holdings.json`，不改策略公式、选约规则、live、归档、两融或原六项豆包任务。未确认年度交易日日历关闭；休市静默。
 
