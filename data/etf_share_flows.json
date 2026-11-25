@@ -3615,7 +3615,7 @@
    17,
    17,
    17,
-   16
+   17
   ],
   "cumulative_yi": [
    null,
@@ -7232,7 +7232,7 @@
    "2015.6264",
    "2941.6302",
    "3098.1714",
-   "3039.6246"
+   "3027.7048"
   ],
   "inflow_yi": [
    null,
@@ -10849,7 +10849,7 @@
    "504.1540",
    "926.0038",
    "156.5412",
-   "-58.5468"
+   "-70.4666"
   ]
  },
  "as_of": "2026-11-24",
@@ -25408,22 +25408,22 @@
   },
   {
    "anomaly_1d": null,
-   "anomaly_20d": null,
-   "anomaly_5d": null,
-   "aum_yi": null,
+   "anomaly_20d": "large_move_unverified",
+   "anomaly_5d": "large_move_unverified",
+   "aum_yi": "898.12",
    "close": "4.210",
    "code": "159919",
    "coverage_1d": null,
    "coverage_20d": null,
    "coverage_5d": null,
-   "delta_1d_yi": null,
-   "delta_20d_yi": null,
-   "delta_5d_yi": null,
+   "delta_1d_yi": "-2.8170",
+   "delta_20d_yi": "109.3680",
+   "delta_5d_yi": "71.3250",
    "exch": "SZ",
    "full": "嘉实沪深300ETF",
-   "inflow_1d_yi": null,
-   "inflow_20d_yi": null,
-   "inflow_5d_yi": null,
+   "inflow_1d_yi": "-11.9198",
+   "inflow_20d_yi": "463.1054",
+   "inflow_5d_yi": "300.7507",
    "name": "沪深300ETF嘉实",
    "quote_source": "https://push2his.eastmoney.com/api/qt/stock/kline/get",
    "share_series": [
@@ -29041,15 +29041,15 @@
     "161.8672",
     "215.6782",
     "216.1462",
-    null
+    "213.3292"
    ],
-   "share_source": null,
-   "shares_status": "pending_unverifiable",
-   "shares_yi": null,
-   "stat_date": null,
-   "tot_vol_wan": null,
-   "undated_snapshot_note": "fund_jjgm 未确认当日规模，无日期快照仅留痕，不参与申赎估算",
-   "undated_snapshot_yi": "213.3292",
+   "share_source": "https://fund.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON&CATALOGID=fund_jjgm&TABKEY=tab1&txtDm=159919&txtStart=2026-11-24&txtEnd=2026-11-24&pageno=1",
+   "shares_status": "official_confirmed",
+   "shares_yi": "213.3292",
+   "stat_date": "2026-11-24",
+   "tot_vol_wan": "2133291.66",
+   "undated_snapshot_note": null,
+   "undated_snapshot_yi": null,
    "vwap": "4.2314"
   },
   {
@@ -76435,19 +76435,19 @@
    "vwap": "1.0659"
   }
  ],
- "generated_at": "2026-11-25T08:05:27+08:00",
+ "generated_at": "2026-11-25T08:39:42+08:00",
  "method": "估算净流入 =（当日官方份额 − 前一官方交易日份额）× 当日成交均价；成交均价 = 成交额 / 成交量。这是全市场申购赎回，不能单独归因国家队，也不是资金观察页的分钟成交额代理。",
  "schema": "etf-share-flows-1",
  "summary": {
-  "aum_covered": 16,
+  "aum_covered": 17,
   "aum_note": "只加总统计日与收盘价同一天的标的。fund_jjgm 失败日的深市无日期快照不计入。",
-  "aum_yi": "10302.55",
-  "inflow_1d_covered": 16,
-  "inflow_1d_yi": "-58.5468",
-  "inflow_20d_covered": 16,
-  "inflow_20d_yi": "3212.2562",
-  "inflow_5d_covered": 16,
-  "inflow_5d_yi": "1361.6978",
+  "aum_yi": "11200.67",
+  "inflow_1d_covered": 17,
+  "inflow_1d_yi": "-70.4666",
+  "inflow_20d_covered": 17,
+  "inflow_20d_yi": "3675.3616",
+  "inflow_5d_covered": 17,
+  "inflow_5d_yi": "1662.4485",
   "universe": 17
  },
  "szse_snapshot": {

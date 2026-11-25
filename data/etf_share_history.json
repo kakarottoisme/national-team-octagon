@@ -251397,6 +251397,12 @@
     "stat_date": "2026-11-24",
     "tot_vol_wan": "5346345.49"
    },
+   "159919": {
+    "sec_name": "沪深300ETF嘉实",
+    "source": "szse_fund_jjgm",
+    "stat_date": "2026-11-24",
+    "tot_vol_wan": "2133291.66"
+   },
    "159977": {
     "sec_name": "创业板ETF天弘",
     "source": "szse_fund_jjgm",
@@ -523667,5 +523673,5 @@
   }
  },
  "schema": "etf-share-flows-1",
- "updated_at": "2026-11-25T08:05:27+08:00"
+ "updated_at": "2026-11-25T08:39:42+08:00"
 }
