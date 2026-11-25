@@ -21,11 +21,12 @@
 `margin.py` 通过 akshare/pandas 取沪深融资融券余额及六个指数日收盘；深市缺失日按交易所接口补齐。手工全量入口保留，云端`ashare_tasks.py`日更只追加缺日期，既有历史逐值不覆盖。2026-11-23授权改为次一交易日09:05/15/25核对前一交易日，SSE信用交易日期+SZSE metadata.subname同日验证，成功标记为数据日。18:05只读data-audit核对前日两融和当日八宫格缺档；窗口迟到/最终缺日不再静默。两融值亿元，指数点位；缺少同日值不能当零或用各自最近日期拼成比较。
 
 ### 期指持仓
-`futures-preview.html` 读 `data/ic_strategy.json`、本人 `data/holdings.json`、`preview-data/official/snapshot-latest.json`、`preview-data/official/futures/{IH,IF,IC,IM}.json` 等官方历史。
+`futures-preview.html` 读 `data/ic_strategy.json`（信号与FIFO预计持仓）、`preview-data/official/snapshot-latest.json`、`preview-data/official/futures/{IH,IF,IC,IM}.json` 等官方历史；本人 `data/holdings.json` 保留但不混入预计持仓。
 - `ic_strategy.py`：新浪中证500和 IC 收盘、中金所今收盘核对，生成原策略信号及模型历史
 - `preview-tools/collect_preview.py`：SSE ETF 份额及 CFFEX 会员排名、快照、状态、四品种日更
 - `preview-tools/futures_history.py`：CFFEX 原始 CSV 严格验日期、前20会员并集、独立品种历史
-- `holdings.json`：本人配置，非模型仓位。采集器不应写它；缺净账本时前端不硬算 D
+- `holdings.json`：本人配置，非模型仓位。采集器不应写它；缺净账本时不硬算真实账户 D。2026-11-25用户授权将原当前持仓展示改为「预计当前持仓」：页面不再读取该账户文件，但原记录完整保留。
+- 「预计当前持仓」由前端纯函数 `replayExpectedHoldings` 回放完整已发布 `ic_strategy.days`，使用各日 `contract` / `total`（含原模型D）与同合约收盘价。加仓按日期记录批次、减仓FIFO扣最早批次、换月/切换全部平旧仓再建新成本；剩余批次按手数加权，历史选择只使用截至当日输入。首条若已持仓且动作为hold则成本未知，不伪造首日成交；缺价不补零、不借其他合约/指数、清仓或换月后恢复已知成本。持仓损益非账户当日浮盈，保证金为12%估算，不显示旧余额/权益或真实持仓差异。变仓记录仅展示当前连续持仓周期；A/B/C/D、选约、采集与真实账户写入权限不变。收盘价仅代理收盘前成交，未扣费用/滑点，盘末跨线可能与实际操作不同。验收 `tests.test_expected_holdings` 包含FIFO边界、同日换月调仓、缺价/期初未知、全部已发布历史Decimal独立回放及历史前缀一致性。
 - 会员持仓观察日与顶部 IC 信号日是两套独立日期；验证发布必须打开 `dashboard.html#futures-preview.html` 核对两处，不以四个会员 shard 更新代替信号更新。日期选择停在上一次最新日时，刷新跟随新最新日；明确选择的历史日仍保留。
 - `futures_close_update.py`：两种增量入口，members仍按原收盘窗口只追加已严格验日期的缺失四会员shard。strategy在2026-11-24授权后按北京时间最近已收盘官方交易日补齐，延迟到凌晨/上午仍处理前日，过滤未收盘新日K；每个新增日验指数、MA250与四挂牌官方今收盘，再调用原引擎候选，仅追加新日且保留旧历史，已有目标日不重算。`ic-strategy.yml` checkout显式main；pending非零，不把旧数据已上线当成功；`--verify-date`只读验收预期数据日，Pages逐字一致后才完成。原schedule、members路径、SSE/全球任务、账户与策略公式不改。前台60秒可见重读及Tab恢复由dashboard可见消息驱动。
 

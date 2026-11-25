@@ -21,7 +21,7 @@ GitHub Pages 上的投资观察看板。公开行情写成 JSON，页面只读�
 |---|---|---|
 | `index.html` | 资金观察 | 盘中成交及成交历史；读 `data/live.json`、`data/history.json`、`data/minutes/YYYY-MM-DD.json` 及成交基准 |
 | `margin.html` | 申赎两融 | 先 ETF 份额申赎、后两融余额，分别读 `data/etf_share_flows.json`、`data/margin_balance.json` |
-| `futures-preview.html` | 期指持仓 | `data/ic_strategy.json`、`data/holdings.json`、`preview-data/official/` |
+| `futures-preview.html` | 期指持仓 | `data/ic_strategy.json`（信号与FIFO预计持仓）、`preview-data/official/`；真实`holdings.json`保留但不再作为预计持仓输入 |
 | `risk-preview.html` | 全球风险 | `preview-data/global.json` |
 | `market-cycle.html` | 市场顶底 | `data/market_cycle.json`；A股/美股分开，1–3个月价格观察规则，不联动持仓或 IC |
 

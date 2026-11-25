@@ -203,6 +203,13 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 .ui-page .account-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ui-page .account-tools small{font-size:13px;color:var(--muted)}
 @media(min-width:700px){.ui-page .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.ui-page .kpis:has(>.kpi:nth-child(2):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:699px){.ui-page .kpi .ft,.ui-page .blk .s,.ui-page .foot{font-size:14px}}
+
+/* Estimated holdings reuses shared typography; six KPIs form two balanced rows. */
+.ui-page .expected-position{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ui-page .expected-batches .panel-head h3{font:inherit;font-weight:600;color:var(--ink);margin:0}
+.ui-page .expected-batches .panel-head span{font-size:var(--type-sec-meta,13px);color:var(--muted)}
+.ui-page .expected-batches .tbx>table{min-width:580px}
+@media(min-width:700px){.ui-page .expected-position{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style><link rel="stylesheet" href="dashboard-shell.css"></head><body data-ui-version="3" class="ui-page" data-ui-view="futures">
 <header class="top"><div class="wrap shell-head"><div class="brand"><span class="mark" aria-hidden="true"><img src="favicon.svg?v=ui-2" width="38" height="38" alt=""></span><div class="brand-copy"><h1>期指持仓</h1><div class="crumb" title="中信期货(代客) · CFFEX 前20会员">中信期货(代客) · CFFEX 前20会员</div></div></div><div class="ctl">
   <button type="button" onclick="openDrawer()">口径说明</button>
@@ -249,8 +256,8 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
 <div class="sec"><h2 id="tblTitle">选中日上榜合约明细</h2><span class="side">多/空 与日变动</span></div>
 <section class="panel"><div class="tbx"><table><colgroup><col style="width:10%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:10%"><col style="width:10%"></colgroup>
 <thead><tr><th>品种</th><th>合约</th><th>多头</th><th>空头</th><th>多日变动</th><th>空日变动</th><th>多排名</th><th>空排名</th></tr></thead>
-<tbody id="tb"><tr><td colspan="8" style="text-align:center;color:var(--faint)">等待数据包…</td></tr></tbody></table></div></section>
-</main><div class="ui-mask" id="icRules" hidden><div class="ui-backdrop" onclick="uiPanel.close()"></div><section class="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="icRulesTitle"><div class="ui-modal-head"><div><h3 id="icRulesTitle">IC 策略 · 最终规则</h3></div><button type="button" class="ui-close" aria-label="关闭" onclick="uiPanel.close()">&#215;</button></div><div class="ui-modal-body"><dl>
+<tbody id="tb"><tr><td colspan="8" style="text-align:center;color:var(--faint)">等待数据包…</td></tr>  </tbody></table></div></section>
+</main><div class="ui-mask" id="expectedHistory" hidden><div class="ui-backdrop" onclick="uiPanel.close()"></div><section class="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="expectedHistoryTitle"><div class="ui-modal-head"><h3 id="expectedHistoryTitle">预计持仓 · 本周期变仓记录</h3><button type="button" class="ui-close" aria-label="关闭" onclick="uiPanel.close()">&#215;</button></div><div class="ui-modal-body" id="expectedHistoryBody"></div></section></div><div class="ui-mask" id="icRules" hidden><div class="ui-backdrop" onclick="uiPanel.close()"></div><section class="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="icRulesTitle"><div class="ui-modal-head"><div><h3 id="icRulesTitle">IC 策略 · 最终规则</h3></div><button type="button" class="ui-close" aria-label="关闭" onclick="uiPanel.close()">&#215;</button></div><div class="ui-modal-body"><dl>
   <dt>品种</dt><dd>中证500股指期货（IC），只做多，不叠加期权。合约乘数 200 元/点。</dd>
   <dt>信号</dt><dd>正式信号用中证500指数收盘。盘中可在约 14:50 用实时价预判，14:57 前下单。若价格距触发线约 0.15% 以内，以收盘后再核对的结果为准。</dd>
   <dt>网格腿 A</dt><dd>收盘 ≤6500 为 2 手，≤6000 为 4 手，≤5500 为 6 手，≤5250 为 8 手，≤5000 为 10 手，否则 0。</dd>
@@ -259,14 +266,14 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
   <dt>盈利覆盖加仓 D</dt><dd>D 腿（盈利覆盖加仓）：自上次 D 撤出以来累计盈利的 50% 够付 1 手保证金（按 12%）即加 1 手，最多 4 手，总手数不超过 10；收盘跌破 MA250×0.99 或底仓归零时 D 全撤。</dd>
   <dt>合计</dt><dd>底仓 = A + B + C，限制在 0 到 10 手。建议手数 = 底仓 + D，不超过 10 手。</dd>
   <dt>年化贴水</dt><dd>(指数收盘 − 期货收盘) / 指数收盘 × 365 / 距最后交易日的日历天数。</dd>
-  <dt>选约</dt><dd>只在当月、次月、当季里比较，下季不参与。距最后交易日不足 10 个日历日的合约不参与比较。开仓以及强制移仓当日，若某张合约的年化贴水比基准近月高出不少于 3 个百分点，就用贴水最高的那张，否则用近月；近月若已不足 10 日，基准改为最近的一张可比较合约。持有期间，若另一张可比较合约比持仓高出不少于 2 个百分点，整仓换过去。全部手数在同一个合约。页面「模型建议」按新开仓规则选合约。</dd>
-  <dt>页面上的两套持仓</dt><dd>模型建议是信号日的 A、B、C，加上从开仓日起按账户浮盈算出的 D。实际持仓只读本机导入文件。两边不同就写明合约和手数差。信号日写在建议手数旁边。</dd>
+  <dt>选约</dt><dd>只在当月、次月、当季里比较，下季不参与。距最后交易日不足 10 个日历日的合约不参与比较。开仓以及强制移仓当日，若某张合约的年化贴水比基准近月高出不少于 3 个百分点，就用贴水最高的那张，否则用近月；近月若已不足 10 日，基准改为最近的一张可比较合约。持有期间，若另一张可比较合约比持仓高出不少于 2 个百分点，整仓换过去。全部手数在同一个合约。页面另列「新开仓参考合约」；预计持仓沿原信号历史的持有路径选约。</dd>
+  <dt>预计当前持仓</dt><dd>按每个已发布信号日的总手数和持有合约，在当日收盘价上估算执行。增加手数新建批次；减仓先进先出；换月或切换合约全部平旧仓，再按新合约价格重建成本。均价只对尚未平掉的批次按手数加权，不使用全部历史买入均价。切换信号日同步回溯持仓，未记录的真实成交不补造。</dd>
   <dt>强制移仓</dt><dd>最后交易日是合约月份的第三个星期五，遇休市顺延。持仓合约最后交易日的前一交易日收盘必须移仓，并按开仓的 3 个百分点规则重选。</dd>
-  <dt>资金</dt><dd>这条规则的回测里，按交易所保证金 12% 估算，峰值大约 129 万。建议账户至少准备 400 万。页面上的保证金只出现在「当前持仓」，按实际手数、最新价和 12% 估算，不是这段峰值。</dd>
+  <dt>资金</dt><dd>这条规则的回测里，按交易所保证金 12% 估算，峰值大约 129 万。建议账户至少准备 400 万。页面保证金按预计手数、同日合约收盘和 12% 估算，不是券商实际风险度。</dd>
   <dt>资金管理</dt><dd>可选：账户留下保证金，再加名义本金的 15%。名义本金 = 手数 × 期货价 × 200。</dd>
  </dl>
- <p class="rules-note">当前账户的 D 盈亏按本机导入配置估算，用账户浮盈，不沿用回测累计。回测重放只在查看更早的信号日时出现。</p>
- <p class="rules-note">D 使用所选信号日的净盈亏账本，缺少账本时不计算；单笔开仓浮盈不等于完整净盈利。</p>
+ <p class="rules-note">A/B/C/D 和选约规则不改。预计持仓读取原信号历史的 total（含 D）；D 的累计及触发仍沿用原模型指数涨跌代理，不用本页持仓损益反向改写信号。</p>
+ <p class="rules-note">真实账户配置保留，不在预计持仓中混用。持仓损益基于剩余批次成本，单笔开仓浮盈不等于完整净盈利，也不是逐日结算后的账户余额。收盘价不能还原收盘前真实成交价，未扣费用及滑点；临近收盘跨越触发线时，实际操作可能不同。</p>
  <p class="rules-note">原回测收益指标尚未统一核验，不作为实盘资金依据。</p>
  </div></section></div>
 
@@ -581,11 +588,54 @@ function validateLocalAccount(h){
  return {as_of:h.as_of||p.entry_date,balance_as_of:h.balance_as_of||h.as_of||p.entry_date,account_balance:finite(h.account_balance),balance_kind:h.balance_kind||null,d_live_start:h.d_live_start||null,d_pnl_as_of:h.d_pnl_as_of||null,d_realized_net_pnl:finite(h.d_realized_net_pnl),d_unrealized_net_pnl:finite(h.d_unrealized_net_pnl),rolls,positions:[{contract:p.contract,direction:p.direction,lots:p.lots,entry_price:p.entry_price,entry_date:p.entry_date,entry_price_kind:p.entry_price_kind||'',last_price:finite(p.last_price),last_date:p.last_date||'',last_price_kind:p.last_price_kind||''}]};
 }
 
-/* IC 收盘信号。数字来自 data/ic_strategy.json，页面只负责排版。 */
+function replayExpectedHoldings(days){
+ const snapshots=new Map();let batches=[],held=null,events=[],cycleStart=null,lastChange=null,lastRoll=null,realized=0,realizedKnown=true;
+ let previousDate=null;
+ const roundMoney=v=>v==null?null:Math.round(v*100)/100;
+ const validPrice=v=>typeof v==='number'&&Number.isFinite(v)&&v>0;
+ for(let i=0;i<days.length;i++){
+  const day=days[i],date=day.date,total=day.total,code=day.contract;
+  if(!validAccountDate(date)||(previousDate&&date<=previousDate))throw new Error('回溯日期无效或重复');
+  if(!Number.isInteger(total)||total<0||total>10||(total>0&&!/^IC\d{2}(0[1-9]|1[0-2])$/.test(code||'')))throw new Error('回溯合约或手数无效');
+  const prices=new Map();for(const row of day.contracts||[]){if(prices.has(row.code))throw new Error('回溯合约报价重复');prices.set(row.code,row.price);}
+  const priceOf=c=>validPrice(prices.get(c))?prices.get(c):null;
+  const before=batches.reduce((s,b)=>s+b.lots,0),oldCode=held;
+  if(before===0&&total>0){cycleStart=date;events=[];realized=0;realizedKnown=true;lastRoll=null;}
+  const sell=oldCode!==code?before:Math.max(0,before-total);
+  if(sell){
+   const exit=priceOf(oldCode),sold=[];let left=sell,pnl=0,known=exit!=null;
+   while(left){const b=batches[0],lots=Math.min(left,b.lots);sold.push({...b,lots});if(b.price==null)known=false;else if(exit!=null)pnl+=lots*(exit-b.price)*200;b.lots-=lots;left-=lots;if(b.lots===0)batches.shift();}
+   realizedKnown=realizedKnown&&known;if(known)realized+=pnl;
+   events.push({date,kind:code!==oldCode?(total?'换出':'清仓'):'减仓',contract:oldCode,lots:sell,price:exit,pnl:known?roundMoney(pnl):null,sold});lastChange=date;
+  }
+  const remaining=batches.reduce((s,b)=>s+b.lots,0),buy=total-remaining;
+  if(buy>0){
+   // The first published row may already carry a position; its cost is unknown,
+   // not that day's close. A later flat session or full roll removes that ambiguity.
+   const initialUnknown=i===0&&day.action==='hold',price=initialUnknown?null:priceOf(code);
+   const kind=before>0&&code!==oldCode?(day.action==='roll'?'换月':'切换合约'):(before>0?'加仓':initialUnknown?'期初持仓（成本未知）':'开仓');
+   batches.push({date,lots:buy,price,kind,contract:code});events.push({date,kind,contract:code,lots:buy,price,pnl:null});lastChange=date;
+   if(before>0&&code!==oldCode)lastRoll=date;
+  }
+  held=total>0?code:null;
+  const validBatches=batches.every(b=>b.price!=null),mark=total?priceOf(held):null;
+  const average=total&&validBatches?batches.reduce((s,b)=>s+b.lots*b.price,0)/total:null;
+  const unrealized=total===0?0:validBatches&&mark!=null?roundMoney(batches.reduce((s,b)=>s+b.lots*(mark-b.price)*200,0)):null;
+  const margin=total===0?0:mark==null?null:roundMoney(total*mark*200*.12);
+  snapshots.set(date,{date,contract:held,lots:total,average,mark,unrealized,margin,cycleStart,lastChange,lastRoll,
+   entryDate:batches.length?batches[0].date:null,lastEntryDate:batches.length?batches[batches.length-1].date:null,
+   realized:realizedKnown?roundMoney(realized):null,batches:batches.map(b=>({...b})),events:events.map(e=>({...e,sold:e.sold?.map(b=>({...b}))})),
+   costKnown:validBatches,missingPrice:total>0&&mark==null});previousDate=date;
+ }
+ return snapshots;
+}
+window.replayExpectedHoldings=replayExpectedHoldings;
+
+/* IC 收盘信号与预计持仓：只回放已发布历史，不写入账户或改变规则。 */
 (function(){
  const host=document.getElementById('icDynamic');
  const sel=document.getElementById('icDate');
- let IC=null,HOLD=null;
+ let IC=null,EXPECTED=new Map();
 
  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
  const num=(n,d)=>n==null||!isFinite(+n)?'—':Number(n).toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -606,8 +656,6 @@ function validateLocalAccount(h){
  const sgn=n=>{n=+n;return n>0?'+'+n:(n<0?'−'+Math.abs(n):'0')};
  const pct=b=>b==null?'—':(b*100).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
  const lotsOf=day=>day&&day.total!=null?+day.total:+(day&&day.target!=null?day.target:0);
- function pos0(){return (HOLD&&Array.isArray(HOLD.positions)&&HOLD.positions[0])||{};}
- function liveStart(){return HOLD?(HOLD.d_live_start||''):'';}
  function cTile(n){n=+n;return n<0?'−'+Math.abs(n):String(n);}
  function legFormula(a,b,c,d){
   function piece(letter,n,first){
@@ -640,132 +688,34 @@ function validateLocalAccount(h){
    nextNote:next?esc(next.code)+' · '+date+' 收盘参考 '+pct(next.basis):'下次判定参考合约数据缺失'
   };
  }
- function liveAddon(base, accountPnl, price){
-  const b=+base||0;
-  if(accountPnl==null||price==null||!isFinite(+price)||b<=0) return {d:0, need:null};
-  const unit=0.12*(+price)*200;
-  const room=Math.max(0,10-b);
-  const cap=Math.min(4,room);
-  const avail=0.5*Math.max(+accountPnl,0);
-  let d=unit>0?Math.min(4,Math.floor(avail/unit)):0;
-  d=Math.min(d,room);
-  let need=null;
-  if(d<cap&&unit>0) need=Math.max(0,(d+1)*unit/0.5-(+accountPnl));
-  return {d, need};
- }
- function marketLast(pos){
-  const kind=String(pos.last_price_kind||'');
-  if((kind!=='收盘'&&kind!=='结算')||pos.last_price==null||pos.last_price==='') return null;
-  return {px:+pos.last_price, date:pos.last_date||'', kind};
- }
- function accountSnap(signalDay){
-  const pos=pos0();
-  const code=pos.contract||'';
-  const lots=pos.lots==null?null:+pos.lots;
-  const dir=pos.direction||'多';
-  const entry=pos.entry_price==null||pos.entry_price===''?null:+pos.entry_price;
-  let px=null,pxDate='',pxVia='';
-  if(signalDay&&code){
-   const row=(signalDay.contracts||[]).find(c=>c.code===code);
-   if(row&&row.price!=null&&(!pos.entry_date||signalDay.date>=pos.entry_date)){px=+row.price;pxDate=signalDay.date;pxVia='signal';}
-  }
-  const quote=marketLast(pos);
-  if(px==null&&quote){px=quote.px;pxDate=quote.date;pxVia='quote';}
-  let pnl=null;
-  if(entry!=null&&px!=null&&lots!=null)pnl=(dir==='空'?-1:1)*lots*(px-entry)*200;
-  return {pos,code,lots,dir,entry,px,pxDate,pxVia,pnl};
- }
- function modelView(day, snap){
-  const base=day&&day.target!=null?+day.target:0;
-  const pick=day&&day.entry_pick||'';
-  const row=day&&(day.contracts||[]).find(c=>c.code===pick);
-  const pickPx=row&&row.price!=null?+row.price:(day&&day.index_close!=null?+day.index_close:null);
-  const holdPx=snap&&snap.px!=null?+snap.px:null;
-  const holdCode=snap&&snap.code||'';
-  const start=liveStart();
-  if(day){
-   const exit=day.index_close<day.ma_lower||base<=0;
-   const pnl=uiNumber(HOLD?.d_realized_net_pnl)!=null&&uiNumber(HOLD?.d_unrealized_net_pnl)!=null&&HOLD.d_pnl_as_of===day.date&&start&&start<=day.date?HOLD.d_realized_net_pnl+HOLD.d_unrealized_net_pnl:null;
-   const ready=pnl!=null&&snap?.pxDate===day.date&&holdPx>0&&snap.dir==='多';
-   const addon=exit?{d:0,need:null}:ready?liveAddon(base,pnl,holdPx):{d:null,need:null};
-   return {live:true,base,d:addon.d,total:addon.d==null?null:Math.max(0,Math.min(10,base+addon.d)),pnl,blocked:exit?'撤出条件生效':ready?'':'净盈亏账本待补',need:addon.need,pick,pickPx,holdPx,holdCode,start};
-  }
-  const d=day&&day.leg_d!=null?+day.leg_d:0;
-  return {live:false, base, d, total:Math.max(0,Math.min(10,base+d)), pnl:day?day.d_pnl:null, need:day?day.d_next_yuan:null, pick, pickPx, holdPx:null, holdCode, start};
- }
- function diffSentence(pick, modelLots, pos){
-  if(!pos||pos.lots==null) return '';
-  const actual=pos.contract||'—';
-  const lots=+pos.lots;
-  const dir=pos.direction||'多';
-  const lotDiff=modelLots==null?null:modelLots-(dir==='空'?-lots:lots);
-  let tail='';
-  if(pick&&actual&&pick!==actual) tail='合约不同';
-  else if(pick&&actual) tail='合约相同';
-  if(lotDiff===0) tail=(tail?tail+'，':'')+'手数相同';
-  else if(lotDiff!=null) tail=(tail?tail+'，':'')+'手数差 '+sgn(lotDiff)+' 手';
-  const left=pick?('建议 '+pick+' × '+(modelLots==null?'—':modelLots)+' 手'):('建议 '+(modelLots==null?'—':modelLots)+' 手');
-  return left+'，实际 '+actual+' '+dir+' '+lots+' 手'+(tail?'；'+tail:'')+'。';
- }
- function holdingsBlock(latest, model){
-  if(!HOLD){
-   return '<div class="sec"><h2>当前持仓</h2></div><section class="panel"><div class="hold-note">持仓配置未加载</div></section>';
-  }
-  const pos=(Array.isArray(HOLD.positions)&&HOLD.positions[0])||{};
-  const code=pos.contract||'';
-  const lots=pos.lots==null?null:+pos.lots;
-  const dir=pos.direction||'多';
-  const entry=pos.entry_price==null||pos.entry_price===''?null:+pos.entry_price;
-  const bal=uiNumber(HOLD.account_balance);
-  let px=null,pxDate='',pxVia='';
-  if(latest&&code){
-   const row=(latest.contracts||[]).find(c=>c.code===code);
-   if(row&&row.price!=null&&(!pos.entry_date||latest.date>=pos.entry_date)){px=+row.price;pxDate=latest.date;pxVia='signal';}
-  }
-  const quote=marketLast(pos);
-  if(px==null&&quote){px=quote.px;pxDate=quote.date;pxVia='quote';}
-  let pnl=null;
-  if(entry!=null&&px!=null&&lots!=null)pnl=(dir==='空'?-1:1)*lots*(px-entry)*200;
-  const equity=HOLD.balance_kind==='equity'?bal:HOLD.balance_kind==='cash_excludes_pnl'&&bal!=null&&pnl!=null?bal+pnl:null;
-  let margin=null,ratio=null;
-  if(px!=null&&lots!=null){margin=lots*px*200*0.12;if(equity>0)ratio=margin/equity;}
-  const cmp=model?diffSentence(model.pick, model.total, pos):'';
-  let uni='';
-  if(latest&&code){
-   const row=(latest.contracts||[]).find(c=>c.code===code);
-   if(!(row&&(row.role==='near'||row.role==='next'||row.role==='quarter')))uni=esc(code)+' 不在模型当月、次月、当季范围内。';
-  }
-  const asof=esc(HOLD.as_of||pos.entry_date||'');
-  const meta=latest&&code?(latest.contracts||[]).find(c=>c.code===code):null;
-  let life='';
-  if(meta&&meta.expiry){
-   const asOfDay=HOLD.as_of||pos.entry_date;
-   const span=asOfDay?Math.round((Date.parse(meta.expiry+'T00:00:00Z')-Date.parse(asOfDay+'T00:00:00Z'))/86400000):meta.days;
-   life=' · 到期 '+esc(meta.expiry)+(span==null?'':' · '+span+' 日');
-   if(meta.basis!=null) life+=' · 年化贴水 '+pct(meta.basis)+(latest&&latest.date&&pos.entry_date&&latest.date<pos.entry_date?'（信号 '+esc(latest.date)+'）':'');
-  }
-  const src='';const multi=Array.isArray(HOLD.positions)&&HOLD.positions.length>1?'配置含多笔持仓，当前仅展示首笔；本页不支持完整多笔汇总。 ':'';
-  const pxKind=pxVia==='signal'?'信号合约收盘':(pos.last_price_kind||'收盘');
-  const pxFt=px==null?'暂无':(esc(pxDate)+' · '+esc(pxKind));
-  const entryKind=pos.entry_price_kind||'收盘';
-  const rollNote=(HOLD.rolls||[]).map(r=>'已实现 '+esc(r.date)+' 平 '+esc(r.from)+' '+esc(r.lots)+' 手 @ '+num(r.close_price,1)+'，开 '+esc(r.to)+' @ '+num(r.open_price,1)+'，盈亏 '+(r.realized_pnl<0?'−':'')+num(Math.abs(r.realized_pnl),0)+' 元。').join('');
-  return '<div class="sec"><h2>当前持仓</h2><span class="side">持仓 '+asof+' · 最新价 '+(pxDate?esc(pxDate):'暂无')+(latest?' · 信号 '+esc(latest.date):'')+'</span></div>'
-   +'<div class="kpis">'
-   +'<div class="kpi"><div class="lb">合约</div><div class="vl">'+esc(code||'—')+'</div><div class="ft">'+esc(dir)+' · '+(lots==null?'—':esc(lots))+' 手'+life+'</div></div>'
-   +'<div class="kpi"><div class="lb">开仓价</div><div class="vl">'+(entry==null?'未填':num(entry,1))+'</div><div class="ft">'+(entry==null?'开仓价：未填':esc(pos.entry_date||'')+' '+esc(entryKind))+'</div></div>'
-   +'<div class="kpi"><div class="lb">最新价</div><div class="vl">'+(px==null?'—':num(px,1))+'</div><div class="ft">'+pxFt+'</div></div>'
-   +'<div class="kpi"><div class="lb">账户余额</div><div class="vl">'+money(bal)+'</div><div class="ft">'+(bal==null?'—':num(bal,0)+' 元')+'</div></div>'
-   +'<div class="kpi"><div class="lb">浮动盈亏</div><div class="vl">'+wan2(pnl)+'</div><div class="ft">手数 ×（最新价 − 开仓价）× 200</div></div>'
-   +'<div class="kpi"><div class="lb">估算权益</div><div class="vl">'+money(equity)+'</div><div class="ft">'+(equity==null?'余额口径待补':HOLD.balance_kind==='equity'?'配置已为权益，不重复加浮盈':'不含浮盈余额 + 当前浮盈估算')+'</div></div>'
-   +'<div class="kpi"><div class="lb">保证金 · 12%</div><div class="vl">'+money(margin)+'</div><div class="ft">实际手数 × 最新价 × 200 × 12%</div></div>'
-   +'<div class="kpi"><div class="lb">保证金 / 估算权益</div><div class="vl">'+pct(ratio)+'</div><div class="ft">12% 估算，非券商风控</div></div>'
-   +'</div><section class="panel"><div class="hold-note">'+multi+rollNote+(cmp||'')+(uni?uni:'')+(src?' 开仓价来源：'+src:'')+'</div></section>';
+ function holdingsBlock(day){
+  const state=day&&EXPECTED.get(day.date);
+  if(!state)return '<div class="sec"><h2>预计当前持仓</h2></div><section class="panel"><div class="hold-note">历史未加载，暂不能计算预计持仓</div></section>';
+  const latestDate=IC.days[IC.days.length-1]?.date,code=state.contract,meta=(day.contracts||[]).find(c=>c.code===code);
+  const kpi=(label,value,note)=>'<div class="kpi"><div class="lb">'+label+'</div><div class="vl">'+value+'</div><div class="ft">'+note+'</div></div>';
+  const costNote=!state.lots?'空仓，无持仓成本':!state.costKnown?'期初或交易日价格缺失，成本不补造':state.batches.length===1?esc(state.entryDate)+' 收盘估算成本':esc(state.entryDate)+' 至 '+esc(state.lastEntryDate)+' · 剩余批次加权';
+  const rows=state.batches.map(b=>'<tr><td>'+esc(b.date)+'</td><td>'+esc(b.kind)+'</td><td>'+esc(b.lots)+' 手</td><td>'+num(b.price,1)+'</td><td>'+wan2(b.price==null||state.mark==null?null:b.lots*(state.mark-b.price)*200)+'</td></tr>').join('');
+  const lastEvent=state.events[state.events.length-1];
+  const changeNote=lastEvent?esc(lastEvent.kind)+' '+esc(lastEvent.lots)+' 手'+(lastEvent.price==null?'':(' · '+num(lastEvent.price,1))):'本日无交易';
+  const title=day.date===latestDate?'预计当前持仓':'预计持仓 · 历史回溯';
+  const historyRows=state.events.slice().reverse().map(e=>'<tr><td>'+esc(e.date)+'</td><td>'+esc(e.kind)+'</td><td>'+esc(e.contract)+'</td><td>'+e.lots+'</td><td>'+num(e.price,1)+'</td><td>'+wan2(e.pnl)+'</td></tr>').join('');
+  document.getElementById('expectedHistoryBody').innerHTML='<p>当前连续持仓周期从 '+esc(state.cycleStart||'无持仓')+' 起；以下均为历史收盘价估算，不是实际成交回报。减仓先扣最早批次，换月先平旧合约，再按新合约当日收盘价建仓。</p><div class="tbx"><table><thead><tr><th>日期</th><th>变动</th><th>合约</th><th>手数</th><th>估算价</th><th>平仓盈亏</th></tr></thead><tbody>'+historyRows+'</tbody></table></div><p>本周期累计已平仓损益 '+wan2(state.realized)+'；未扣手续费及滑点。期货逐日结算不改变这里保留的批次开仓成本，持仓损益也不等于账户当日浮盈。</p>';
+  return '<div class="sec expected-position-head"><h2>'+title+'</h2><span class="side">'+esc(day.date)+' 收盘后 · 按每日信号执行估算</span><div class="section-actions"><button type="button" onclick="uiPanel.open(\'expectedHistory\')">查看变仓记录</button></div></div>'
+   +'<div class="kpis expected-position" id="expectedPosition" data-date="'+esc(day.date)+'">'
+   +kpi('预计合约 / 手数',code?esc(code)+'<small>多 '+state.lots+' 手</small>':'空仓',meta?'到期 '+esc(meta.expiry)+' · 剩余 '+esc(meta.days)+' 日':'不持有合约')
+   +kpi('剩余持仓均价',num(state.average,2),costNote)
+   +kpi('合约最新收盘',num(state.mark,1),esc(day.date)+' · 本合约收盘'+(state.missingPrice?' · 数据缺失':''))
+   +kpi('持仓损益（估算）',wan2(state.unrealized),'按剩余开仓批次计算 · 未扣费用')
+   +kpi('占用保证金（12%估算）',wan2(state.margin),'预计手数 × 本合约收盘 × 200 × 12%')
+   +kpi('最近持仓变动',esc(state.lastChange?.slice(5)||'—'),esc(state.lastChange||'')+' · '+changeNote)
+   +'</div><section class="panel expected-batches"><div class="panel-head"><h3>剩余持仓批次</h3><span>减仓先进先出 · 换月重置成本</span></div><div class="tbx"><table><thead><tr><th>成本日期</th><th>来源</th><th>剩余手数</th><th>估算开仓价</th><th>持仓损益</th></tr></thead><tbody>'
+   +(rows||'<tr><td colspan="5">空仓，无剩余批次</td></tr>')+'</tbody></table></div><div class="hold-note">本轮首次开仓 '+esc(state.cycleStart||'—')+' · 最近换月/切换 '+esc(state.lastRoll||'—')+'。按原信号历史的持有路径回放；不使用“今天新开仓选约”替代已有合约。收盘价代理收盘前成交，无法还原真实成交价；临近收盘信号跨线可能不同。账户余额、权益及真实成交记录不混入本估算。</div></section>';
  }
  function render(){
   const days=(IC&&Array.isArray(IC.days))?IC.days:[];
   const latest=days.length?days[days.length-1]:null;
   if(!days.length){
-   host.innerHTML='<section class="panel"><div class="foot">收盘信号还没有生成（data/ic_strategy.json）。</div></section>'+holdingsBlock(null,null);
+   host.innerHTML='<section class="panel"><div class="foot">收盘信号还没有生成（data/ic_strategy.json）。</div></section>'+holdingsBlock(null);
    sel.innerHTML='';
    moveICFootnotes();
    return;
@@ -780,24 +730,11 @@ function validateLocalAccount(h){
    sel.value=cur||latest.date;
   }
   const day=days.find(d=>d.date===sel.value)||latest;
-  const snap=accountSnap(latest);
-  const view=modelView(day.date===latest.date?latest:null, snap);
-  const hist=modelView(null, snap);
-  const shown=day.date===latest.date?view:hist;
-  // historical dates keep the engine D, labeled as backtest; the latest day uses the account.
-  const shownModel=day.date===latest.date?view:{
-   live:false,
-   base:day.target!=null?+day.target:0,
-   d:day.leg_d!=null?+day.leg_d:0,
-   total:Math.max(0,Math.min(10,(day.target!=null?+day.target:0)+(day.leg_d!=null?+day.leg_d:0))),
-   pnl:day.d_pnl,
-   need:day.d_next_yuan,
-   pick:day.entry_pick||'',
-   pickPx:(()=>{const r=(day.contracts||[]).find(c=>c.code===day.entry_pick);return r&&r.price!=null?+r.price:null})(),
-   start:liveStart()
-  };
-  const legD=shownModel.d;
-  const total=shownModel.total??shownModel.base;const accountMissing=day.date===latest.date&&!HOLD;const dUnknown=accountMissing||legD==null;const baseOnly=dUnknown;
+  const state=EXPECTED.get(day.date);
+  const snap={code:day.contract||'',px:state?.mark??null};
+  const shownModel={live:false,base:day.target,d:day.leg_d,total:day.total,pnl:day.d_pnl,need:day.d_next_yuan,
+   pick:day.entry_pick||'',blocked:day.index_close<day.ma_lower||day.target<=0?'撤出条件生效':'',start:null};
+  const legD=shownModel.d,total=shownModel.total,accountMissing=false,dUnknown=legD==null,baseOnly=dUnknown;
   const dState=legD>0?'在场':'未在场';
   const nxt=(day.contracts||[]).find(c=>c.role==='next');
   function aAt(px){
@@ -819,7 +756,7 @@ function validateLocalAccount(h){
    :(day.b_open&&day.trend_off_below!=null?('下一收盘跌破 '+num(day.trend_off_below,2)+' → 0'):'—');
   const cRead=cBasisReadout(day,latest.date);
   const dOrd=legD+1;
-  const dPrice=dUnknown?'账本未核验':shownModel.live&&snap.px!=null?('按持仓 '+(snap.code?esc(snap.code):'')+' 最新价 '+num(snap.px,1)+' 的 12% 保证金'):(shownModel.live?'持仓最新价暂无':'回测估算');
+  const dPrice='原模型累计（指数代理），不等于账户盈利';
   const dTrig=(shownModel.live&&snap.px==null)?'持仓最新价暂无'
    :(shownModel.need==null?'已达上限':('再赚 '+wan2(shownModel.need)+' 加第 '+dOrd+' 手，'+dPrice))
    +' · 撤出线 '+num(day.ma_lower,2);
@@ -859,7 +796,7 @@ function validateLocalAccount(h){
    +leg('a','A 网格', esc(day.leg_a), blk('规则','',aTable)+blk('现状', num(day.index_close,3), '中证500收盘')+blk('下次变化','',aNext))
    +leg('b','B 趋势', esc(day.leg_b), blk('规则','','&gt;MA250×1.01 加 2 手<br>&lt;MA250×0.99 减 2 手')+blk('MA250（250日均线）', num(day.ma250,2), '上轨 '+num(day.ma_upper,2)+' · 下轨 '+num(day.ma_lower,2)+' · 趋势'+(day.b_open?'打开':'关闭')+rail)+blk('下次变化', bTrig, ''))
    +leg('c','C 贴水', esc(cTile(day.leg_c)), blk('规则','','≥10% 加 2 手<br>&lt;3% 减 2 手<br>3% ≤ 贴水 <10% 不加不减；判定后保持到下次换月')+blk('本轮判定',cRead.decisionValue,cRead.decisionNote)+blk(cRead.currentTitle,cRead.currentValue,cRead.currentNote)+blk('下次判定',cRead.nextValue,cRead.nextNote))
-   +leg('d','D 盈利加仓', dUnknown?'—':esc(legD), blk('规则','','盈利 50% 够 1 手 12% 保证金即加 1 手，最多 4 手<br>跌破 MA250×0.99 或底仓归零全撤')+blk('现状', wan2(shownModel.pnl), dUnknown?(accountMissing?'持仓未加载':'净盈亏账本待补'):(dState+(shownModel.live?' · 净盈亏':' · 回测')))+blk('下次变化', accountMissing?'持仓未加载':shownModel.blocked?shownModel.blocked:(shownModel.need==null?'已达上限或不适用':('再赚 '+wan2(shownModel.need))), (shownModel.live&&snap.px!=null?'按持仓 '+(snap.code||'')+' '+num(snap.px,1):dPrice)+dMeter+'撤出线 '+num(day.ma_lower,2)))
+   +leg('d','D 盈利加仓', dUnknown?'—':esc(legD), blk('规则','','盈利 50% 够 1 手 12% 保证金即加 1 手，最多 4 手<br>跌破 MA250×0.99 或底仓归零全撤')+blk('现状', wan2(shownModel.pnl), dUnknown?(accountMissing?'持仓未加载':'净盈亏账本待补'):(dState+' · 原模型累计（指数代理）'))+blk('下次变化', accountMissing?'持仓未加载':shownModel.blocked?shownModel.blocked:(shownModel.need==null?'已达上限或不适用':('再赚 '+wan2(shownModel.need))), (shownModel.live&&snap.px!=null?'按持仓 '+(snap.code||'')+' '+num(snap.px,1):dPrice)+dMeter+'撤出线 '+num(day.ma_lower,2)))
    +'</div>';
   const known={grid_down:1,grid_up:1,trend_on:1,trend_off:1,basis:1};
   const extra=(day.triggers||[]).filter(r=>!known[r.kind]);
@@ -868,22 +805,21 @@ function validateLocalAccount(h){
   const cons=(day.contracts||[]).map(c=>{
    let status=String(c.status||'').replace(/持仓中\s*·\s*/g,'').replace(/持仓中/g,'').replace(/^\s*·\s*/,'').trim();
    const bits=[];
-   if(c.code&&c.code===actualCode) bits.push(day.date===latest.date?'实际持仓':'当前账户合约（非当日持仓）');
+   if(c.code&&c.code===actualCode) bits.push('预计持仓');
    if(c.code&&c.code===shownModel.pick) bits.push('建议新开仓');
    if(status) bits.push(status);
    const cls=(c.code===actualCode?'held':'')+(c.code===shownModel.pick&&c.code!==actualCode?' suggest':'');
    return '<tr class="'+cls+'"><td>'+esc(c.code)+'</td><td>'+esc(c.label)+'</td><td>'+num(c.price,1)+'</td><td>'+esc(c.expiry)+'</td><td>'+esc(c.days)+'</td><td>'+pct(c.basis)+'</td><td>'+esc(bits.join(' · ')||'—')+'</td></tr>';
   }).join('')||'<tr><td colspan="7">这一天没有挂牌合约。</td></tr>';
   const pickFt=shownModel.pick?(esc(shownModel.pick)+(day.entry_roll?' · '+esc(day.entry_roll)+' 收盘强制换月':'')):'—';
-  const latestModel=modelView(latest, snap);
   host.innerHTML=
-   '<section class="model" aria-label="模型建议"><header class="model-h"><div class="model-total"><span class="k">'+(baseOnly?'ABC底仓':'模型建议')+'</span><b>'+esc(total)+'</b><small>手</small></div><div class="model-formula">'+esc(baseOnly?abcText(day):abcdText(day, legD))+'</div><div class="model-meta">新开仓参考合约 '+pickFt+' · 按信号日 '+esc(day.date)+(day.date!==latest.date?' · 回测':'')+'</div></header>'
+   '<section class="model" aria-label="模型建议"><header class="model-h"><div class="model-total"><span class="k">'+(baseOnly?'ABC底仓':'模型建议')+'</span><b>'+esc(total)+'</b><small>手</small></div><div class="model-formula">'+esc(baseOnly?abcText(day):abcdText(day, legD))+'</div><div class="model-meta">新开仓参考合约 '+pickFt+' · 按信号日 '+esc(day.date)+(day.date!==latest.date?' · 历史回溯':'')+'</div></header>'
    +lotbar+legRow+'</section>'
    +extraHtml
-   +holdingsBlock(latest, latestModel)
+   +holdingsBlock(day)
    +'<div class="sec"><h2>IC 挂牌合约</h2><span class="side">信号日 '+esc(day.date)+' 收盘</span></div>'
    +'<section class="panel"><div class="tbx"><table><colgroup><col style="width:12%"><col style="width:10%"><col style="width:14%"><col style="width:16%"><col style="width:12%"><col style="width:14%"><col style="width:22%"></colgroup><thead><tr><th>合约</th><th>角色</th><th>收盘</th><th>到期</th><th>日历天</th><th>年化贴水</th><th>比较</th></tr></thead><tbody>'+cons+'</tbody></table></div>'
-   +'<div class="foot">指数用新浪中证500收盘。期货用收盘价，并与中金所日行情「今收盘」核对；日行情未出时用 15:00 的最新价，不是结算价。1 点 = 200 元。年化贴水 = (指数 − 期货) / 指数 × 365 / 日历天数。「实际持仓」来自账户配置，「建议新开仓」是模型按新开仓规则选出的合约。</div></section>';
+   +'<div class="foot">指数用新浪中证500收盘。期货用收盘价，并与中金所日行情「今收盘」核对；日行情未出时用 15:00 的最新价，不是结算价。1 点 = 200 元。年化贴水 = (指数 − 期货) / 指数 × 365 / 日历天数。「预计持仓」沿已发布历史的持有路径回放；「建议新开仓」仅供从空仓开始比较，两者不可混用。</div></section>';
 
   moveICFootnotes();
  }
@@ -894,14 +830,14 @@ function validateLocalAccount(h){
  }
  sel.addEventListener('change',()=>{const u=new URL(location.href);u.searchParams.set('signal',sel.value);history.replaceState(null,'',u);render()});
  window.reloadIC=async()=>{
-  const result=await Promise.allSettled([readJSON('data/ic_strategy.json?t='+Date.now()),readJSON('data/holdings.json?t='+Date.now())]);
-  const valid=result[0].status==='fulfilled'&&Array.isArray(result[0].value?.days)&&result[0].value.days.length;
-  if(valid)IC={...result[0].value,days:result[0].value.days.slice().sort((a,b)=>a.date.localeCompare(b.date))};
-  let accountError='';
-  if(result[1].status==='fulfilled'){try{HOLD=validateLocalAccount(result[1].value)}catch(e){accountError='持仓配置无效，保留上次记录'}}else accountError='持仓配置读取失败，保留上次记录';
-  render();
-  if(accountError)pageNotice(accountError);
-  if(!valid){const note=document.createElement('div');note.className='data-notice';note.textContent='策略数据读取失败：保留上次可用结果，不能认为刷新成功；点击刷新重试。';host.prepend(note)}
+  try{
+   const candidate=await readJSON('data/ic_strategy.json?t='+Date.now());
+   if(!Array.isArray(candidate?.days)||!candidate.days.length||candidate.latest!==candidate.days.at(-1).date)throw new Error('历史日期与截止日不一致');
+   const expected=replayExpectedHoldings(candidate.days);
+   IC=candidate;EXPECTED=expected;render();
+  }catch(e){
+   render();const note=document.createElement('div');note.className='data-notice';note.textContent='策略历史读取或回放失败：保留上次可用结果，不代表本次更新成功。';host.prepend(note);
+  }
  };
  window.refresh();
 })();

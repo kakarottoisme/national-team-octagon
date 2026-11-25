@@ -20,12 +20,14 @@ class ReviewedUX(unittest.TestCase):
   s=self.source('index.html');self.assertIn('value:uiNumber(v)',s)
   self.assertNotIn('value:+v.toFixed(3)',s)
  def test_d_boundary_and_missing_input(self):
-  s=self.source('futures-preview.html');a=s.index(' function liveAddon(');b=s.index(' function accountSnap(',a)
-  self.js(s[a:b]+"const assert=require('assert');assert.deepStrictEqual(liveAddon(4,null,6000),{d:0,need:null});assert.equal(liveAddon(4,600000,6000).d,2);assert.equal(liveAddon(9,9999999,6000).d,1);assert.equal(liveAddon(10,9999999,6000).d,0);assert.equal(liveAddon(4,-100,6000).d,0)")
+  s=self.source('futures-preview.html')
+  self.assertIn('d:day.leg_d,total:day.total,pnl:day.d_pnl,need:day.d_next_yuan',s)
+  self.assertNotIn('function liveAddon(',s)
+  self.assertIn('不用本页持仓损益反向改写信号',s)
  def test_d_exit_respected_and_history_not_real_account(self):
-  s=self.source('futures-preview.html');self.assertIn('day.index_close<day.ma_lower||base<=0',s);self.assertIn("day.date!==latest.date?' · 回测'",s)
+  s=self.source('futures-preview.html');self.assertIn('day.index_close<day.ma_lower||day.target<=0',s);self.assertIn("day.date!==latest.date?' · 历史回溯'",s)
  def test_negative_c_and_limits_are_visible(self):
-  s=self.source('futures-preview.html');self.assertIn("['C',+day.leg_c||0,'c']",s);self.assertIn('底仓限幅至',s);self.assertIn('3% ≤ 贴水 <10% 为 0',s)
+  s=self.source('futures-preview.html');self.assertIn("['C',+day.leg_c||0,'c']",s);self.assertIn('底仓限幅至',s);self.assertIn('3% ≤ 贴水 <10% 不加不减',s)
  def test_net_short_definition_is_not_reversed(self):
   s=self.source('futures-preview.html');self.assertIn('空−多',s);self.assertNotIn('净空=多−空',s)
  def test_grid_width_scoped(self):

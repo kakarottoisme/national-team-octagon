@@ -3,7 +3,7 @@ import subprocess,unittest
 ROOT=Path(__file__).resolve().parents[1]
 class CBasisReadout(unittest.TestCase):
  def test_decision_current_and_next_are_distinct_and_date_bound(self):
-  s=(ROOT/'futures-preview.html').read_text();code=s.split(' function cBasisReadout(',1)[1].split(' function liveAddon(',1)[0];code='function cBasisReadout('+code
+  s=(ROOT/'futures-preview.html').read_text();code=s.split(' function cBasisReadout(',1)[1].split(' function holdingsBlock(',1)[0];code='function cBasisReadout('+code
   stub="const assert=require('assert');const esc=s=>String(s).replace(/</g,'&lt;');const pct=v=>v==null?'—':(v*100).toFixed(2)+'%';\n"
   checks="""
 let d={date:'2026-11-23',c_set_on:'2026-11-19',c_contract:'IC2612',c_basis:.146876,next_roll:'2026-12-17',contracts:[{code:'IC2701',role:'next',basis:.135502},{code:'IC2612',role:'near',basis:.169112}]};

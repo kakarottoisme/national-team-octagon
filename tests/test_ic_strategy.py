@@ -238,8 +238,9 @@ class TestPageCopy(unittest.TestCase):
         self.assertNotIn("全样本年化 43.96%", page)
         self.assertIn("原回测收益指标尚未统一核验", page)
         self.assertIn("账户配置", page)
-        self.assertIn("readJSON('data/holdings.json", page)
-        self.assertIn("当前持仓", page)
+        self.assertNotIn("readJSON('data/holdings.json", page)
+        self.assertIn("replayExpectedHoldings(candidate.days)", page)
+        self.assertIn("预计当前持仓", page)
         self.assertNotIn("margin_14", page)
         self.assertNotIn("按 14%", page)
         self.assertNotIn("14% 档", page)
@@ -268,7 +269,7 @@ class TestPageCopy(unittest.TestCase):
         self.assertNotIn("day.action_text", page)
         self.assertIn("模型建议", page)
         self.assertIn("按信号日", page)
-        self.assertIn("不沿用回测累计", page)
+        self.assertIn("不用本页持仓损益反向改写信号", page)
 
 
 class TestMerge(unittest.TestCase):
