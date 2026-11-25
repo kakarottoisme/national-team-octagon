@@ -1,6 +1,6 @@
 {
   "schema_version": "2.1-safe",
-  "generated_at": "2026-11-24T03:48:54+00:00",
+  "generated_at": "2026-11-25T10:44:24+00:00",
   "data_status": "safe_public_with_attribution",
   "policy_notes": [
     "US Treasury data is public domain; Cboe index CSVs are public CDN downloads with attribution.",
@@ -14,46 +14,46 @@
       "ok": true,
       "degraded": false,
       "error": null,
-      "as_of": "2026-11-23",
-      "last_attempt_at": "2026-11-24T03:48:54+00:00"
+      "as_of": "2026-11-24",
+      "last_attempt_at": "2026-11-25T10:44:24+00:00"
     },
     "cboe": {},
     "public_macro": {
       "fetch_status": {
         "ust_10y_nominal": {
           "state": "ok",
-          "as_of": "2026-11-23",
-          "n": 723
+          "as_of": "2026-11-24",
+          "n": 724
         },
         "ust_curve_nominal": {
           "state": "ok",
-          "as_of": "2026-11-23",
-          "n": 723
+          "as_of": "2026-11-24",
+          "n": 724
         },
         "ust_10y_real": {
           "state": "ok",
-          "as_of": "2026-11-23",
-          "n": 723
+          "as_of": "2026-11-24",
+          "n": 724
         },
         "ust_curve_real": {
           "state": "ok",
-          "as_of": "2026-11-23",
-          "n": 723
+          "as_of": "2026-11-24",
+          "n": 724
         },
         "bei_10y": {
           "state": "ok",
-          "as_of": "2026-11-23",
-          "n": 723
+          "as_of": "2026-11-24",
+          "n": 724
         },
         "sofr": {
           "state": "ok",
-          "as_of": "2026-11-20",
+          "as_of": "2026-11-23",
           "n": 272
         },
         "acm_tp_10y": {
           "state": "ok",
-          "as_of": "2026-11-20",
-          "n": 16324
+          "as_of": "2026-11-23",
+          "n": 16325
         },
         "iorb": {
           "state": "error"
@@ -70,9 +70,9 @@
         }
       },
       "errors": [
-        "iorb: The read operation timed out",
+        "iorb: HTTP Error 502: Bad Gateway",
         "nfci: The read operation timed out",
-        "sahm: The read operation timed out"
+        "sahm: HTTP Error 502: Bad Gateway"
       ]
     }
   },
@@ -153,21 +153,21 @@
       "unit": "%",
       "status": "connected",
       "value": {
-        "1 Mo": 4.2,
-        "3 Mo": 4.37,
-        "6 Mo": 4.45,
-        "1 Yr": 4.57,
+        "1 Mo": 4.21,
+        "3 Mo": 4.36,
+        "6 Mo": 4.46,
+        "1 Yr": 4.59,
         "2 Yr": 4.63,
-        "3 Yr": 4.69,
-        "5 Yr": 4.74,
-        "7 Yr": 4.81,
-        "10 Yr": 4.92,
+        "3 Yr": 4.67,
+        "5 Yr": 4.69,
+        "7 Yr": 4.79,
+        "10 Yr": 4.91,
         "20 Yr": 5.33,
-        "30 Yr": 5.29
+        "30 Yr": 5.3
       },
-      "as_of": "2026-11-23",
+      "as_of": "2026-11-24",
       "as_of_raw": null,
-      "collected_at": "2026-11-24T11:46:13+08:00",
+      "collected_at": "2026-11-25T18:41:46+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -11736,6 +11736,22 @@
             "20 Yr": 5.33,
             "30 Yr": 5.29
           }
+        },
+        {
+          "date": "2026-11-24",
+          "value": {
+            "1 Mo": 4.21,
+            "3 Mo": 4.36,
+            "6 Mo": 4.46,
+            "1 Yr": 4.59,
+            "2 Yr": 4.63,
+            "3 Yr": 4.67,
+            "5 Yr": 4.69,
+            "7 Yr": 4.79,
+            "10 Yr": 4.91,
+            "20 Yr": 5.33,
+            "30 Yr": 5.3
+          }
         }
       ],
       "change": null,
@@ -11761,15 +11777,15 @@
       "unit": "%",
       "status": "connected",
       "value": {
-        "5 YR": 2.59,
-        "7 YR": 2.68,
+        "5 YR": 2.58,
+        "7 YR": 2.67,
         "10 YR": 2.79,
-        "20 YR": 3.04,
-        "30 YR": 3.17
+        "20 YR": 3.05,
+        "30 YR": 3.19
       },
-      "as_of": "2026-11-23",
+      "as_of": "2026-11-24",
       "as_of_raw": null,
-      "collected_at": "2026-11-24T11:46:18+08:00",
+      "collected_at": "2026-11-25T18:41:53+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -19000,6 +19016,16 @@
             "20 YR": 3.04,
             "30 YR": 3.17
           }
+        },
+        {
+          "date": "2026-11-24",
+          "value": {
+            "5 YR": 2.58,
+            "7 YR": 2.67,
+            "10 YR": 2.79,
+            "20 YR": 3.05,
+            "30 YR": 3.19
+          }
         }
       ],
       "change": null,
@@ -19646,9 +19672,9 @@
       "unit": "%",
       "status": "connected",
       "value": 2.79,
-      "as_of": "2026-11-23",
+      "as_of": "2026-11-24",
       "as_of_raw": null,
-      "collected_at": "2026-11-24T11:46:18+08:00",
+      "collected_at": "2026-11-25T18:41:53+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -22541,6 +22567,10 @@
         {
           "date": "2026-11-23",
           "value": 2.79
+        },
+        {
+          "date": "2026-11-24",
+          "value": 2.79
         }
       ],
       "change": null,
@@ -22568,19 +22598,11 @@
       "layer": "S_slow_variables",
       "unit": "%",
       "status": "connected",
-      "value": 0.715,
-      "as_of": "2026-11-20",
+      "value": 0.665,
+      "as_of": "2026-11-23",
       "as_of_raw": null,
-      "collected_at": "2026-11-24T11:46:30+08:00",
+      "collected_at": "2026-11-25T18:42:05+08:00",
       "history": [
-        {
-          "date": "2021-09-07",
-          "value": -0.429
-        },
-        {
-          "date": "2021-09-08",
-          "value": -0.484
-        },
         {
           "date": "2021-09-09",
           "value": -0.529
@@ -27776,6 +27798,10 @@
         {
           "date": "2026-11-20",
           "value": 0.715
+        },
+        {
+          "date": "2026-11-23",
+          "value": 0.665
         }
       ],
       "change": null,
@@ -27827,18 +27853,10 @@
       "unit": "%",
       "status": "connected",
       "value": 3.92,
-      "as_of": "2026-11-20",
+      "as_of": "2026-11-23",
       "as_of_raw": null,
-      "collected_at": "2026-11-24T11:46:21+08:00",
+      "collected_at": "2026-11-25T18:41:56+08:00",
       "history": [
-        {
-          "date": "2025-10-17",
-          "value": 4.18
-        },
-        {
-          "date": "2025-10-20",
-          "value": 4.16
-        },
         {
           "date": "2025-10-21",
           "value": 4.23
@@ -28922,13 +28940,17 @@
         {
           "date": "2026-11-20",
           "value": 3.92
+        },
+        {
+          "date": "2026-11-23",
+          "value": 3.92
         }
       ],
       "change": null,
       "change_pct": null,
       "stale": false,
       "last_attempt_at": null,
-      "source_url": "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2025-10-20&endDate=2026-11-24",
+      "source_url": "https://markets.newyorkfed.org/api/rates/secured/sofr/search.json?startDate=2025-10-21&endDate=2026-11-25",
       "link_url": "https://www.newyorkfed.org/markets/reference-rates/sofr",
       "license": "https://resources.newyorkfed.org/privacy/termsofuse",
       "license_status": "official_source",
@@ -29018,10 +29040,10 @@
       "layer": "S_slow_variables",
       "unit": "percent",
       "status": "connected",
-      "value": 2.13,
-      "as_of": "2026-11-23",
+      "value": 2.12,
+      "as_of": "2026-11-24",
       "as_of_raw": null,
-      "collected_at": "2026-11-24T11:46:18+08:00",
+      "collected_at": "2026-11-25T18:41:53+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -31914,6 +31936,10 @@
         {
           "date": "2026-11-23",
           "value": 2.13
+        },
+        {
+          "date": "2026-11-24",
+          "value": 2.12
         }
       ],
       "change": null,
@@ -31937,9 +31963,9 @@
     }
   ],
   "errors": [
-    "iorb: The read operation timed out",
+    "iorb: HTTP Error 502: Bad Gateway",
     "nfci: The read operation timed out",
-    "sahm: The read operation timed out"
+    "sahm: HTTP Error 502: Bad Gateway"
   ],
   "run_state": "partial"
 }
