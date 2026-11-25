@@ -22,7 +22,7 @@
 
 ### 期指持仓
 `futures-preview.html` 读 `data/ic_strategy.json`（信号与FIFO预计持仓）、`preview-data/official/snapshot-latest.json`、`preview-data/official/futures/{IH,IF,IC,IM}.json` 等官方历史；本人 `data/holdings.json` 保留但不混入预计持仓。
-- `ic_strategy.py`：新浪中证500和 IC 收盘、中金所今收盘核对，生成原策略信号及模型历史
+- `ic_strategy.py`：新浪中证500和 IC 收盘、中金所今收盘核对，生成原策略信号及模型历史。2026-11-25用户授权纳入下季：`FAR_FROM=2026-11-26`，按各信号日生效，不按运行日期。生效前仍三合约，生效后四挂牌合约；3pp开仓/2pp换仓/10自然日及ABC/D不变，`selection_policy`元数据留痕。原772日历史及FIFO成本不倒改，前端当前日以四合约重算比较列展示，历史日仍旧规则。
 - `preview-tools/collect_preview.py`：SSE ETF 份额及 CFFEX 会员排名、快照、状态、四品种日更
 - `preview-tools/futures_history.py`：CFFEX 原始 CSV 严格验日期、前20会员并集、独立品种历史
 - `holdings.json`：本人配置，非模型仓位。采集器不应写它；缺净账本时不硬算真实账户 D。2026-11-25用户授权将原当前持仓展示改为「预计当前持仓」：页面不再读取该账户文件，但原记录完整保留。
@@ -87,7 +87,7 @@ python3 etf_share_flows.py
 - 任一 ETF 抓取/解析抛异常，不写新的 live 或归档；原子化不等于跨 history/minutes 的事务
 
 ### IC
-`schema/latest/days` 及每一天原有字段由 `build_payload`、`make_day` 和 `dump_payload` 定义；dump 保留每个 day 一行、末尾换行。本轮所有非 I/O 函数的 AST 一致。A/B/C/D、MA250、0–10手、D最多4手、乘数200、12%保证金、3pp开仓/2pp换仓/最少10自然日等均是现行模型，未重新回测认证。模型历史与本人账户是不同层。
+`schema/latest/days` 及每一天原有字段由 `build_payload`、`make_day` 和 `dump_payload` 定义；dump 保留每个 day 一行、末尾换行。2026-11-25授权仅将下季按信号日纳入选约，见上文；其余非I/O函数与发布前版本AST一致。A/B/C/D、MA250、0–10手、D最多4手、乘数200、12%保证金、3pp开仓/2pp换仓/最少10自然日等均是现行模型，未重新回测认证。模型历史与本人账户是不同层。
 
 ### 官方期指 / 风险
 - futures schema=`futures-history-2.0`，records日期键；日期来自 CSV 交易日，不能拿快照日期推断

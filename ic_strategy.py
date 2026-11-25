@@ -40,6 +40,9 @@ GRID = (5000, 5250, 5500, 6000, 6500)
 OPEN_GAP = 0.03
 SWITCH_GAP = 0.02
 MIN_DAYS = 10
+# 2026-11-25 收盘后授权扩围；旧信号/成交路径不倒改。
+FAR_FROM = dt.date(2026, 11, 26)
+SELECTION_POLICY = "four-listed-v2"
 # D 腿：盈利的 50% 覆盖 12% 保证金才加仓，最多 4 手，底仓 + D 不超过 10。
 D_FRAC = 0.5
 D_MAX = 4
@@ -427,11 +430,26 @@ def choose_switch(held: str, eligible: list[str], discounts: dict[str, float]) -
     return _best(contenders, discounts)
 
 
-def status_text(role: str, days: int, price: float | None, code: str, held: str | None) -> str:
+def far_enabled(slots: list[dict]) -> bool:
+    """Dated slots are evaluated on their own signal date, not runner wall clock.
+
+    Undated slots in pure selection tests use the current four-contract policy.
+    """
+    if not slots:
+        return False
+    s = slots[0]
+    if s.get("expiry") is None or s.get("days") is None:
+        return True
+    asof = dt.date.fromisoformat(s["expiry"]) - dt.timedelta(days=int(s["days"]))
+    return asof >= FAR_FROM
+
+
+def status_text(role: str, days: int, price: float | None, code: str, held: str | None,
+                include_far: bool = False) -> str:
     bits = []
     if held and code == held:
         bits.append("持仓中")
-    if role == "far":
+    if role == "far" and not include_far:
         bits.append("下季不参与")
     elif price is None:
         bits.append("无行情")
@@ -444,8 +462,9 @@ def status_text(role: str, days: int, price: float | None, code: str, held: str 
 
 def eligible_codes(slots: list[dict], prices: dict[str, float | None]) -> list[str]:
     out = []
+    include_far = far_enabled(slots)
     for s in slots:
-        if s["role"] == "far" or s["days"] < MIN_DAYS:
+        if (s["role"] == "far" and not include_far) or s["days"] < MIN_DAYS:
             continue
         if prices.get(s["code"]) is None:
             continue
@@ -639,7 +658,7 @@ def simulate(index_rows: list[tuple[str, float]], price_map: dict[str, dict[str,
                 "expiry": s["expiry"],
                 "days": s["days"],
                 "basis": None if basis is None else round(basis, 6),
-                "status": status_text(s["role"], s["days"], px, s["code"], held),
+                "status": status_text(s["role"], s["days"], px, s["code"], held, far_enabled(slots)),
             })
         held_px = prices.get(held) if held else None
         notional = target * held_px * MULTIPLIER if held_px and target else 0.0
@@ -960,6 +979,9 @@ def build_payload(index_rows, price_map, holidays, cffex_note: str) -> dict:
             "total_cap": 10,
             "exit": "收盘 < MA250×0.99，或底仓 <= 0",
         },
+        "selection_policy": {"version": SELECTION_POLICY, "effective_from": FAR_FROM.isoformat(),
+                             "roles": ["near", "next", "quarter", "far"],
+                             "open_gap": OPEN_GAP, "switch_gap": SWITCH_GAP, "min_days": MIN_DAYS},
         "sources": {
             "index": "新浪财经 sh000905 日K收盘（CN_MarketDataService.getKLineData scale=240）",
             "futures": "新浪财经 IC 日K收盘（InnerFuturesNewService.getDailyKLine 字段 c）",

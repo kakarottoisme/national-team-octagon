@@ -266,7 +266,7 @@ body.ui-page{font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
   <dt>盈利覆盖加仓 D</dt><dd>D 腿（盈利覆盖加仓）：自上次 D 撤出以来累计盈利的 50% 够付 1 手保证金（按 12%）即加 1 手，最多 4 手，总手数不超过 10；收盘跌破 MA250×0.99 或底仓归零时 D 全撤。</dd>
   <dt>合计</dt><dd>底仓 = A + B + C，限制在 0 到 10 手。建议手数 = 底仓 + D，不超过 10 手。</dd>
   <dt>年化贴水</dt><dd>(指数收盘 − 期货收盘) / 指数收盘 × 365 / 距最后交易日的日历天数。</dd>
-  <dt>选约</dt><dd>只在当月、次月、当季里比较，下季不参与。距最后交易日不足 10 个日历日的合约不参与比较。开仓以及强制移仓当日，若某张合约的年化贴水比基准近月高出不少于 3 个百分点，就用贴水最高的那张，否则用近月；近月若已不足 10 日，基准改为最近的一张可比较合约。持有期间，若另一张可比较合约比持仓高出不少于 2 个百分点，整仓换过去。全部手数在同一个合约。页面另列「新开仓参考合约」；预计持仓沿原信号历史的持有路径选约。</dd>
+  <dt>选约</dt><dd>从 2026-11-26 信号日起，当月、次月、当季、下季四张挂牌合约都参与比较；此前已发布的信号和持仓成本保持原样，不倒改。距最后交易日不足 10 个日历日的合约不参与比较。开仓以及强制移仓当日，若某张合约的年化贴水比基准近月高出不少于 3 个百分点，就用贴水最高的那张，否则用近月；近月若已不足 10 日，基准改为最近的一张可比较合约。持有期间，若另一张可比较合约比持仓高出不少于 2 个百分点，整仓换过去。全部手数在同一个合约。远月也只按年化贴水比较，价格更低不等于收益更高。页面另列「新开仓参考合约」；预计持仓沿原信号历史的持有路径选约。</dd>
   <dt>预计当前持仓</dt><dd>按每个已发布信号日的总手数和持有合约，在当日收盘价上估算执行。增加手数新建批次；减仓先进先出；换月或切换合约全部平旧仓，再按新合约价格重建成本。均价只对尚未平掉的批次按手数加权，不使用全部历史买入均价。切换信号日同步回溯持仓，未记录的真实成交不补造。</dd>
   <dt>强制移仓</dt><dd>最后交易日是合约月份的第三个星期五，遇休市顺延。持仓合约最后交易日的前一交易日收盘必须移仓，并按开仓的 3 个百分点规则重选。</dd>
   <dt>资金</dt><dd>这条规则的回测里，按交易所保证金 12% 估算，峰值大约 129 万。建议账户至少准备 400 万。页面保证金按预计手数、同日合约收盘和 12% 估算，不是券商实际风险度。</dd>
@@ -588,6 +588,22 @@ function validateLocalAccount(h){
  return {as_of:h.as_of||p.entry_date,balance_as_of:h.balance_as_of||h.as_of||p.entry_date,account_balance:finite(h.account_balance),balance_kind:h.balance_kind||null,d_live_start:h.d_live_start||null,d_pnl_as_of:h.d_pnl_as_of||null,d_realized_net_pnl:finite(h.d_realized_net_pnl),d_unrealized_net_pnl:finite(h.d_unrealized_net_pnl),rolls,positions:[{contract:p.contract,direction:p.direction,lots:p.lots,entry_price:p.entry_price,entry_date:p.entry_date,entry_price_kind:p.entry_price_kind||'',last_price:finite(p.last_price),last_date:p.last_date||'',last_price_kind:p.last_price_kind||''}]};
 }
 
+function fourContractComparison(day, includeFar){
+ const contracts=day.contracts||[],rates=new Map();
+ for(const c of contracts){const valid=typeof c.price==='number'&&c.price>0&&day.index_close>0&&c.days>0;rates.set(c.code,valid?(day.index_close-c.price)/day.index_close*365/c.days:null);}
+ const eligible=contracts.filter(c=>(includeFar||c.role!=='far')&&c.days>=10&&rates.get(c.code)!=null);
+ const near=contracts.find(c=>c.role==='near'),base=eligible.find(c=>c.code===near?.code)||eligible[0];
+ const best=list=>list.length?list.reduce((a,b)=>rates.get(b.code)>rates.get(a.code)?b:a):null;
+ const opens=base?eligible.filter(c=>c.code!==base.code&&rates.get(c.code)>=rates.get(base.code)+.03-1e-9):[];
+ const pick=(best(opens)||base)?.code||null,heldRate=rates.get(day.contract);
+ const switches=heldRate!=null?eligible.filter(c=>c.code!==day.contract&&rates.get(c.code)>=heldRate+.02-1e-9):[];
+ const switchPick=best(switches)?.code||null;
+ return {pick,switchPick,rows:contracts.map(c=>({code:c.code,basis:rates.get(c.code),nearGap:rates.get(c.code)!=null&&base?rates.get(c.code)-rates.get(base.code):null,
+  heldGap:rates.get(c.code)!=null&&heldRate!=null?rates.get(c.code)-heldRate:null,
+  status:c.role==='far'&&!includeFar?'旧规则未纳入':rates.get(c.code)==null?'行情缺失':c.days<10?'不足10日，不参与':c.code===switchPick?'达到换仓门槛':c.code===day.contract?'当前合约':c.code===pick?'新开仓参考':'参与比较，未触发'}))};
+}
+window.fourContractComparison=fourContractComparison;
+
 function replayExpectedHoldings(days){
  const snapshots=new Map();let batches=[],held=null,events=[],cycleStart=null,lastChange=null,lastRoll=null,realized=0,realizedKnown=true;
  let previousDate=null;
@@ -802,15 +818,18 @@ window.replayExpectedHoldings=replayExpectedHoldings;
   const extra=(day.triggers||[]).filter(r=>!known[r.kind]);
   const extraHtml=extra.length?('<div class="sec"><h2>其余触发</h2></div><section class="panel"><div class="tbx"><table class="wrap-cells"><tbody>'+extra.map(r=>'<tr><td>'+esc(r.cond)+'：'+esc(r.effect)+'</td></tr>').join('')+'</tbody></table></div></section>'):'';
   const actualCode=snap.code;
+  const includeFar=day.date===latest.date||day.date>='2026-11-26';
+  const compared=fourContractComparison(day,includeFar),detail=new Map(compared.rows.map(c=>[c.code,c]));
+  const gap=v=>v==null?'—':(v>=0?'+':'−')+num(Math.abs(v*100),2)+' pp';
   const cons=(day.contracts||[]).map(c=>{
-   let status=String(c.status||'').replace(/持仓中\s*·\s*/g,'').replace(/持仓中/g,'').replace(/^\s*·\s*/,'').trim();
-   const bits=[];
-   if(c.code&&c.code===actualCode) bits.push('预计持仓');
-   if(c.code&&c.code===shownModel.pick) bits.push('建议新开仓');
-   if(status) bits.push(status);
-   const cls=(c.code===actualCode?'held':'')+(c.code===shownModel.pick&&c.code!==actualCode?' suggest':'');
-   return '<tr class="'+cls+'"><td>'+esc(c.code)+'</td><td>'+esc(c.label)+'</td><td>'+num(c.price,1)+'</td><td>'+esc(c.expiry)+'</td><td>'+esc(c.days)+'</td><td>'+pct(c.basis)+'</td><td>'+esc(bits.join(' · ')||'—')+'</td></tr>';
-  }).join('')||'<tr><td colspan="7">这一天没有挂牌合约。</td></tr>';
+   const view=detail.get(c.code),bits=[];
+   if(c.code===actualCode)bits.push('预计持仓');
+   if(c.code===compared.pick)bits.push('新开仓参考');
+   if(c.code!==actualCode&&c.code!==compared.pick||view.status==='不足10日，不参与'||view.status==='行情缺失'||view.status==='旧规则未纳入'||view.status==='达到换仓门槛')bits.push(view.status);
+   const cls=(c.code===actualCode?'held':'')+(c.code===compared.pick&&c.code!==actualCode?' suggest':'');
+   return '<tr class="'+cls+'"><td>'+esc(c.code)+'</td><td>'+esc(c.label)+'</td><td>'+num(c.price,1)+'</td><td>'+esc(c.expiry)+'</td><td>'+esc(c.days)+'</td><td>'+pct(view.basis)+'</td><td>'+gap(view.nearGap)+'</td><td>'+gap(view.heldGap)+'</td><td>'+esc(bits.join(' · ')||'—')+'</td></tr>';
+  }).join('')||'<tr><td colspan="9">这一天没有挂牌合约。</td></tr>';
+  const compareNote=day.date<'2026-11-26'&&day.date===latest.date?'本日按四合约重算参考；下季从 2026-11-26 信号日起纳入，旧持仓路径不倒改。':includeFar?'当月、次月、当季、下季均参与；新开仓优势≥3pp、换仓优势≥2pp，且剩余≥10日。':'历史日保留旧三合约规则，旧持仓成本不倒改。';
   const pickFt=shownModel.pick?(esc(shownModel.pick)+(day.entry_roll?' · '+esc(day.entry_roll)+' 收盘强制换月':'')):'—';
   host.innerHTML=
    '<section class="model" aria-label="模型建议"><header class="model-h"><div class="model-total"><span class="k">'+(baseOnly?'ABC底仓':'模型建议')+'</span><b>'+esc(total)+'</b><small>手</small></div><div class="model-formula">'+esc(baseOnly?abcText(day):abcdText(day, legD))+'</div><div class="model-meta">新开仓参考合约 '+pickFt+' · 按信号日 '+esc(day.date)+(day.date!==latest.date?' · 历史回溯':'')+'</div></header>'
@@ -818,7 +837,7 @@ window.replayExpectedHoldings=replayExpectedHoldings;
    +extraHtml
    +holdingsBlock(day)
    +'<div class="sec"><h2>IC 挂牌合约</h2><span class="side">信号日 '+esc(day.date)+' 收盘</span></div>'
-   +'<section class="panel"><div class="tbx"><table><colgroup><col style="width:12%"><col style="width:10%"><col style="width:14%"><col style="width:16%"><col style="width:12%"><col style="width:14%"><col style="width:22%"></colgroup><thead><tr><th>合约</th><th>角色</th><th>收盘</th><th>到期</th><th>日历天</th><th>年化贴水</th><th>比较</th></tr></thead><tbody>'+cons+'</tbody></table></div>'
+   +'<section class="panel ic-contract-comparison"><div class="tbx"><table><colgroup><col style="width:10%"><col style="width:7%"><col style="width:10%"><col style="width:13%"><col style="width:7%"><col style="width:11%"><col style="width:10%"><col style="width:10%"><col style="width:22%"></colgroup><thead><tr><th>合约</th><th>角色</th><th>收盘</th><th>到期</th><th>日历天</th><th>年化贴水</th><th>较开仓基准</th><th>较持有合约</th><th>比较</th></tr></thead><tbody>'+cons+'</tbody></table></div><div class="foot">'+esc(compareNote)+' pp = 百分点；年化贴水不是收益保证，未考虑盘口价差和成交滑点。</div>'
    +'<div class="foot">指数用新浪中证500收盘。期货用收盘价，并与中金所日行情「今收盘」核对；日行情未出时用 15:00 的最新价，不是结算价。1 点 = 200 元。年化贴水 = (指数 − 期货) / 指数 × 365 / 日历天数。「预计持仓」沿已发布历史的持有路径回放；「建议新开仓」仅供从空仓开始比较，两者不可混用。</div></section>';
 
   moveICFootnotes();
