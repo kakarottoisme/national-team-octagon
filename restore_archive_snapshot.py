@@ -63,6 +63,8 @@ def build(snapshot, date, provenance):
         row.update(interval_minutes=1,source='tencent_minutes_preserved_snapshot',source_url=provenance['source_url'],price_type='minute_quote',interpolated=False)
         indices[code]=row
     minutes=merge_indices(minutes,indices)
+    from archive import validate_complete
+    validate_complete(summary, minutes, date)
     return summary,minutes
 
 
@@ -101,6 +103,35 @@ def from_git(root, date):
         except (ValueError,TypeError,KeyError,OverflowError):
             continue
     raise ValueError('没有可验证的当日完整Git收盘快照，未补档；缺点不补0、不借用其他日期')
+
+
+def enrich_missing_indices(root, date):
+    """Repair an existing archive's missing display layer only, from immutable Git.
+
+    Explicit manual repair, not automatic overwrite: ETF arrays and every summary
+    stay unchanged. Complete stored index rows are never replaced.
+    """
+    from archive import validate_complete
+    root = Path(root); date = canonical_date(date)
+    path = root/'data/minutes'/f'{date}.json'
+    original = json.loads(path.read_text())
+    history = json.loads((root/'data/history.json').read_text())
+    if original.get('date') != date or date not in history:
+        raise ValueError('Existing archive date/history mismatch')
+    summary, recovered = from_git(root, date)
+    if history[date] != summary:
+        raise ValueError('Preserved close summary differs from existing archive; no overwrite')
+    candidate = merge_indices(original, recovered['index_minutes'])
+    candidate.setdefault('index_archive_provenance', copy.deepcopy(recovered['archive_provenance']))
+    if candidate['etfs'] != original['etfs']:
+        raise ValueError('ETF arrays must remain unchanged')
+    validate_complete(summary, candidate, date)
+    if candidate == original:
+        return False
+    if json.loads(path.read_text()) != original:
+        raise ValueError('Archive changed concurrently; stop')
+    write_json_atomic(path, candidate, separators=(',',':'))
+    return True
 
 
 def main():

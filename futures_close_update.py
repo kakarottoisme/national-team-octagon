@@ -115,6 +115,56 @@ def run_members(root,day,fetch=source_get):
     return {'state':'current' if complete else 'pending','date':day,'changed':changed,'products':results}
 
 
+def member_missing_days(root, day, calendar=is_trading_day):
+    """Missing official sessions since each product's last published day.
+
+    Also check recent internal holes; a later successful day must not hide a gap.
+    Never initialise a shard or overwrite an already-published record.
+    """
+    jobs = set()
+    for product in PRODUCTS:
+        shard = load(Path(root)/f'preview-data/official/futures/{product}.json')
+        validate_shard(shard)
+        records = shard.get('records', {})
+        published = sorted(d for d, row in records.items() if row.get('source_status') == 'published')
+        if not published or published[-1] > day.isoformat():
+            raise ValueError('会员历史缺失或日期晚于已收盘交易日，停止')
+        start = min(dt.date.fromisoformat(published[-1]) + dt.timedelta(days=1),
+                    max(dt.date.fromisoformat(published[0]), day-dt.timedelta(days=20)))
+        cursor = start
+        while cursor <= day:
+            ds = cursor.isoformat()
+            if calendar(cursor) and records.get(ds, {}).get('source_status') != 'published':
+                jobs.add(ds)
+            cursor += dt.timedelta(days=1)
+    return sorted(jobs)
+
+
+def verify_members_date(root, day):
+    missing = member_missing_days(root, day)
+    if missing:
+        raise ValueError('期指会员缺少官方交易日：' + ', '.join(missing))
+    for product in PRODUCTS:
+        record = load(Path(root)/f'preview-data/official/futures/{product}.json')['records'].get(day.isoformat(), {})
+        if (record.get('source_status') != 'published' or
+                record.get('trading_date') != day.isoformat() or
+                record.get('source_date_evidence') != day.isoformat() or
+                not record.get('source_sha256')):
+            raise ValueError(product + ' 目标日/原始来源证据不完整')
+    return True
+
+
+def run_members_catchup(root, day, fetch=source_get):
+    results = [run_members(root, dt.date.fromisoformat(ds), fetch)
+               for ds in member_missing_days(root, day)]
+    missing = member_missing_days(root, day)
+    changed = sorted({p for result in results for p in result['changed']})
+    if not missing:
+        verify_members_date(root, day)
+    return {'state': 'pending' if missing else 'current', 'date': day.isoformat(),
+            'changed': changed, 'missing_dates': missing, 'days': results}
+
+
 def parse_official_closes(raw,day):
     """Date evidence is the dated CFFEX URL; CSV uses named 今收盘, not positional settlement."""
     rows=csv.DictReader(io.StringIO(raw.decode('gbk')))
@@ -214,20 +264,23 @@ def main(argv=None,now=None):
     parser.add_argument('--verify-date',help='Read-only business-date gate after push and Pages verification')
     args=parser.parse_args(argv);now=now or dt.datetime.now(TZ)
     try:
-        if args.verify_date:
-            if args.mode!='strategy':raise ValueError('日期验收仅用于IC信号')
+        if args.verify_date is not None:
             day=dt.date.fromisoformat(args.verify_date)
             if not is_trading_day(day) or day>strategy_target_day(now):raise ValueError('验收日不是已收盘交易日')
-            if not validate_strategy_date(load(args.root/'data/ic_strategy.json'),day.isoformat()):
-                raise ValueError('缺少应有信号日 '+day.isoformat())
+            if args.mode=='strategy':
+                if not validate_strategy_date(load(args.root/'data/ic_strategy.json'),day.isoformat()):
+                    raise ValueError('缺少应有信号日 '+day.isoformat())
+            else:
+                verify_members_date(args.root, day)
             result={'state':'data_date_verified','date':day.isoformat(),'changed':[]}
         elif args.mode=='strategy':
             day=strategy_target_day(now)
             result=run_strategy(args.root,day)
-        elif not permitted(now):result={'state':'outside_close_window_or_nontrading','changed':[]}
-        else:result=run_members(args.root,now.date())
+        else:
+            day=strategy_target_day(now)
+            result=run_members_catchup(args.root,day)
         print(json.dumps(result,ensure_ascii=False))
-        if args.mode=='strategy' and result['state'] not in ('updated','already_current','data_date_verified'):
+        if result['state'] not in ('updated','already_current','current','data_date_verified'):
             return 1 # Pending is not a successful data update; subsequent schedules can retry.
         return 0
     except (Exception,SystemExit) as exc:

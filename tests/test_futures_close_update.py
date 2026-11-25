@@ -203,6 +203,10 @@ class Workflow(unittest.TestCase):
         self.assertIn('--verify-date "$EXPECTED_DATA_DATE"',ic_text)
         self.assertIn('set -euo pipefail',ic_text)
         text=(root/'.github/workflows/preview-data.yml').read_text()
+        self.assertIn('steps.members.outputs.data_date',text)
+        self.assertIn('Final business result',text)
+        self.assertIn('--verify-date "$EXPECTED_DATA_DATE"',text)
+        self.assertIn('TARGET_DATE="$TARGET"',text)
         self.assertEqual(text.count("if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true"),5)
         # Exact UTC slots -> 15:35..17:55, old 17:40, evening fallbacks.
         slots=[7*60+m for m in [35,45,55]]+[h*60+m for h in [8,9] for m in [5,15,25,35,45,55]]

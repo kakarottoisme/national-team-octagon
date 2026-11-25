@@ -94,14 +94,16 @@ class AutomationTests(unittest.TestCase):
     def test_archive_persistent_bad_data_never_writes(self):
         import archive
         now=dt.datetime(2026,11,19,15,12,tzinfo=c.TZ)
-        with patch.object(archive,'g',return_value=self.archive_response(falling=True)) as fetch, \
-             patch.object(a.time,'sleep') as sleep, \
-             patch.object(a,'write_json_atomic') as write,patch.object(a,'commit_files') as push:
-            with self.assertRaisesRegex(ValueError,'累计成交额倒退'):
-                a.archive(now,{})
-            self.assertEqual(fetch.call_count,3)
-            self.assertEqual([x.args[0] for x in sleep.call_args_list],[15,30])
-            write.assert_not_called();push.assert_not_called()
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t);(root/'data').mkdir();(root/'data/history.json').write_text('{}')
+            with patch.object(a,'ROOT',root),patch.object(archive,'g',return_value=self.archive_response(falling=True)) as fetch, \
+                 patch.object(a.time,'sleep') as sleep, \
+                 patch.object(a,'write_json_atomic') as write,patch.object(a,'commit_files') as push:
+                with self.assertRaisesRegex(ValueError,'累计成交额倒退'):
+                    a.archive(now,{})
+                self.assertEqual(fetch.call_count,3)
+                self.assertEqual([x.args[0] for x in sleep.call_args_list],[15,30])
+                write.assert_not_called();push.assert_not_called()
 
     def test_archive_transient_http_retry_auth_no_retry(self):
         from unittest.mock import Mock

@@ -41,36 +41,101 @@ def build_archive(fetch=None):
     return iso_date, summary, {"date": iso_date, "etfs": minutes}
 
 
+def add_index_minutes(minutes, directory, fetch=None):
+    """One shared merge path for the CLI and scheduled archive entry.
+
+    Closed same-day cached data is preferred; no optional fetch is necessary if
+    all seven native minute series were already saved by the live workflow.
+    """
+    import datetime as dt
+    from backfill_index_minutes import canonical_date, is_complete, merge_indices
+    from index_quotes import INDEX_UNIVERSE, fetch_index_minutes
+    date = canonical_date(minutes['date'])
+    directory = Path(directory)
+    result = minutes
+    for cached in (directory/'minutes'/f'{date}.json', directory/'live.json'):
+        try:
+            candidate = json.loads(cached.read_text(encoding='utf-8'))
+            if canonical_date(candidate.get('date', '')) != date:
+                continue
+            if cached.name == 'live.json':
+                stamp = dt.datetime.fromisoformat(candidate['updated'])
+                if stamp.date().isoformat() != date or stamp.time() < dt.time(15):
+                    continue
+            for code, row in (candidate.get('index_minutes') or {}).items():
+                native = dict(row)
+                native.setdefault('interval_minutes', 1)
+                native.setdefault('source', 'tencent_minutes')
+                native.setdefault('source_url', 'https://web.ifzq.gtimg.cn/appstock/app/minute/query?code='+code)
+                native.setdefault('price_type', 'minute_quote')
+                native.setdefault('interpolated', False)
+                result = merge_indices(result, {code:native})
+        except (OSError, ValueError, TypeError, KeyError, OverflowError):
+            continue
+    complete = lambda: all(code in result.get('index_minutes', {}) and
+                           result['index_minutes'][code].get('interval_minutes', 1) == 1 and
+                           is_complete(result['index_minutes'][code], 1)
+                           for _, code in INDEX_UNIVERSE)
+    if not complete():
+        for code, row in fetch_index_minutes(date.replace('-', ''), fetch=fetch).items():
+            try:
+                native = dict(row)
+                native.update(interval_minutes=1, source='tencent_minutes',
+                              source_url='https://web.ifzq.gtimg.cn/appstock/app/minute/query?code='+code,
+                              price_type='minute_quote', interpolated=False)
+                result = merge_indices(result, {code:native})
+            except (ValueError, TypeError, KeyError, OverflowError):
+                continue
+    return result
+
+
+def validate_complete(summary, minutes, date):
+    """Business completeness, not file existence or a successful process exit."""
+    import math
+    from backfill_index_minutes import canonical_date, is_complete
+    from index_quotes import INDEX_UNIVERSE
+    if canonical_date(minutes.get('date', '')) != date:
+        raise ValueError('八宫格存档日期不匹配')
+    required = [f'{m//60:02d}{m%60:02d}' for start,end in ((570,690),(780,900))
+                for m in range(start,end+1)]
+    if set(minutes.get('etfs', {})) != {code for _,code in E}:
+        raise ValueError('七ETF存档不完整')
+    calculated = {}
+    for name, code in E:
+        row = minutes['etfs'][code]
+        if (not set(required).issubset(row.get('t', [])) or
+                row['t'] != sorted(set(row['t'])) or
+                not len(row['t']) == len(row.get('p', [])) == len(row.get('a', []))):
+            raise ValueError(code+' 交易分钟不完整或不对齐')
+        if 'date' in row and canonical_date(row['date']) != date:
+            raise ValueError(code+' 分时日期不匹配')
+        for value in [row.get('pre'), *row['p']]:
+            if isinstance(value,bool) or not isinstance(value,(int,float)) or not math.isfinite(value) or value <= 0:
+                raise ValueError(code+' 价格/前日基准无效')
+        for value in row['a']:
+            if isinstance(value,bool) or not isinstance(value,(int,float)) or not math.isfinite(value) or value < 0:
+                raise ValueError(code+' 分钟成交额无效')
+        calculated[name] = estimated_large_minutes(row['a'])
+    calculated['合计'] = round(sum(calculated.values()),2)
+    if any(summary.get(key) != value for key,value in calculated.items()):
+        raise ValueError('ETF分钟重算摘要不一致')
+    if (not isinstance(summary.get('上证收盘'),(int,float)) or summary['上证收盘'] <= 0 or
+            not math.isfinite(summary['上证收盘']) or
+            not isinstance(summary.get('上证涨跌幅'),(int,float)) or not math.isfinite(summary['上证涨跌幅'])):
+        raise ValueError('上证同日收盘或涨跌幅无效')
+    for _,code in INDEX_UNIVERSE:
+        row = minutes.get('index_minutes', {}).get(code, {})
+        if (row.get('interval_minutes',1) != 1 or row.get('interpolated',False) or
+                not row or canonical_date(row.get('date','')) != date or not is_complete(row,1)):
+            raise ValueError(code+' 同日完整1分钟指数存档缺失')
+    return True
+
+
 def main(data_dir=None, fetch=None, include_indices=True):
     date, summary, minutes = build_archive(fetch=fetch)
     directory = Path(data_dir) if data_dir is not None else ROOT / "data"
     if include_indices:
-        from backfill_index_minutes import canonical_date, merge_indices
-        from index_quotes import fetch_index_minutes
-        # Prefer this same day's native minute quotes. Optional source failure
-        # must not erase an earlier good archive or prevent ETF archiving.
-        layers = []
-        for cached in (directory / "minutes" / f"{date}.json", directory / "live.json"):
-            try:
-                candidate = json.loads(cached.read_text(encoding="utf-8"))
-                if canonical_date(candidate.get("date", "")) == date:
-                    layers.append((candidate.get("index_minutes") or {}, False))
-            except (OSError, ValueError, TypeError):
-                pass
-        layers.append((fetch_index_minutes(date.replace("-", ""), fetch=fetch), True))
-        for code, row, fresh in [(code, row, fresh) for layer, fresh in layers for code, row in layer.items()]:
-            try:
-                native = dict(row)
-                if fresh or "interval_minutes" not in native:
-                    native.setdefault("interval_minutes", 1)
-                    native.setdefault("source", "tencent_minutes")
-                    native.setdefault("source_url", "https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=" + code)
-                    native.setdefault("price_type", "minute_quote")
-                    native.setdefault("interpolated", False)
-                minutes = merge_indices(minutes, {code: native})
-            except (ValueError, TypeError, KeyError, OverflowError):
-                # Bad/mixed-date/partial optional index data is not fabricated.
-                continue
+        minutes = add_index_minutes(minutes, directory, fetch=fetch)
     history_path = directory / "history.json"
     history = json.loads(history_path.read_text(encoding="utf-8")) if history_path.exists() else {}
     history[date] = summary

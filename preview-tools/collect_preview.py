@@ -232,6 +232,7 @@ def maybe_collect_global():
             state = "degraded_partial"
         else:
             state = "failed_nonblocking"
+        state = 'ok' if raw_state == 'ok' and st.get('ok') and not st.get('errors') else ('degraded_partial' if st.get('ok') else 'failed_nonblocking')
         return state, {"module_state": raw_state, "path": st.get("path"),
                        "metrics_total": st.get("metrics_total"),
                        "connected": st.get("connected"),
@@ -341,13 +342,18 @@ def run(target_date=None, fetcher=None, now=None):
                        "status": "recorded_no_date", "note": "无日期,份额待核禁算"})
 
     if sse_date is None:
+        # Independent global sources must still run when the SSE share source
+        # is unavailable; never let an unrelated domestic failure starve them.
+        g_state, g_info = maybe_collect_global()
         snap = {"schema_version": SCHEMA_VERSION, "generated_at": iso(now),
                 "as_of": None, "run_status": "failed",
                 "message": "SSE 连续多日无发布(节假日/未发布/源失败)",
+                "global": {"state":g_state, **g_info},
                 "sources": source_log, "errors": errors}
         save_json(STATUS_PATH, {"schema_version": SCHEMA_VERSION, "generated_at": iso(now),
                                 "run_status": "failed", "as_of": None,
-                                "domestic": "failed", "sources": source_log, "errors": errors})
+                                "domestic": "failed", "global":g_state, "global_detail":g_info,
+                                "sources": source_log, "errors": errors})
         return snap
 
     as_of = sse_date.strftime("%Y-%m-%d")

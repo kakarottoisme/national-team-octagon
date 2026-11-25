@@ -295,6 +295,7 @@ def archive(now, state, timing=None):
     mode=archive_mode(now)
     if mode is None:return {'notify':False,'reason':'不在授权窗口','state':'outside_window'}
     if timing is not None:timing['mode']=mode
+    import archive as producer
     history=json.loads((ROOT/'data/history.json').read_text())
     saved=ROOT/f'data/minutes/{date}.json'
     if state.get('archive_publication_pending') == date:
@@ -302,6 +303,7 @@ def archive(now, state, timing=None):
             raise ArchivePublicationError('上次归档推送结果未明且远端缺少完整档，保留提交，禁止重抓或重复提交')
         if json.loads(saved.read_text()).get('date') != date:
             raise ArchivePublicationError('已提交归档日期不匹配，停止覆盖')
+        producer.validate_complete(history[date], json.loads(saved.read_text()), date)
         verify_archive_pages(['data/history.json', f'data/minutes/{date}.json'])
         state.pop('archive_publication_pending', None)
         state['archive_success'] = date
@@ -310,6 +312,7 @@ def archive(now, state, timing=None):
         # Late execution reads immutable Git observations only, never Tencent.
         if date in history and saved.exists():
             if json.loads(saved.read_text()).get('date')!=date:raise ValueError('已存档日期不匹配，停止自动覆盖')
+            producer.validate_complete(history[date], json.loads(saved.read_text()), date)
             verify_archive_pages(['data/history.json',f'data/minutes/{date}.json'])
             state['archive_success']=date
             return {'notify':False,'reason':'当日已存档','state':'already_archived','mode':mode}
@@ -325,9 +328,13 @@ def archive(now, state, timing=None):
         state['archive_success']=date
         state.pop('archive_failure',None)
         return {'notify':False,'reason':'晚到补档成功','state':'archived','mode':mode,'sources':[minutes['archive_provenance']['source_url']]}
-    if state.get('archive_success') == date and date in history and saved.exists():
-        return {'notify':False,'reason':'当日已存档','state':'already_archived'}
-    import archive as producer
+    if date in history or saved.exists():
+        if date not in history or not saved.exists():
+            raise ValueError('当日已有单边档，停止覆盖')
+        producer.validate_complete(history[date], json.loads(saved.read_text()), date)
+        verify_archive_pages(['data/history.json',f'data/minutes/{date}.json'])
+        state['archive_success'] = date
+        return {'notify':False,'reason':'当日已完整存档','state':'already_archived'}
     source_started=time.monotonic()
     def windowed_fetch(url):
         # Keep the original request window even between slow retries.
@@ -340,6 +347,8 @@ def archive(now, state, timing=None):
     started=time.monotonic()
     try:
         day,summary,minutes = producer.build_archive(fetch=validated)
+        minutes = producer.add_index_minutes(minutes, ROOT/'data', fetch=windowed_fetch)
+        producer.validate_complete(summary, minutes, date)
         if day!=date or '上证收盘' not in summary or '上证涨跌幅' not in summary:
             raise ValueError('上证当日收盘或涨跌幅缺失，未存档')
         for key in summary:
@@ -354,9 +363,8 @@ def archive(now, state, timing=None):
     finally:
         if timing is not None:timing['collect_seconds']=round(time.monotonic()-started,3)
     history=json.loads((ROOT/'data/history.json').read_text())
-    if date in history and history[date]==summary and (ROOT/f'data/minutes/{date}.json').exists():
-        state['archive_success']=date
-        return {'notify':False,'reason':'已入库且无变化'}
+    if date in history or (ROOT/f'data/minutes/{date}.json').exists():
+        raise ValueError('当日存档在采集期间发生变化，停止覆盖')
     history[date]=summary
     write_json_atomic(ROOT/'data/history.json',dict(sorted(history.items())),ensure_ascii=False,indent=1)
     write_json_atomic(ROOT/f'data/minutes/{date}.json',minutes,separators=(',',':'))
@@ -485,11 +493,16 @@ def data_audit(now, state):
         missing.append(date + '八宫格日终存档（缺日或错过采集窗口）')
     else:
         minute = json.loads(minute_path.read_text())
-        if minute.get('date') != date:
-            missing.append(date + '八宫格存档日期不匹配')
+        try:
+            import archive as producer
+            producer.validate_complete(history[date], minute, date)
+        except (ValueError, TypeError, KeyError) as exc:
+            missing.append(date + '八宫格存档不完整：' + str(exc))
     if missing:
         raise ValueError('日终核对发现缺档：' + '，'.join(missing))
-    return {'notify':False, 'status':'success', 'reason':'两融目标日和当日八宫格均已入库'}
+    verify_archive_pages(['data/margin_balance.json','data/history.json',f'data/minutes/{date}.json'])
+    return {'notify':False, 'status':'success', 'data_date':expected,
+            'archive_date':date, 'reason':'两融目标日、七ETF及七指数完整且正式发布一致'}
 
 
 def failure_result(task, now, state, reason):
@@ -528,15 +541,15 @@ def execute_task(task, now, state, final=False, timing=None):
                'live-health':[(575,695),(805,905)]}
     try:
         if not is_trading_day(now.date()):
-            return {'notify':False,'reason':'非交易日'}
+            return {'notify':False,'status':'skipped','reason':'非交易日'}
         if task != 'archive' and not any(a <= minute <= b for a,b in windows[task]):
             if task in ('archive','margin','data-audit'):
                 return failure_result(task, now, state, '错过授权采集/核对窗口，未采集；请核对数据日期')
-            return {'notify':False,'reason':'不在授权窗口'}
+            return {'notify':False,'status':'skipped','reason':'不在授权窗口'}
         if task == 'ic': return ic(now)
         if task == 'archive':
             if archive_mode(now) is None:
-                return {'notify':False,'state':'outside_window','reason':'不在授权窗口'}
+                return {'notify':False,'status':'skipped','state':'outside_window','reason':'不在授权窗口'}
             result = archive(now,state,timing)
             state.pop('archive_source_pending', None)
             return result

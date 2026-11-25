@@ -4,8 +4,8 @@
  "product": "IC",
  "source": "CFFEX",
  "range_start": "2026-04-01",
- "range_end": "2026-11-20",
- "collected_at": "2026-11-21T06:18:57+08:00",
+ "range_end": "2026-11-25",
+ "collected_at": "2026-11-25T18:29:24+08:00",
  "records": {
   "2026-04-01": {
    "trading_date": "2026-04-01",
@@ -10081,11 +10081,158 @@
    "observed_difference": 14702,
    "coverage_status": "complete_observed",
    "note": ""
+  },
+  "2026-11-23": {
+   "trading_date": "2026-11-23",
+   "source_url": "http://www.cffex.com.cn/sj/ccpm/202611/23/IC_1.csv",
+   "source_sha256": "37f67a528bc36f96b055150f61da01466665519f86292dc80f7f8d8917ab872a",
+   "source_status": "published",
+   "source_date_evidence": "2026-11-23",
+   "contracts": [
+    {
+     "contract": "IC2612",
+     "long": 33485,
+     "short": 40063,
+     "long_change": 1567,
+     "short_change": 1454,
+     "long_rank": 2,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IC2703",
+     "long": 12627,
+     "short": 17432,
+     "long_change": -340,
+     "short_change": -405,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IC2706",
+     "long": 5479,
+     "short": 8656,
+     "long_change": -363,
+     "short_change": -327,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    }
+   ],
+   "both_absent_contracts": [],
+   "long_observed": 51591,
+   "short_observed": 66151,
+   "net_short": 14560,
+   "observed_difference": 14560,
+   "coverage_status": "complete_observed",
+   "note": ""
+  },
+  "2026-11-24": {
+   "trading_date": "2026-11-24",
+   "source_url": "http://www.cffex.com.cn/sj/ccpm/202611/24/IC_1.csv",
+   "source_sha256": "5c0ec95c11445b32c6e0e87fb86a6edf58cabffe6fe3748b1e5da9e03a871dde",
+   "source_status": "published",
+   "source_date_evidence": "2026-11-24",
+   "contracts": [
+    {
+     "contract": "IC2612",
+     "long": 27582,
+     "short": 36143,
+     "long_change": -5903,
+     "short_change": -3920,
+     "long_rank": 2,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IC2703",
+     "long": 12091,
+     "short": 16752,
+     "long_change": -536,
+     "short_change": -680,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IC2706",
+     "long": 5188,
+     "short": 8684,
+     "long_change": -291,
+     "short_change": 28,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    }
+   ],
+   "both_absent_contracts": [],
+   "long_observed": 44861,
+   "short_observed": 61579,
+   "net_short": 16718,
+   "observed_difference": 16718,
+   "coverage_status": "complete_observed",
+   "note": ""
+  },
+  "2026-11-25": {
+   "trading_date": "2026-11-25",
+   "source_url": "http://www.cffex.com.cn/sj/ccpm/202611/25/IC_1.csv",
+   "source_sha256": "c52d972aa053bbcf823a5cc393f5eba01d6109d4bf7d96fe0d1ecb49b0388640",
+   "source_status": "published",
+   "source_date_evidence": "2026-11-25",
+   "contracts": [
+    {
+     "contract": "IC2612",
+     "long": 32794,
+     "short": 38742,
+     "long_change": 5212,
+     "short_change": 2599,
+     "long_rank": 2,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IC2703",
+     "long": 12921,
+     "short": 18009,
+     "long_change": 830,
+     "short_change": 1257,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IC2706",
+     "long": 5733,
+     "short": 9422,
+     "long_change": 545,
+     "short_change": 738,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    }
+   ],
+   "both_absent_contracts": [],
+   "long_observed": 51448,
+   "short_observed": 66173,
+   "net_short": 14725,
+   "observed_difference": 14725,
+   "coverage_status": "complete_observed",
+   "note": ""
   }
  },
  "coverage": {
-  "date_count": 218,
-  "published": 145,
+  "date_count": 233,
+  "published": 160,
   "not_published": 73,
   "errors": 0,
   "not_published_dates": [

@@ -37,6 +37,7 @@ jobs:
       - name: Checkout latest main (采集前,保证干净基线)
         uses: actions/checkout@v5
         with:
+          ref: main
           fetch-depth: 20
           persist-credentials: true
 
@@ -48,8 +49,20 @@ jobs:
           export GIT_TERMINAL_PROMPT=0
 
       - name: Collect published futures independently (no unrelated sources)
+        id: members
+        continue-on-error: true # Publish valid products, then fail the final date gate if incomplete.
         shell: bash
-        run: python3 futures_close_update.py --mode members
+        run: |
+          set -uo pipefail
+          python3 futures_close_update.py --mode members | tee /tmp/members-result.json
+          code=${PIPESTATUS[0]}
+          python3 - << 'PY'
+          import json, os
+          result = json.load(open('/tmp/members-result.json'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('data_date=' + result.get('date', '') + '\n')
+          PY
+          exit "$code"
 
       - name: Setup Python + preview-tools deps (ACM .xls 需要 pinned xlrd)
         if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
@@ -62,9 +75,21 @@ jobs:
         run: python3 -m pip install --disable-pip-version-check -r preview-tools/requirements.txt
 
       - name: Run collector (官方SSE+CFFEX; global容错)
+        id: full
+        continue-on-error: true # Independent source failure must not discard valid futures additions.
         if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
         shell: bash
-        run: python3 preview-tools/collect_preview.py
+        run: |
+          set -euo pipefail
+          TARGET=$(python3 -c 'import datetime as d; from futures_close_update import strategy_target_day, TZ; print(strategy_target_day(d.datetime.now(TZ)).strftime("%Y%m%d"))')
+          python3 preview-tools/collect_preview.py --date "$TARGET"
+          TARGET_DATE="$TARGET" python3 - << 'PY'
+          import json, os, sys
+          data = json.load(open('preview-data/status.json'))
+          target = os.environ['TARGET_DATE']
+          expected = target[:4]+'-'+target[4:6]+'-'+target[6:]
+          sys.exit(0 if data.get('as_of') == expected and data.get('domestic') == 'ok' and data.get('run_status') in ('ok', 'partial') else 1)
+          PY
 
       - name: Refresh intraday turnover baseline (post-close, 同时点对齐分母)
         if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
@@ -112,8 +137,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERIFY_PUBLISH: ${{ inputs.verify_publish }}
+          EXPECTED_DATA_DATE: ${{ steps.members.outputs.data_date }}
         shell: bash
         run: |
+          set -euo pipefail
           args=()
           if [[ "$VERIFY_PUBLISH" == "true" ]]; then args+=(--request-build); fi
           python3 futures_pages_sync.py preview-data/official/futures/{IH,IF,IC,IM}.json "${args[@]}"
+          python3 futures_close_update.py --mode members --verify-date "$EXPECTED_DATA_DATE"
+
+      - name: Final business result (never green on missing data)
+        if: always()
+        env:
+          MEMBERS_OUTCOME: ${{ steps.members.outcome }}
+          FULL_OUTCOME: ${{ steps.full.outcome }}
+        shell: bash
+        run: |
+          [[ "$MEMBERS_OUTCOME" == "success" ]] || exit 1
+          [[ "$FULL_OUTCOME" != "failure" ]] || exit 1

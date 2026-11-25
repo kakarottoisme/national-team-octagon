@@ -15,7 +15,7 @@ import restore_archive_snapshot as r
 class RestoreSnapshot(unittest.TestCase):
     @staticmethod
     def sample():
-        times=expected_times(1)
+        times=[f'{m//60:02d}{m%60:02d}' for start,end in ((570,690),(780,900)) for m in range(start,end+1)]
         rows={code:{'date':'20261120','t':times[:],'p':[2.5]*len(times),'a':[1.0,1.0001]+[0.0]*(len(times)-2),'pre':2.4} for _,code in ETF_UNIVERSE}
         values={name:estimated_large_minutes(rows[code]['a']) for name,code in ETF_UNIVERSE}
         values.update({'合计':round(sum(values.values()),2),'上证收盘':99.0,'上证涨跌幅':-1.0})
@@ -108,10 +108,12 @@ class RestoreSnapshot(unittest.TestCase):
         from urllib.error import URLError
         from tests.test_ashare_tasks import AutomationTests
         ticks=iter([0,0,0,61])
-        with patch.object(a.time,'monotonic',side_effect=lambda:next(ticks)),patch.object(a.time,'sleep'),patch.object(archive,'g',side_effect=URLError('temporary')) as fetch:
-            with self.assertRaisesRegex(ValueError,'实时抓源窗口已结束'):
-                a.archive(dt.datetime(2026,11,20,15,30),{})
-            self.assertEqual(fetch.call_count,1)
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);(root/'data').mkdir();(root/'data/history.json').write_text('{}')
+            with patch.object(a,'ROOT',root),patch.object(a.time,'monotonic',side_effect=lambda:next(ticks)),patch.object(a.time,'sleep'),patch.object(archive,'g',side_effect=URLError('temporary')) as fetch:
+                with self.assertRaisesRegex(ValueError,'实时抓源窗口已结束'):
+                    a.archive(dt.datetime(2026,11,20,15,30),{})
+                self.assertEqual(fetch.call_count,1)
 
     def test_source_failures_follow_1522_then_1531_without_alert(self):
         state={}

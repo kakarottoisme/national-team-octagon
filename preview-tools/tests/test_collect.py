@@ -172,6 +172,7 @@ class TestSingleSourceFailure(TempWorkdir):
         snap = cp.run(target_date=dt.date(2026, 11, 3), fetcher=ft2,
                       now=dt.datetime(2026, 11, 3, 17, 0, tzinfo=dt.timezone(dt.timedelta(hours=8))))
         self.assertEqual(snap["run_status"], "failed")
+        self.assertEqual(snap['global']['state'],'ok') # SSE failure cannot skip independent global collection.
         self.assertIn("SSE", snap["errors"][0])
 
 

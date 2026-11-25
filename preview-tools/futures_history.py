@@ -211,6 +211,13 @@ def collect_daily(product, date, out_path, raw_dir=None, fetcher=None):
                  "product": product, "source": "CFFEX",
                  "range_start": date.isoformat(), "range_end": date.isoformat(),
                  "records": {}}
+    existing = shard.get('records', {}).get(date.isoformat(), {})
+    if existing.get('source_status') == 'published':
+        if existing.get('trading_date') != date.isoformat() or existing.get('source_date_evidence') != date.isoformat():
+            raise ValueError('Existing published member date evidence is invalid; preserve file')
+        return {'product': product, 'date': date.isoformat(),
+                'source_status': 'published', 'state': 'already_current',
+                'records_after': len(shard['records'])}
     before = len(shard.get("records", {}))
     rec = backfill_one_day(product, date, raw_dir=raw_dir, fetcher=fetcher)
     shard.setdefault("records", {})[date.isoformat()] = rec

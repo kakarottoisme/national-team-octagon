@@ -815,7 +815,7 @@ def update_global(output_path: str) -> dict[str, Any]:
     connected_now = sum(1 for m in payload["metrics"] if m["status"] == "connected")
     stale_now = sum(1 for m in payload["metrics"] if m["status"] == "connected_stale")
     failed_now = sum(1 for m in payload["metrics"] if m["status"] == "failed_no_cache")
-    if connected_now >= 4:
+    if payload['run_state'] == 'ok' and not pm.get('errors'):
         state = "ok"
     elif connected_now >= 1 or stale_now >= 1:
         state = "degraded_partial"
