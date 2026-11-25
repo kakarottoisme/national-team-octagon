@@ -62,14 +62,17 @@ def parse_cffex_csv(raw_bytes, product, expected_date=None):
     text = raw_bytes.decode("gbk", errors="replace")
     lines = text.splitlines()
     rows = [[x.strip() for x in ln.split(",")] for ln in lines]
-    def find(label):
-        for r in rows[:4]:
-            if label in r:
-                return r.index(label)
-        return None
-    li, si = find("持买单量"), find("持卖单量")
-    ti, ci, ri = find("交易日"), find("合约"), find("排名")
-    if li is None or si is None or ti is None:
+    # Old CSVs start with market totals; the member header can be much later.
+    ranking = next((i for i,r in enumerate(rows)
+                    if '持买单量' in r and '持卖单量' in r and '会员简称' in r), None)
+    if ranking is None:
+        return None, [], [], "header_invalid"
+    header = rows[ranking] if all(label in rows[ranking] for label in ('交易日','合约','排名')) else (rows[ranking - 1] if ranking else [])
+    if not all(label in header for label in ('交易日','合约','排名')):
+        return None, [], [], "header_invalid"
+    li, si = rows[ranking].index('持买单量'), rows[ranking].index('持卖单量')
+    ti, ci, ri = (header.index(x) for x in ('交易日','合约','排名'))
+    if rows[ranking][li-1]!='会员简称' or rows[ranking][si-1]!='会员简称':
         return None, [], [], "header_invalid"
     col = {"td": ti, "contract": ci if ci is not None else 1,
            "rank": ri if ri is not None else 2,

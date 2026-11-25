@@ -24,7 +24,8 @@
 `futures-preview.html` 读 `data/ic_strategy.json`（信号与FIFO预计持仓）、`preview-data/official/snapshot-latest.json`、`preview-data/official/futures/{IH,IF,IC,IM}.json` 等官方历史；本人 `data/holdings.json` 保留但不混入预计持仓。
 - `ic_strategy.py`：新浪中证500和 IC 收盘、中金所今收盘核对，生成原策略信号及模型历史。2026-11-25用户授权纳入下季：`FAR_FROM=2026-11-26`，按各信号日生效，不按运行日期。生效前仍三合约，生效后四挂牌合约；3pp开仓/2pp换仓/10自然日及ABC/D不变，`selection_policy`元数据留痕。原772日历史及FIFO成本不倒改，前端当前日以四合约重算比较列展示，历史日仍旧规则。
 - `preview-tools/collect_preview.py`：SSE ETF 份额及 CFFEX 会员排名、快照、状态、四品种日更
-- `preview-tools/futures_history.py`：CFFEX 原始 CSV 严格验日期、前20会员并集、独立品种历史
+- `preview-tools/futures_history.py`：CFFEX 原始 CSV 严格验日期、前20会员并集、独立品种历史；兼容旧文件开头的全市场汇总段，只按后面的会员列计算，不把总持仓误作会员持仓。
+- `preview-tools/futures_full_backfill.py`：2026-11-25授权全量前补，IF从2010-04-16，IH/IC从2015-04-16，IM从2022-07-22上市首日逐工作日取官方文件。只写指定staging目录，checkpoint可续跑；原CSV与SHA逐日保留。HTTP200官方404模板只记源文件不可用，不推断休市，其他HTML仍报源错误。`audit_futures_full_history.py`独立逐CSV按会员精确名称、列位置、日期重算多/空/变动/排名/净空并核SHA。当前四shard既有233条记录保留，日更仍只增量追加；页面「全部历史」展示所选品种可取全部发布日，未上市/未上榜为null，不補零。
 - `holdings.json`：本人配置，非模型仓位。采集器不应写它；缺净账本时不硬算真实账户 D。2026-11-25用户授权将原当前持仓展示改为「预计当前持仓」：页面不再读取该账户文件，但原记录完整保留。
 - 「预计当前持仓」由前端纯函数 `replayExpectedHoldings` 回放完整已发布 `ic_strategy.days`，使用各日 `contract` / `total`（含原模型D）与同合约收盘价。加仓按日期记录批次、减仓FIFO扣最早批次、换月/切换全部平旧仓再建新成本；剩余批次按手数加权，历史选择只使用截至当日输入。首条若已持仓且动作为hold则成本未知，不伪造首日成交；缺价不补零、不借其他合约/指数、清仓或换月后恢复已知成本。持仓损益非账户当日浮盈，保证金为12%估算，不显示旧余额/权益或真实持仓差异。变仓记录仅展示当前连续持仓周期；A/B/C/D、选约、采集与真实账户写入权限不变。收盘价仅代理收盘前成交，未扣费用/滑点，盘末跨线可能与实际操作不同。验收 `tests.test_expected_holdings` 包含FIFO边界、同日换月调仓、缺价/期初未知、全部已发布历史Decimal独立回放及历史前缀一致性。
 - 会员持仓观察日与顶部 IC 信号日是两套独立日期；验证发布必须打开 `dashboard.html#futures-preview.html` 核对两处，不以四个会员 shard 更新代替信号更新。日期选择停在上一次最新日时，刷新跟随新最新日；明确选择的历史日仍保留。

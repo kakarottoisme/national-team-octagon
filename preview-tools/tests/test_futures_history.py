@@ -23,6 +23,15 @@ SAMPLE = (
 
 
 class TestFuturesHistory(unittest.TestCase):
+    def test_legacy_totals_before_ranking_are_not_member_positions(self):
+        prefix='交易日,合约,会员类别,总成交量,比上交易日增减,总持买单量,比上交易日增减,总持卖单量,比上一交易日增减\n'+('20150416,IC1505,期货公司,233776,233776,6643,6643,6643,6643\n'*7)+'\n'
+        csv=prefix+'交易日,合约,排名,成交量排名,,,持买单量排名,,,持卖单量排名,,\n,,,会员简称,成交量,比上一交易日增减,会员简称,持买单量,比上一交易日增减,会员简称,持卖单量,比上一交易日增减\n20150416,IC1505,3,中信期货,13905,13905,中信建投,900,900,中信期货,407,407\n20150416,IC1505,10,其他,1,1,中信期货,152,152,其他,1,1'
+        record=fh.backfill_one_day('IC',dt.date(2015,4,16),fetcher=lambda _: (200,csv.encode('gbk')))
+        self.assertEqual(record['long_observed'],152)
+        self.assertEqual(record['short_observed'],407)
+        self.assertEqual(record['net_short'],255)
+        self.assertEqual(record['source_status'],'published')
+
     def test_parse_member_rows(self):
         td, contracts, both_absent, perr = fh.parse_cffex_csv(
             SAMPLE, "IH", expected_date=dt.date(2026, 11, 4))
