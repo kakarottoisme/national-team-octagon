@@ -461,6 +461,11 @@ def status_text(role: str, days: int, price: float | None, code: str, held: str 
 
 
 def eligible_codes(slots: list[dict], prices: dict[str, float | None]) -> list[str]:
+    """列出可比较的合约，不在这里决定是否开仓或切换。
+
+    下季自 FAR_FROM 起与其他月份使用相同的行情和剩余期限门槛；
+    是否最终选中，仍由 choose_open / choose_switch 按原贴水门槛决定。
+    """
     out = []
     include_far = far_enabled(slots)
     for s in slots:

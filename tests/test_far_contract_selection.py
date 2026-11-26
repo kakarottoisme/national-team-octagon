@@ -17,6 +17,22 @@ class FarContractSelection(unittest.TestCase):
   self.assertEqual(got['contract'],slots[3]['code']);self.assertEqual(got['action'],'switch')
   rates[slots[3]['code']]=.119
   self.assertEqual(ic.choose_switch(slots[0]['code'],ic.eligible_codes(slots,prices),rates),slots[2]['code'])
+ def test_far_eligibility_does_not_force_open_or_switch(self):
+  day=ic.FAR_FROM
+  slots=ic.list_slots(day,set());near,next_month,quarter,far=(s['code'] for s in slots)
+  prices={s['code']:6000 for s in slots}
+  self.assertIn(far,ic.eligible_codes(slots,prices))
+  # 下季贴水最高，但领先持仓不到 2 个百分点，继续持有。
+  rates={near:.10,next_month:.101,quarter:.11,far:.1199}
+  self.assertEqual(ic.decide_position(day,slots,prices,rates,near,set(),4)['action'],'hold')
+  self.assertEqual(ic.fresh_entry(slots,prices,rates),near)
+  # 恰好达到换仓门槛时允许直接切到下季，但未达到空仓开仓门槛。
+  rates[far]=rates[near]+ic.SWITCH_GAP
+  decision=ic.decide_position(day,slots,prices,rates,near,set(),4)
+  self.assertEqual((decision['action'],decision['contract']),('switch',far))
+  self.assertEqual(ic.fresh_entry(slots,prices,rates),near)
+  rates[far]=rates[near]+ic.OPEN_GAP
+  self.assertEqual(ic.fresh_entry(slots,prices,rates),far)
  def test_original_thresholds_and_missing_quote_still_apply(self):
   slots=ic.list_slots(dt.date(2026,11,26),set());prices={s['code']:6000 for s in slots};prices[slots[3]['code']]=None
   self.assertNotIn(slots[3]['code'],ic.eligible_codes(slots,prices))
