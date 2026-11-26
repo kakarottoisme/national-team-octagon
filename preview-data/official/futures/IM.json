@@ -4,8 +4,8 @@
  "product": "IM",
  "source": "CFFEX",
  "range_start": "2022-07-22",
- "range_end": "2026-11-25",
- "collected_at": "2026-11-25T18:29:24+08:00",
+ "range_end": "2026-11-26",
+ "collected_at": "2026-11-27T01:52:24+08:00",
  "records": {
   "2022-07-22": {
    "trading_date": "2022-07-22",
@@ -66930,11 +66930,71 @@
    "observed_difference": 34557,
    "coverage_status": "complete_observed",
    "note": ""
+  },
+  "2026-11-26": {
+   "trading_date": "2026-11-26",
+   "source_url": "http://www.cffex.com.cn/sj/ccpm/202611/26/IM_1.csv",
+   "source_sha256": "cdce6b45ad0455e2c5e5d1c2bd17e1cfcd5ebbc3b5899903a3160a37272586f0",
+   "source_status": "published",
+   "source_date_evidence": "2026-11-26",
+   "contracts": [
+    {
+     "contract": "IM2612",
+     "long": 54098,
+     "short": 77196,
+     "long_change": -1383,
+     "short_change": -459,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IM2701",
+     "long": 2309,
+     "short": 3013,
+     "long_change": 13,
+     "short_change": 98,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IM2703",
+     "long": 24369,
+     "short": 28589,
+     "long_change": -1591,
+     "short_change": -2581,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IM2706",
+     "long": 10828,
+     "short": 17522,
+     "long_change": 2018,
+     "short_change": 2158,
+     "long_rank": 1,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    }
+   ],
+   "both_absent_contracts": [],
+   "long_observed": 91604,
+   "short_observed": 126320,
+   "net_short": 34716,
+   "observed_difference": 34716,
+   "coverage_status": "complete_observed",
+   "note": ""
   }
  },
  "coverage": {
-  "date_count": 1582,
-  "published": 1053,
+  "date_count": 1583,
+  "published": 1054,
   "missing": [
    "2022-07-23",
    "2022-07-24",

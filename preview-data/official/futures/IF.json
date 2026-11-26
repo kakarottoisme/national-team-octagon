@@ -4,8 +4,8 @@
  "product": "IF",
  "source": "CFFEX",
  "range_start": "2010-04-16",
- "range_end": "2026-11-25",
- "collected_at": "2026-11-25T18:29:24+08:00",
+ "range_end": "2026-11-26",
+ "collected_at": "2026-11-27T01:52:24+08:00",
  "records": {
   "2010-04-16": {
    "trading_date": "2010-04-16",
@@ -208861,11 +208861,60 @@
    "observed_difference": 21399,
    "coverage_status": "complete_observed",
    "note": ""
+  },
+  "2026-11-26": {
+   "trading_date": "2026-11-26",
+   "source_url": "http://www.cffex.com.cn/sj/ccpm/202611/26/IF_1.csv",
+   "source_sha256": "ed10e7a880971780d43702088a987cfb3c7ca55b431c3e06659c970cc9220ee7",
+   "source_status": "published",
+   "source_date_evidence": "2026-11-26",
+   "contracts": [
+    {
+     "contract": "IF2612",
+     "long": 20087,
+     "short": 29895,
+     "long_change": -3574,
+     "short_change": -2771,
+     "long_rank": 2,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IF2703",
+     "long": 6839,
+     "short": 17498,
+     "long_change": -405,
+     "short_change": -218,
+     "long_rank": 4,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    },
+    {
+     "contract": "IF2706",
+     "long": 4053,
+     "short": 6489,
+     "long_change": -374,
+     "short_change": 140,
+     "long_rank": 2,
+     "short_rank": 1,
+     "long_status": "ranked",
+     "short_status": "ranked"
+    }
+   ],
+   "both_absent_contracts": [],
+   "long_observed": 30979,
+   "short_observed": 53882,
+   "net_short": 22903,
+   "observed_difference": 22903,
+   "coverage_status": "complete_observed",
+   "note": ""
   }
  },
  "coverage": {
-  "date_count": 6062,
-  "published": 4034,
+  "date_count": 6063,
+  "published": 4035,
   "missing": [
    "2010-04-17",
    "2010-04-18",
