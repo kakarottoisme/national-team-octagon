@@ -84,6 +84,49 @@ class ParseTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             f.fetch_szse_jjgm("159919", dt.date(2026, 11, 1), dt.date(2026, 11, 19), pages=1, get=boom)
 
+    def test_jjgm_transient_reset_and_empty_are_bounded(self):
+        import urllib.error
+        seen, waits = [], []
+        def get(url, **kwargs):
+            seen.append(url)
+            if len(seen) == 1:
+                raise urllib.error.URLError('connection reset by peer')
+            if len(seen) == 2:
+                return 200, jjgm_body([])
+            return 200, jjgm_body([('2026-11-27', '159919  ', '2,156,961.66')])
+        rows = f.fetch_szse_jjgm('159919', dt.date(2026,11,26), dt.date(2026,11,27),
+                                 get=get, sleep=waits.append)
+        self.assertEqual(rows, {'2026-11-27':'2156961.66'})
+        self.assertEqual(len(seen), 3)
+        self.assertEqual(waits, [2, 5])
+        self.assertEqual(len(set(seen)), 1)
+
+    def test_jjgm_auth_and_schema_failures_not_retried(self):
+        import urllib.error
+        for response in ('auth', 'schema'):
+            calls = []
+            def get(url, **kwargs):
+                calls.append(url)
+                if response == 'auth':
+                    raise urllib.error.HTTPError(url, 403, 'forbidden', {}, None)
+                return 200, '<html>not json</html>'
+            with self.assertRaises((urllib.error.HTTPError, RuntimeError)):
+                f.fetch_szse_jjgm('159919', dt.date(2026,11,26), dt.date(2026,11,27),
+                                  get=get, sleep=lambda _:self.fail('must not retry'))
+            self.assertEqual(len(calls), 1)
+
+    def test_jjgm_empty_or_server_failure_never_fills_dates(self):
+        for status in (200, 503):
+            calls, waits = [], []
+            def get(url, **kwargs):
+                calls.append(url)
+                return status, jjgm_body([])
+            with self.assertRaises(RuntimeError):
+                f.fetch_szse_jjgm('159919', dt.date(2026,11,26), dt.date(2026,11,27),
+                                  get=get, sleep=waits.append)
+            self.assertEqual(len(calls), 3)
+            self.assertEqual(waits, [2, 5])
+
     def test_merge_szse_series_respects_sh_cap_day(self):
         history = f.empty_history()
         n = f.merge_szse_series(history, "159919",

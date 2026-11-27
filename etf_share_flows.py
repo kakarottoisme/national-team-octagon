@@ -23,6 +23,7 @@ import re
 import sys
 import time
 import urllib.request
+import urllib.error
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal, ROUND_HALF_UP
@@ -527,23 +528,41 @@ def parse_szse_jjgm(obj) -> dict:
     return out
 
 
-def fetch_szse_jjgm(code, beg: dt.date, end: dt.date, pages=SZSE_JJGM_PAGES, get=http_get) -> dict:
-    """逐基金拉带 size_date 的历史规模。翻页到空即停；任一页非 200/无有效记录则抛错。"""
+def fetch_szse_jjgm(code, beg: dt.date, end: dt.date, pages=SZSE_JJGM_PAGES, get=http_get, sleep=time.sleep) -> dict:
+    """逐基金读取官方日期规模；临时断连/空响应有限重读，授权或结构错误不重试。"""
     if code not in BY_CODE or BY_CODE[code]["exch"] != "SZ":
         raise RuntimeError(f"{code} 不是深市 watch 标的")
     merged = {}
     for page in range(1, pages + 1):
         url = SZSE_JJGM_URL.format(code=code, start=beg.strftime("%Y-%m-%d"),
                                    end=end.strftime("%Y-%m-%d"), page=page)
-        status, text = get(url, headers={"User-Agent": UA, "Accept": "application/json, text/plain, */*",
-                                         "X-Requested-With": "XMLHttpRequest",
-                                         "Referer": "https://fund.szse.cn/"})
-        if status != 200:
-            raise RuntimeError(f"SZSE fund_jjgm {code} p{page} HTTP {status}")
-        try:
-            rows = parse_szse_jjgm(json.loads(text))
-        except (ValueError, RuntimeError) as exc:
-            raise RuntimeError(f"SZSE fund_jjgm {code} p{page} 解析失败: {exc}")
+        for attempt in range(3):
+            try:
+                status, text = get(url, headers={"User-Agent": UA, "Accept": "application/json, text/plain, */*",
+                                                 "X-Requested-With": "XMLHttpRequest",
+                                                 "Referer": "https://fund.szse.cn/"})
+                if status != 200:
+                    if status not in (408, 429) and status < 500:
+                        raise RuntimeError(f"SZSE fund_jjgm {code} p{page} HTTP {status}")
+                    if attempt == 2:
+                        raise RuntimeError(f"SZSE fund_jjgm {code} p{page} HTTP {status}")
+                    sleep((2, 5)[attempt])
+                    continue
+                # JSON/schema errors are not network retries. An empty first page
+                # may be a temporary publication response; never invent its dates.
+                try:
+                    rows = parse_szse_jjgm(json.loads(text))
+                except (ValueError, RuntimeError) as exc:
+                    raise RuntimeError(f"SZSE fund_jjgm {code} p{page} 解析失败: {exc}")
+                if rows or merged or attempt == 2:
+                    break
+            except urllib.error.HTTPError as exc:
+                if (exc.code not in (408, 429) and exc.code < 500) or attempt == 2:
+                    raise
+            except (urllib.error.URLError, TimeoutError, ConnectionError):
+                if attempt == 2:
+                    raise
+            sleep((2, 5)[attempt])
         if not rows:
             break
         merged.update(rows)

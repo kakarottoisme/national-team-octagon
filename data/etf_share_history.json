@@ -251685,6 +251685,42 @@
    }
   },
   "2026-11-27": {
+   "159352": {
+    "sec_name": "中证A500ETF南方",
+    "source": "szse_fund_jjgm",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "3177310.17"
+   },
+   "159629": {
+    "sec_name": "中证1000ETF富国",
+    "source": "szse_fund_jjgm",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "108325.26"
+   },
+   "159845": {
+    "sec_name": "中证1000ETF华夏",
+    "source": "szse_fund_jjgm",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "405942.56"
+   },
+   "159915": {
+    "sec_name": "创业板ETF易方达",
+    "source": "szse_fund_jjgm",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "5774745.49"
+   },
+   "159919": {
+    "sec_name": "沪深300ETF嘉实",
+    "source": "szse_fund_jjgm",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "2156961.66"
+   },
+   "159977": {
+    "sec_name": "创业板ETF天弘",
+    "source": "szse_fund_jjgm",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "661387.28"
+   },
    "510050": {
     "sec_name": "上证50ETF",
     "source": "sse",
@@ -509810,5 +509846,5 @@
   }
  },
  "schema": "etf-share-flows-1",
- "updated_at": "2026-11-28T00:44:09+08:00"
+ "updated_at": "2026-11-28T01:11:56+08:00"
 }
