@@ -86,10 +86,10 @@ class ExpectedHoldings(unittest.TestCase):
     def test_ui_estimate_is_not_real_account(self):
         src=PAGE.read_text()
         self.assertIn('预计当前持仓',src);self.assertIn('先进先出',src)
-        self.assertIn('+holdingsBlock(day)',src)
+        self.assertIn('${expected(r)}',src)
         self.assertNotIn("readJSON('data/holdings.json",src)
-        self.assertIn('原模型累计（指数代理）',src)
-        self.assertIn('收盘价代理收盘前成交',src)
-        self.assertIn('预计合约 / 手数',src)
+        self.assertIn('累计期货净收益的50%',src)
+        self.assertIn('不是已核验真实账户',src)
+        self.assertIn('IC 预计合约 / 手数',src)
 
 if __name__=='__main__':unittest.main()

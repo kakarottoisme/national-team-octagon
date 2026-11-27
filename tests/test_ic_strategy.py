@@ -233,13 +233,13 @@ class TestPageCopy(unittest.TestCase):
     def test_rules_holdings_and_no_broker_rate(self):
         from pathlib import Path
         page = Path(__file__).resolve().parents[1].joinpath("futures-preview.html").read_text(encoding="utf-8")
-        self.assertIn("D 腿（盈利覆盖加仓）：自上次 D 撤出以来累计盈利的 50% 够付 1 手保证金（按 12%）即加 1 手，最多 4 手，总手数不超过 10；收盘跌破 MA250×0.99 或底仓归零时 D 全撤。", page)
-        self.assertIn("单笔开仓浮盈不等于完整净盈利", page)
+        self.assertIn("D：重置后累计期货净收益的50%覆盖一手12%估算保证金才加1手", page)
+        self.assertIn("目标与预计持仓差额不能代替你的真实持仓", page)
         self.assertNotIn("全样本年化 43.96%", page)
-        self.assertIn("原回测收益指标尚未统一核验", page)
-        self.assertIn("账户配置", page)
+        self.assertIn("连续研究模拟账户", page)
+        self.assertIn("不写真实账户", page)
         self.assertNotIn("readJSON('data/holdings.json", page)
-        self.assertIn("replayExpectedHoldings(candidate.days)", page)
+        self.assertIn("replayExpectedHoldings", page)
         self.assertIn("预计当前持仓", page)
         self.assertNotIn("margin_14", page)
         self.assertNotIn("按 14%", page)
@@ -267,9 +267,9 @@ class TestPageCopy(unittest.TestCase):
         self.assertEqual(roll["realized_pnl"], -64000)
         self.assertNotIn("14%", json.dumps(holdings, ensure_ascii=False))
         self.assertNotIn("day.action_text", page)
-        self.assertIn("模型建议", page)
-        self.assertIn("按信号日", page)
-        self.assertIn("不用本页持仓损益反向改写信号", page)
+        self.assertIn("IC 目标", page)
+        self.assertIn("snapshot", page)
+        self.assertIn("不倒改原IC历史", page)
 
 
 class TestMerge(unittest.TestCase):

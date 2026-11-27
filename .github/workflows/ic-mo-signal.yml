@@ -1,0 +1,52 @@
+name: Refresh IC MO current signal
+# Only the two replaced strategy modules; existing IC history and member workflow unchanged.
+on:
+  schedule:
+    - cron: '45 6 * * 1-5'
+    - cron: '35,45,55 7 * * 1-5'
+    - cron: '5,15,25,35,45,55 8 * * 1-5'
+    - cron: '10 12,14 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        options: [auto, close, preview]
+        default: auto
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: refresh-ic-mo-signal
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 20
+      - name: Collect only IC MO dated snapshots
+        env:
+          REQUESTED_MODE: ${{ inputs.mode }}
+        run: |
+          mode=$(python3 -c 'import os,datetime as d; from zoneinfo import ZoneInfo; x=os.getenv("REQUESTED_MODE","auto"); n=d.datetime.now(ZoneInfo("Asia/Shanghai")); print(x if x in ("preview","close") else "preview" if n.hour==14 else "close")')
+          python3 ic_mo_update.py --mode "$mode"
+      - name: Publish only combination packet
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/ic_mo_strategy.json
+          if ! git diff --cached --quiet; then
+            git commit -m "IC MO snapshot $(date -u +%FT%RZ)"
+            for try in 1 2 3; do
+              if git push origin HEAD:main; then break; fi
+              git fetch origin main
+              git rebase origin/main || { git rebase --abort; exit 1; }
+              if [ "$try" = 3 ]; then exit 1; fi
+            done
+          fi
+          python3 futures_pages_sync.py data/ic_mo_strategy.json --request-build
