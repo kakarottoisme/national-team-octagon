@@ -1,6 +1,6 @@
 {
   "schema_version": "2.1-safe",
-  "generated_at": "2026-11-27T10:12:25+00:00",
+  "generated_at": "2026-11-27T10:35:17+00:00",
   "data_status": "safe_public_with_attribution",
   "policy_notes": [
     "US Treasury data is public domain; Cboe index CSVs are public CDN downloads with attribution.",
@@ -15,7 +15,7 @@
       "degraded": false,
       "error": null,
       "as_of": "2026-11-25",
-      "last_attempt_at": "2026-11-27T10:12:25+00:00"
+      "last_attempt_at": "2026-11-27T10:35:17+00:00"
     },
     "cboe": {},
     "public_macro": {
@@ -167,7 +167,7 @@
       },
       "as_of": "2026-11-25",
       "as_of_raw": null,
-      "collected_at": "2026-11-27T18:09:21+08:00",
+      "collected_at": "2026-11-27T18:32:14+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -11801,7 +11801,7 @@
       },
       "as_of": "2026-11-25",
       "as_of_raw": null,
-      "collected_at": "2026-11-27T18:09:22+08:00",
+      "collected_at": "2026-11-27T18:32:15+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -19700,7 +19700,7 @@
       "value": 2.73,
       "as_of": "2026-11-25",
       "as_of_raw": null,
-      "collected_at": "2026-11-27T18:09:22+08:00",
+      "collected_at": "2026-11-27T18:32:15+08:00",
       "history": [
         {
           "date": "2024-01-02",
@@ -22631,7 +22631,7 @@
       "value": 0.611,
       "as_of": "2026-11-25",
       "as_of_raw": null,
-      "collected_at": "2026-11-27T18:09:24+08:00",
+      "collected_at": "2026-11-27T18:32:17+08:00",
       "history": [
         {
           "date": "2021-09-13",
@@ -27885,7 +27885,7 @@
       "value": 3.94,
       "as_of": "2026-11-24",
       "as_of_raw": null,
-      "collected_at": "2026-11-27T18:09:22+08:00",
+      "collected_at": "2026-11-27T18:32:15+08:00",
       "history": [
         {
           "date": "2025-10-23",
@@ -29069,7 +29069,7 @@
       "value": 2.12,
       "as_of": "2026-11-25",
       "as_of_raw": null,
-      "collected_at": "2026-11-27T18:09:22+08:00",
+      "collected_at": "2026-11-27T18:32:15+08:00",
       "history": [
         {
           "date": "2024-01-02",
