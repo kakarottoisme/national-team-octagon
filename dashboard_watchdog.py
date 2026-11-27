@@ -85,10 +85,15 @@ def assess(name,target,now,reader=read):
   import sys
   sys.path.insert(0,str(ROOT/'preview-tools'))
   import global_sources as g
-  reference=g.fetch_treasury_nominal_curve()
-  rows=[m for m in d.get('metrics',[]) if m['id']=='A3_yield_curve_nominal']
-  if not reference.get('ok'):problems.append('Treasury reference unavailable; preserve dates')
-  elif not rows or rows[0].get('as_of','')<reference['as_of']:problems.append('Treasury observed date behind published source')
+  import public_macro as pm
+  reference=pm.collect_public_macro(years=(now.year,),now=now,fetcher=lambda url:pm._get(url,timeout=12,retries=0))
+  by_id={m['id']:m for m in d.get('metrics',[])}
+  mapping={**g._PUBLIC_MACRO_MAP,'bei_10y':'S8_bei_10y'}
+  for metric in reference.get('metrics',[]):
+   name=mapping.get(metric['id'])
+   if name and name in by_id and by_id[name].get('status','').startswith('connected'):
+    if metric.get('as_of') and (by_id[name].get('as_of') or '')<metric['as_of']:problems.append(name+' behind its actual published source')
+  if reference.get('errors'):problems.append('source reference check incomplete; preserve dates')
  elif name=='margin':
   import ashare_tasks as checker
   if checker.margin_missing(d,target):problems.append('margin prior disclosure date/internal gap missing')
@@ -206,7 +211,8 @@ def inspect(mode,state,persist,check_only=False,followup=False):
 def main():
  p=argparse.ArgumentParser();p.add_argument('mode',choices=['intraday','daily']);p.add_argument('--state-dir',required=True);p.add_argument('--check-only',action='store_true');p.add_argument('--followup',action='store_true');a=p.parse_args()
  r=Path(a.state_dir);r.mkdir(parents=True,exist_ok=True);path=r/'dashboard-watchdog.json';now=dt.datetime.now(TZ)
- with (r/'watchdog.lock').open('a') as lock:
+ # Use the SAME lock as archive/margin writers, not just other watchdogs.
+ with (r/'lock').open('a') as lock:
   fcntl.flock(lock,fcntl.LOCK_EX);state=json.loads(path.read_text()) if path.exists() else {'attempts':{},'unresolved':{}}
   persist=lambda x:write_json_atomic(path,x,ensure_ascii=False,indent=2)
   sync_checkout();results=inspect(a.mode,state,persist,a.check_only,a.followup)
@@ -214,7 +220,8 @@ def main():
  # Followup is inside the same consolidated cron execution, not a new task.
  followup=None;minute=now.hour*60+now.minute
  if a.mode=='intraday':
-  if 560<=minute<695 or 775<=minute<905:followup=now.replace(second=0,microsecond=0)+dt.timedelta(minutes=5-now.minute%5)
+  if 500<=minute<510:followup=now.replace(hour=8,minute=30,second=0,microsecond=0)
+  elif 560<=minute<695 or 775<=minute<905:followup=now.replace(second=0,microsecond=0)+dt.timedelta(minutes=5-now.minute%5)
   elif 940<=minute<1080:followup=now.replace(second=0,microsecond=0)+dt.timedelta(minutes=10-now.minute%10)
   elif not a.followup and results:followup=now+dt.timedelta(minutes=15)
  elif not a.followup and any(v.get('problems') or v.get('error') for v in results.values()):followup=now+dt.timedelta(minutes=20)

@@ -54,6 +54,9 @@ if [[ "$TASK" == margin || "$TASK" == data-audit || "$TASK" == watch-daily ]]; t
   PYTHON="$STATE/margin-env/bin/python"
   "$PYTHON" -c 'import akshare,pandas; assert akshare.__version__ == "1.18.97"' 2>/dev/null || "$PYTHON" -m pip install --quiet 'akshare==1.18.97' pandas
 fi
+if [[ "$TASK" == watch-daily ]]; then
+  "$PYTHON" -c 'import xlrd; assert xlrd.__version__ == "2.0.2"' 2>/dev/null || "$PYTHON" -m pip install --quiet 'xlrd==2.0.2'
+fi
 if [[ "$TASK" == watch-intraday || "$TASK" == watch-daily ]]; then
   WATCH_EXTRA=()
   if [[ "${3:-}" == --followup ]]; then WATCH_EXTRA=(--followup); fi
