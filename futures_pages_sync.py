@@ -17,7 +17,9 @@ import urllib.request
 ROOT=Path(__file__).resolve().parent
 SITE='https://kakarottoisme.github.io/national-team-octagon/'
 REPO='kakarottoisme/national-team-octagon'
-ALLOWED={'data/ic_strategy.json','preview-data/global.json','preview-data/status.json',
+ALLOWED={'data/ic_strategy.json','data/market_cycle.json','data/etf_share_flows.json',
+         'data/etf_share_history.json','data/etf_szse_snapshot.json','data/etf_index_reference.json','data/historical_overview.json',
+         'preview-data/global.json','preview-data/status.json',
          'preview-data/official/history.json','preview-data/official/snapshot-latest.json',
          'preview-data/turnover-baseline.json','preview-data/turnover-history.json',
          *[f'preview-data/official/futures/{p}.json' for p in ['IH','IF','IC','IM']]}

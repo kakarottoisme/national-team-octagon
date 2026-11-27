@@ -478,10 +478,21 @@ def fetch_kline(code, beg, end, get=http_get):
     query = ("?secid={secid}&klt=101&fqt=0&fields1=f1,f2,f3,f4,f5,f6"
              "&fields2=f51,f52,f53,f54,f55,f56,f57&beg={beg}&end={end}").format(
         secid=secid, beg=beg.strftime("%Y%m%d"), end=end.strftime("%Y%m%d"))
-    status, text = get(KLINE_URL + query, headers={"User-Agent": UA, "Referer": "https://quote.eastmoney.com/"})
-    if status != 200:
-        raise RuntimeError(f"kline HTTP {status} {code}")
-    return parse_kline_payload(json.loads(text))
+    last = None
+    for attempt in range(3):
+        try:
+            endpoint = KLINE_URL if attempt < 2 else KLINE_URL.replace('://push2his.', '://33.push2his.')
+            status, text = get(endpoint + query, headers={"User-Agent": UA, "Referer": "https://quote.eastmoney.com/"})
+            if status != 200:
+                raise RuntimeError(f"kline HTTP {status} {code}")
+            rows = parse_kline_payload(json.loads(text))
+            return {d:r for d,r in rows.items() if beg.isoformat() <= d <= end.isoformat()}
+        except Exception as exc:
+            last = exc
+            if getattr(exc, 'code', None) in (401,403,404) or attempt == 2:
+                raise
+            time.sleep(attempt + 1)
+    raise last
 
 
 def fetch_szse(get=http_get):
@@ -695,12 +706,19 @@ def update_recent(lookback_days=12, get=http_get, sleep=time.sleep, now=None):
     start = today - dt.timedelta(days=lookback_days)
     if known:
         start = min(start, dt.date.fromisoformat(known[-1]))
-    quote_start = dt.date.fromisoformat(known[0]) if known else start
+    # Daily refresh uses only the recent window; requesting all history from 2012
+    # repeatedly caused unnecessarily large/partial responses and missing tail rows.
+    quote_start = start
+    quote_changed = False
+    quote_errors = []
     for code in BY_CODE:
         try:
-            merge_quotes(history, code, fetch_kline(code, quote_start, today, get=get))
-        except Exception:
-            pass
+            rows = fetch_kline(code, quote_start, today, get=get)
+            before = {day:(history.get('quotes',{}).get(day,{}) or {}).get(code) for day in rows}
+            merge_quotes(history, code, rows)
+            quote_changed = quote_changed or any(before[day] != history['quotes'][day][code] for day in rows)
+        except Exception as exc:
+            quote_errors.append(code + ': ' + type(exc).__name__)
         sleep(0.2)
     added = []
     for day in daterange(start, today):
@@ -744,17 +762,17 @@ def update_recent(lookback_days=12, get=http_get, sleep=time.sleep, now=None):
             szse_doc, szse_changed = record_szse(szse_doc, fetch_szse(get=get), stamp)
         except Exception:
             szse_changed = False
-    if not added and not sz_added and not szse_changed and history.get("updated_at"):
+    if not added and not sz_added and not szse_changed and not quote_changed and history.get("updated_at"):
         flows = build_flows(history, szse_doc, generated_at=history.get("updated_at"))
         changed = write_if_changed(FLOWS_PATH, flows)
-        return {"added": [], "szse_errors": sz_errors, "as_of": flows.get("as_of"), "changed": changed}
+        return {"added": [], "szse_errors": sz_errors, "quote_errors": quote_errors, "as_of": flows.get("as_of"), "changed": changed}
     history["updated_at"] = stamp
     history["schema"] = SCHEMA
     flows = build_flows(history, szse_doc, generated_at=stamp)
     changed = write_if_changed(HISTORY_PATH, history)
     changed = write_if_changed(SZSE_PATH, szse_doc) or changed
     changed = write_if_changed(FLOWS_PATH, flows) or changed
-    return {"added": added, "as_of": flows.get("as_of"), "changed": changed}
+    return {"added": added, "as_of": flows.get("as_of"), "changed": changed, "quote_errors": quote_errors, "szse_errors": sz_errors}
 
 
 def rebuild_only():

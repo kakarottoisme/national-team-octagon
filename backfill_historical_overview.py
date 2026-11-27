@@ -88,8 +88,11 @@ def main():
     for rev,doc,sha in snapshots('preview-data/turnover-baseline.json'):
         for d in chosen:
             if d not in bases and valid_base(doc,d):bases[d]=(rev,doc,sha)
-    days={}
+    target=ROOT/'data/historical_overview.json'
+    existing=json.loads(target.read_text()).get('days',{}) if target.exists() else {}
+    days=dict(existing) # A shallow daily checkout must never delete prior verified history.
     for d,(rev,doc,sha) in sorted(chosen.items()):
+        if d in days:continue
         b=bases.get(d);row=build_close(doc,b[1] if b else None)
         if row['net_buy_yi'] is None and row['same_time_ratio'] is None:continue
         row['source']={'snapshot_commit':rev,'snapshot_sha256':sha,'snapshot_updated':doc['updated'],

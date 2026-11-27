@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pages: write
 concurrency:
   group: refresh-market-cycle
   cancel-in-progress: false
@@ -17,10 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
+          ref: main
           fetch-depth: 20
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Official A-share calendar gate
@@ -33,10 +35,12 @@ jobs:
               f.write('trade='+str(is_trading_day(dt.datetime.now(TZ).date())).lower()+'\n')
           PY
       - name: Collect independent completed daily prices
+        id: collect
+        continue-on-error: true
         if: steps.gate.outputs.trade == 'true'
         run: python3 market_cycle.py
       - name: Commit only new independent dataset
-        if: steps.gate.outputs.trade == 'true'
+        if: ${{ !cancelled() && steps.gate.outputs.trade == 'true' }}
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
@@ -44,4 +48,23 @@ jobs:
           git add -- data/market_cycle.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'refresh market cycle observations'
-          git push origin HEAD:main
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch --depth=20 origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error::market-cycle concurrent conflict; local data retained, no force push"
+              exit 1
+            fi
+          done
+          exit 1
+      - name: Verify market data is published on Pages
+        if: ${{ !cancelled() && steps.gate.outputs.trade == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 futures_pages_sync.py data/market_cycle.json
+      - name: Final collection result
+        if: always()
+        env:
+          COLLECT_OUTCOME: ${{ steps.collect.outcome }}
+        run: test "$COLLECT_OUTCOME" != "failure"

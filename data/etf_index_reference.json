@@ -1,7 +1,7 @@
 {
  "indices": {
   "上证180": {
-   "as_of": "2026-11-23",
+   "as_of": "2026-11-27",
    "code": "sh000010",
    "dates": {
     "2012-01-04": 4923.873,
@@ -3617,13 +3617,18 @@
     "2026-11-18": 9005.454,
     "2026-11-19": 9020.094,
     "2026-11-20": 8983.526,
-    "2026-11-23": 8950.285
+    "2026-11-23": 8950.285,
+    "2026-11-24": 8971.002,
+    "2026-11-25": 8851.327,
+    "2026-11-26": 8846.636,
+    "2026-11-27": 9142.756
    },
    "price_type": "收盘点位",
-   "source_url": "https://finance.sina.com.cn/realstock/company/sh000010/hisdata_klc2/klc_kl.js"
+   "source_url": "https://finance.sina.com.cn/realstock/company/sh000010/hisdata_klc2/klc_kl.js",
+   "update_source_url": "https://quotes.sina.cn/cn/api/jsonp_v2.php/var%20x/CN_MarketDataService.getKLineData?symbol=sh000010&scale=240&ma=no&datalen=60"
   },
   "中证A500": {
-   "as_of": "2026-11-23",
+   "as_of": "2026-11-27",
    "code": "sh000510",
    "dates": {
     "2012-01-04": 2405.478,
@@ -7239,10 +7244,15 @@
     "2026-11-18": 4767.829,
     "2026-11-19": 4766.892,
     "2026-11-20": 4693.281,
-    "2026-11-23": 4719.522
+    "2026-11-23": 4719.522,
+    "2026-11-24": 4719.976,
+    "2026-11-25": 4618.718,
+    "2026-11-26": 4615.013,
+    "2026-11-27": 4853.294
    },
    "price_type": "收盘点位",
-   "source_url": "https://finance.sina.com.cn/realstock/company/sh000510/hisdata_klc2/klc_kl.js"
+   "source_url": "https://finance.sina.com.cn/realstock/company/sh000510/hisdata_klc2/klc_kl.js",
+   "update_source_url": "https://quotes.sina.cn/cn/api/jsonp_v2.php/var%20x/CN_MarketDataService.getKLineData?symbol=sh000510&scale=240&ma=no&datalen=60"
   }
  },
  "schema": "etf-index-reference-1"

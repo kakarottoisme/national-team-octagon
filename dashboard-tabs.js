@@ -51,6 +51,11 @@
   }, true);
   addEventListener('message',event => {
     if(event.source!==parent || event.origin!==origin) return;
+    if(event.data?.kind==='view-visibility' && event.data.page===page && event.data.visible && !document.hidden && ['index.html','risk-preview.html','market-cycle.html'].includes(page)) {
+      if(page!=='index.html' || typeof view==='undefined' || view==='live') {
+        if(typeof refresh==='function')refresh();
+      }
+    }
     if(event.data?.kind==='prepare-view') {
       sizeCharts();post({kind:'view-sized',page,width:innerWidth,height:innerHeight});
     }

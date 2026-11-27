@@ -30,7 +30,7 @@ class Overlay(unittest.TestCase):
   ref=json.loads((ROOT/'data/etf_index_reference.json').read_text())
   self.assertEqual(set(ref['indices']),{'上证180','中证A500'})
   for name,row in ref['indices'].items():
-   self.assertEqual(min(row['dates']),'2012-01-04');self.assertEqual(max(row['dates']),'2026-11-23')
+   self.assertEqual(min(row['dates']),'2012-01-04');self.assertGreaterEqual(max(row['dates']),'2026-11-23')
    self.assertTrue(all(isinstance(v,(int,float)) and v>0 for v in row['dates'].values()))
    self.assertIn('finance.sina.com.cn/realstock/company/',row['source_url'])
  def test_share_calculations_preserved(self):

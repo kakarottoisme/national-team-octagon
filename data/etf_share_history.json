@@ -251501,6 +251501,12 @@
     "stat_date": "2026-11-25",
     "tot_vol_wan": "5488645.49"
    },
+   "159919": {
+    "sec_name": "沪深300ETF嘉实",
+    "source": "szse_fund_jjgm",
+    "stat_date": "2026-11-25",
+    "tot_vol_wan": "2133201.66"
+   },
    "159977": {
     "sec_name": "创业板ETF天弘",
     "source": "szse_fund_jjgm",
@@ -251598,6 +251604,12 @@
     "source": "szse_fund_jjgm",
     "stat_date": "2026-11-26",
     "tot_vol_wan": "5698745.49"
+   },
+   "159919": {
+    "sec_name": "沪深300ETF嘉实",
+    "source": "szse_fund_jjgm",
+    "stat_date": "2026-11-26",
+    "tot_vol_wan": "2133201.66"
    },
    "159977": {
     "sec_name": "创业板ETF天弘",
@@ -509539,11 +509551,23 @@
     "source": "eastmoney_push2his",
     "volume_hand": "6229091"
    },
+   "159915": {
+    "amount_yuan": "12942412821.468",
+    "close": "2.217",
+    "source": "eastmoney_push2his",
+    "volume_hand": "58665364"
+   },
    "159919": {
     "amount_yuan": "474221074.100",
     "close": "4.136",
     "source": "eastmoney_push2his",
     "volume_hand": "1143038"
+   },
+   "159977": {
+    "amount_yuan": "452823041.427",
+    "close": "1.144",
+    "source": "eastmoney_push2his",
+    "volume_hand": "3953767"
    },
    "510050": {
     "amount_yuan": "2502866451.000",
@@ -509580,9 +509604,131 @@
     "close": "5.888",
     "source": "eastmoney_push2his",
     "volume_hand": "4119659"
+   },
+   "512100": {
+    "amount_yuan": "7908110964.000",
+    "close": "2.249",
+    "source": "eastmoney_push2his",
+    "volume_hand": "35123395"
+   },
+   "512500": {
+    "amount_yuan": "381685093.000",
+    "close": "3.333",
+    "source": "eastmoney_push2his",
+    "volume_hand": "1136359"
+   },
+   "560010": {
+    "amount_yuan": "1249103255.000",
+    "close": "2.308",
+    "source": "eastmoney_push2his",
+    "volume_hand": "5384034"
+   },
+   "588000": {
+    "amount_yuan": "7560344351.000",
+    "close": "1.233",
+    "source": "eastmoney_push2his",
+    "volume_hand": "60706524"
+   },
+   "588080": {
+    "amount_yuan": "2241797832.000",
+    "close": "1.194",
+    "source": "eastmoney_push2his",
+    "volume_hand": "18584951"
+   }
+  },
+  "2026-11-27": {
+   "159352": {
+    "amount_yuan": "5280257791.357",
+    "close": "1.091",
+    "source": "eastmoney_push2his",
+    "volume_hand": "50143181"
+   },
+   "159629": {
+    "amount_yuan": "973649189.887",
+    "close": "2.543",
+    "source": "eastmoney_push2his",
+    "volume_hand": "4002240"
+   },
+   "159845": {
+    "amount_yuan": "5182015760.818",
+    "close": "2.526",
+    "source": "eastmoney_push2his",
+    "volume_hand": "21213899"
+   },
+   "159915": {
+    "amount_yuan": "22087273827.185",
+    "close": "2.471",
+    "source": "eastmoney_push2his",
+    "volume_hand": "93911009"
+   },
+   "159919": {
+    "amount_yuan": "1820571156.166",
+    "close": "4.343",
+    "source": "eastmoney_push2his",
+    "volume_hand": "4272827"
+   },
+   "159977": {
+    "amount_yuan": "928486158.474",
+    "close": "1.289",
+    "source": "eastmoney_push2his",
+    "volume_hand": "7658796"
+   },
+   "510050": {
+    "amount_yuan": "3349217484.000",
+    "close": "2.962",
+    "source": "eastmoney_push2his",
+    "volume_hand": "11511582"
+   },
+   "510300": {
+    "amount_yuan": "12369926692.000",
+    "close": "4.162",
+    "source": "eastmoney_push2his",
+    "volume_hand": "30280345"
+   },
+   "510330": {
+    "amount_yuan": "1316514860.000",
+    "close": "4.335",
+    "source": "eastmoney_push2his",
+    "volume_hand": "3098682"
+   },
+   "510500": {
+    "amount_yuan": "9909162735.000",
+    "close": "6.404",
+    "source": "eastmoney_push2his",
+    "volume_hand": "15855976"
+   },
+   "512100": {
+    "amount_yuan": "13820057852.000",
+    "close": "2.464",
+    "source": "eastmoney_push2his",
+    "volume_hand": "58025035"
+   },
+   "512500": {
+    "amount_yuan": "817477508.000",
+    "close": "3.631",
+    "source": "eastmoney_push2his",
+    "volume_hand": "2326266"
+   },
+   "560010": {
+    "amount_yuan": "2515824965.000",
+    "close": "2.528",
+    "source": "eastmoney_push2his",
+    "volume_hand": "10336929"
+   },
+   "588000": {
+    "amount_yuan": "18631731612.000",
+    "close": "1.447",
+    "source": "eastmoney_push2his",
+    "volume_hand": "138875014"
+   },
+   "588080": {
+    "amount_yuan": "5501207271.000",
+    "close": "1.406",
+    "source": "eastmoney_push2his",
+    "volume_hand": "42395764"
    }
   }
  },
  "schema": "etf-share-flows-1",
- "updated_at": "2026-11-27T08:34:18+08:00"
+ "updated_at": "2026-11-27T17:16:12+08:00"
 }

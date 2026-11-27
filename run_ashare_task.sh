@@ -23,7 +23,27 @@ cleanup() {
 trap cleanup EXIT
 # No credential/token copied into command arguments or output.
 CLONE_START=$SECONDS
-git clone --quiet --depth 20 https://github.com/kakarottoisme/national-team-octagon.git "$RUN/repo"
+# Retry only read-only checkout transport failures, before any business write.
+# Partial clones contain no user data; auth failures stop immediately.
+for attempt in 1 2 3; do
+  ERR="$RUN/clone-error.txt"
+  if git clone --quiet --depth 20 https://github.com/kakarottoisme/national-team-octagon.git "$RUN/repo" 2>"$ERR"; then break; fi
+  if python3 - "$ERR" <<'PY'
+import sys
+s=open(sys.argv[1]).read().lower()
+sys.exit(0 if any(x in s for x in ('authentication failed','permission denied','403','401','repository not found')) else 1)
+PY
+  then
+    printf 'Checkout authentication/permission failure; no retry\n' >&2
+    exit 1
+  fi
+  if [[ "$attempt" == 3 ]]; then
+    printf 'Checkout failed after 3 bounded transport attempts; no business writes\n' >&2
+    exit 1
+  fi
+  rm -rf -- "$RUN/repo"
+  sleep "$((attempt * 2))"
+done
 if [[ "$TASK" == archive ]]; then
   export ARCHIVE_CHECKOUT_READY_AT="$(TZ=Asia/Shanghai date -Iseconds)"
   export ARCHIVE_CLONE_SECONDS="$((SECONDS-CLONE_START))"

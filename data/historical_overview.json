@@ -179,6 +179,78 @@
    },
    "time": "15:00",
    "total_amt_yi": 496.7509
+  },
+  "2026-11-24": {
+   "net_buy_yi": -41.103,
+   "net_covered": 7,
+   "same_time_covered": 7,
+   "same_time_den_yi": 545.665,
+   "same_time_ratio": 0.931115794489293,
+   "source": {
+    "baseline_commit": "27cb07ddf27382049a10fd9b8b649a9af68857b8",
+    "baseline_last_day": "2026-11-20",
+    "baseline_sha256": "d7b354266e14c04129e0e3584ef5a2165d1646dfcd30996a4b53db311c521878",
+    "snapshot_commit": "14f759a0bf4e6759ed4f792b8beb92ed018082e5",
+    "snapshot_sha256": "74ead55b66eb849287e7eca317d77fe49e1ca1288b794b6b849c7437b45eb235",
+    "snapshot_updated": "2026-11-24 15:01:32",
+    "snapshot_url": "https://github.com/kakarottoisme/national-team-octagon/commit/14f759a0bf4e6759ed4f792b8beb92ed018082e5"
+   },
+   "time": "15:00",
+   "total_amt_yi": 508.0773
+  },
+  "2026-11-25": {
+   "net_buy_yi": 12.447,
+   "net_covered": 7,
+   "same_time_covered": 7,
+   "same_time_den_yi": 552.721,
+   "same_time_ratio": 1.0361187651636177,
+   "source": {
+    "baseline_commit": "32109398556c4c66ee94749b20cae52229a3e24b",
+    "baseline_last_day": "2026-11-24",
+    "baseline_sha256": "12922c121191bbf08859502fba5b4f73e02a580f75fe927dc3f0cf17d64ec658",
+    "snapshot_commit": "552d7ec924e536ba6c908570b44395c59a9b9d48",
+    "snapshot_sha256": "9f2d33cb70698b37b3badce594040eb0ff0de5b4921bae300ef2c237078134cd",
+    "snapshot_updated": "2026-11-25 15:01:26",
+    "snapshot_url": "https://github.com/kakarottoisme/national-team-octagon/commit/552d7ec924e536ba6c908570b44395c59a9b9d48"
+   },
+   "time": "15:00",
+   "total_amt_yi": 572.6846
+  },
+  "2026-11-26": {
+   "net_buy_yi": 37.404,
+   "net_covered": 7,
+   "same_time_covered": 7,
+   "same_time_den_yi": 560.29,
+   "same_time_ratio": 0.7367400810294669,
+   "source": {
+    "baseline_commit": "be91e73ce5c9e0e1b60e05cebece524509e7e27e",
+    "baseline_last_day": "2026-11-25",
+    "baseline_sha256": "f5be84d451790c25fcdd09adce400a2e3e698382756388ab2f90da8f0da11771",
+    "snapshot_commit": "ed76b8acc15c8399bf87a7e0329eb87efb39c1a8",
+    "snapshot_sha256": "fb9422101f526b6fbd989d87be1ae75942d88462ed927be0e5ed3df45647587a",
+    "snapshot_updated": "2026-11-26 15:01:37",
+    "snapshot_url": "https://github.com/kakarottoisme/national-team-octagon/commit/ed76b8acc15c8399bf87a7e0329eb87efb39c1a8"
+   },
+   "time": "15:00",
+   "total_amt_yi": 412.7881
+  },
+  "2026-11-27": {
+   "net_buy_yi": 156.953,
+   "net_covered": 7,
+   "same_time_covered": 7,
+   "same_time_den_yi": 560.29,
+   "same_time_ratio": 1.5250607721001626,
+   "source": {
+    "baseline_commit": "be91e73ce5c9e0e1b60e05cebece524509e7e27e",
+    "baseline_last_day": "2026-11-25",
+    "baseline_sha256": "f5be84d451790c25fcdd09adce400a2e3e698382756388ab2f90da8f0da11771",
+    "snapshot_commit": "b28faf950375d4c4be1334d643cb888b5b3fb31c",
+    "snapshot_sha256": "5531342e8c564be914504f266613552a64c0c65de7d151136178c72614ca47ab",
+    "snapshot_updated": "2026-11-27 15:01:45",
+    "snapshot_url": "https://github.com/kakarottoisme/national-team-octagon/commit/b28faf950375d4c4be1334d643cb888b5b3fb31c"
+   },
+   "time": "15:00",
+   "total_amt_yi": 854.4763
   }
  },
  "method": "Preserved same-day complete close snapshot; prior 20-day baseline only; no interpolation",

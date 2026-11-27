@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  pages: write
 
 concurrency:
   group: refresh-etf-share-flows
@@ -46,13 +47,22 @@ jobs:
         shell: bash
         run: python3 etf_share_flows.py
 
+      - name: Refresh independently dated ETF benchmark overlay
+        id: index_overlay
+        continue-on-error: true
+        run: python3 etf_index_update.py
+
+      - name: Enrich archived overview from preserved quotes only
+        continue-on-error: true
+        run: python3 backfill_historical_overview.py
+
       - name: Commit share files only when they changed
         shell: bash
         run: |
           set -euo pipefail
           export GIT_TERMINAL_PROMPT=0
           STAMP=$(date -u +%Y-%m-%dT%H:%MZ)
-          git add data/etf_share_history.json data/etf_share_flows.json data/etf_szse_snapshot.json
+          git add data/etf_share_history.json data/etf_share_flows.json data/etf_szse_snapshot.json data/etf_index_reference.json data/historical_overview.json
           if git diff --cached --quiet; then
             echo "ETF份额无变化，不提交"
             exit 0
@@ -72,6 +82,11 @@ jobs:
             fi
           done
           exit 1
+
+      - name: Verify ETF share data is published on Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 futures_pages_sync.py data/etf_share_flows.json data/etf_share_history.json data/etf_szse_snapshot.json data/etf_index_reference.json data/historical_overview.json
 
       - name: Check actual disclosure freshness after preserving fetched data
         shell: bash
