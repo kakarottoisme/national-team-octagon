@@ -29,7 +29,7 @@ def due(mode,now):
   prior=day-dt.timedelta(days=1)
   if not is_trading_day(prior):return {}
   target=prior.isoformat()
-  return {'flows':target,'global':target,'archive':target,'margin':previous(prior).isoformat()}
+  return {'flows':target,'global':target,'archive':target,'margin':previous(prior).isoformat(),'futures':target,'ic':target,'cycle':target}
  if not is_trading_day(day):return {}
  target=day.isoformat();out={}
  # A scheduled node may arrive up to 4 minutes late; no backwards catch-up burst.
@@ -155,6 +155,7 @@ def repair(name,state,key,persist,target=None):
   if name=='global':args+=['-f','global_only=true']
   gh(*args);state['attempts'][reservation]='accepted';persist(state);return 'existing workflow dispatched'
  if state['attempts'].get(key):return 'node already attempted'
+ if any(k.endswith('-'+name) and v=='reserved' for k,v in state['attempts'].items()):return 'prior direct write unconfirmed; inspect retained checkout before any new write'
  # Recheck direct targets immediately before reserving a write.
  if name=='margin':
   import ashare_tasks as checker
