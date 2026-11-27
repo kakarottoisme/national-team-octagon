@@ -13,7 +13,7 @@ class IsolatedPublishing(unittest.TestCase):
         self.assertIn('--skip-global',by['full']['run'])
         self.assertIn('"${paths[@]}"',by['pages']['run'])
         # Simulate the incident: valid global data with failing unrelated turnover.
-        code=by['publish_data']['run'].split('          # impossible split')[0]
+        code=by['publish_data']['run']
         code=code[:code.index('if git diff --cached --quiet')]
         with tempfile.TemporaryDirectory() as t:
             root=Path(t);d=root/'bin';d.mkdir()
@@ -33,6 +33,14 @@ class IsolatedPublishing(unittest.TestCase):
         calls=[];checks=iter([False,True]);times=iter([0,1])
         self.assertEqual(sync.main(['preview-data/global.json'],check=lambda p:next(checks),request=lambda:calls.append(1) or 'queued',sleep=lambda s:None,clock=lambda:next(times)),0)
         self.assertEqual(calls,[1])
+    def test_pending_futures_does_not_fail_pages_with_empty_date(self):
+        steps=yaml.safe_load((ROOT/'.github/workflows/preview-data.yml').read_text())['jobs']['refresh']['steps']
+        code=next(s for s in steps if s.get('id')=='pages')['run']
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t);binary=root/'python3'
+            binary.write_text('#!/bin/sh\ncase "$*" in *--verify-date*) exit 99;; esac\n');binary.chmod(0o755)
+            p=subprocess.run(['bash','-c',code],env=os.environ|{'PATH':t+':'+os.environ['PATH'],'PUBLISH_PATHS':'preview-data/global.json','VERIFY_PUBLISH':'false','EXPECTED_DATA_DATE':''},capture_output=True,text=True)
+            self.assertEqual(p.returncode,0,p.stderr)
     def test_frontend_polling_preserves_source_date(self):
         text=(ROOT/'risk-preview.html').read_text()
         self.assertIn('5*60*1000',text)

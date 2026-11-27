@@ -191,7 +191,11 @@ jobs:
           if [[ "$VERIFY_PUBLISH" == "true" ]]; then args+=(--request-build); fi
           read -r -a paths <<< "$PUBLISH_PATHS"
           python3 futures_pages_sync.py "${paths[@]}" "${args[@]}"
-          python3 futures_close_update.py --mode members --verify-date "$EXPECTED_DATA_DATE"
+          if [[ -n "$EXPECTED_DATA_DATE" ]]; then
+            python3 futures_close_update.py --mode members --verify-date "$EXPECTED_DATA_DATE"
+          else
+            echo "期指本轮尚无可验证交易日；全球等已成功模块已独立发布，缺日由最终业务检查报错"
+          fi
 
       - name: Final business result (never green on missing data)
         if: always()
