@@ -509521,6 +509521,24 @@
    }
   },
   "2026-11-26": {
+   "159352": {
+    "amount_yuan": "4502070975.654",
+    "close": "1.028",
+    "source": "eastmoney_push2his",
+    "volume_hand": "43550178"
+   },
+   "159629": {
+    "amount_yuan": "420314252.296",
+    "close": "2.312",
+    "source": "eastmoney_push2his",
+    "volume_hand": "1804488"
+   },
+   "159845": {
+    "amount_yuan": "1444846834.305",
+    "close": "2.305",
+    "source": "eastmoney_push2his",
+    "volume_hand": "6229091"
+   },
    "159919": {
     "amount_yuan": "474221074.100",
     "close": "4.136",
@@ -509532,6 +509550,12 @@
     "close": "2.864",
     "source": "eastmoney_push2his",
     "volume_hand": "8730497"
+   },
+   "510180": {
+    "amount_yuan": "87082186.000",
+    "close": "3.565",
+    "source": "eastmoney_push2his",
+    "volume_hand": "243657"
    },
    "510300": {
     "amount_yuan": "3419450769.000",
@@ -509560,5 +509584,5 @@
   }
  },
  "schema": "etf-share-flows-1",
- "updated_at": "2026-11-27T07:59:48+08:00"
+ "updated_at": "2026-11-27T08:34:18+08:00"
 }
