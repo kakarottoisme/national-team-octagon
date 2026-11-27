@@ -1,38 +1,38 @@
 {
  "latest": {
-  "collected_at": "2026-11-27T17:20:51+08:00",
+  "collected_at": "2026-11-28T00:44:09+08:00",
   "date_status": "undated",
   "note": "文件无份额统计日，collected_at 只是抓取时间。",
   "rows": {
    "159352": {
     "name": "A500ETF南方",
     "nav": "1.0317",
-    "scale_shares": "30414101746"
+    "scale_shares": "31773101746"
    },
    "159629": {
     "name": "中证1000ETF富国",
     "nav": "2.3168",
-    "scale_shares": "779252663"
+    "scale_shares": "1083252663"
    },
    "159845": {
     "name": "中证1000ETF华夏",
     "nav": "2.3081",
-    "scale_shares": "2334425606"
+    "scale_shares": "4059425606"
    },
    "159915": {
     "name": "创业板ETF易方达",
     "nav": "2.2048",
-    "scale_shares": "56987454936"
+    "scale_shares": "57747454936"
    },
    "159919": {
     "name": "沪深300ETF嘉实",
     "nav": "4.1484",
-    "scale_shares": "21332016676"
+    "scale_shares": "21569616676"
    },
    "159977": {
     "name": "创业板ETF天弘",
     "nav": "1.1442",
-    "scale_shares": "6729872820"
+    "scale_shares": "6613872820"
    }
   }
  },
@@ -294,6 +294,43 @@
      "name": "创业板ETF天弘",
      "nav": "1.1442",
      "scale_shares": "6729872820"
+    }
+   }
+  },
+  {
+   "collected_at": "2026-11-28T00:44:09+08:00",
+   "date_status": "undated",
+   "note": "文件无份额统计日，collected_at 只是抓取时间。",
+   "rows": {
+    "159352": {
+     "name": "A500ETF南方",
+     "nav": "1.0317",
+     "scale_shares": "31773101746"
+    },
+    "159629": {
+     "name": "中证1000ETF富国",
+     "nav": "2.3168",
+     "scale_shares": "1083252663"
+    },
+    "159845": {
+     "name": "中证1000ETF华夏",
+     "nav": "2.3081",
+     "scale_shares": "4059425606"
+    },
+    "159915": {
+     "name": "创业板ETF易方达",
+     "nav": "2.2048",
+     "scale_shares": "57747454936"
+    },
+    "159919": {
+     "name": "沪深300ETF嘉实",
+     "nav": "4.1484",
+     "scale_shares": "21569616676"
+    },
+    "159977": {
+     "name": "创业板ETF天弘",
+     "nav": "1.1442",
+     "scale_shares": "6613872820"
     }
    }
   }

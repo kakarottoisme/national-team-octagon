@@ -251683,6 +251683,74 @@
     "stat_date": "2026-11-26",
     "tot_vol_wan": "5057262.81"
    }
+  },
+  "2026-11-27": {
+   "510050": {
+    "sec_name": "上证50ETF",
+    "source": "sse",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "2559486.68"
+   },
+   "510180": {
+    "sec_name": "上证180ETF",
+    "source": "sse",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "446555.77"
+   },
+   "510300": {
+    "sec_name": "沪深300ETF华泰柏瑞",
+    "source": "sse",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "5763738.77"
+   },
+   "510310": {
+    "sec_name": "沪深300ETF易方达",
+    "source": "sse",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "3159874.4"
+   },
+   "510330": {
+    "sec_name": "沪深300ETF华夏",
+    "source": "sse",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "2366934.98"
+   },
+   "510500": {
+    "sec_name": "中证500ETF南方",
+    "source": "sse",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "1493536.86"
+   },
+   "512100": {
+    "sec_name": "中证1000ETF南方",
+    "source": "sse",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "3327721.76"
+   },
+   "512500": {
+    "sec_name": "中证500ETF华夏",
+    "source": "sse",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "216240.88"
+   },
+   "560010": {
+    "sec_name": "中证1000ETF广发",
+    "source": "sse",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "318462.17"
+   },
+   "588000": {
+    "sec_name": "科创50ETF",
+    "source": "sse",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "10307066.82"
+   },
+   "588080": {
+    "sec_name": "科创板50ETF易方达",
+    "source": "sse",
+    "stat_date": "2026-11-27",
+    "tot_vol_wan": "5007762.81"
+   }
   }
  },
  "quotes": {
@@ -509679,11 +509747,23 @@
     "source": "eastmoney_push2his",
     "volume_hand": "11511582"
    },
+   "510180": {
+    "amount_yuan": "90423519.000",
+    "close": "3.700",
+    "source": "eastmoney_push2his",
+    "volume_hand": "249845"
+   },
    "510300": {
     "amount_yuan": "12369926692.000",
     "close": "4.162",
     "source": "eastmoney_push2his",
     "volume_hand": "30280345"
+   },
+   "510310": {
+    "amount_yuan": "2177106041.000",
+    "close": "4.042",
+    "source": "eastmoney_push2his",
+    "volume_hand": "5492422"
    },
    "510330": {
     "amount_yuan": "1316514860.000",
@@ -509730,5 +509810,5 @@
   }
  },
  "schema": "etf-share-flows-1",
- "updated_at": "2026-11-27T17:20:51+08:00"
+ "updated_at": "2026-11-28T00:44:09+08:00"
 }
