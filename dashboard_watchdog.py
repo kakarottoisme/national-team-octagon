@@ -36,7 +36,7 @@ def due(mode,now):
  node=minute-minute%5
  if 560<=node<=695 or 775<=node<=905:out['live']=target
  if 510<=node<=559:out['cycle']=previous(day).isoformat()
- if (940<=node<=1080 and node%10==0) or node in (1220,1340,1420):out.update(futures=target,ic=target)
+ if (940<=node<=1080 and node%10==0) or any(start<=minute<start+60 for start in (1220,1340,1420)):out.update(futures=target,ic=target)
  if node==1040:out['cycle']=target
  return out
 
@@ -191,11 +191,11 @@ def sync_checkout():
  git('fetch','--quiet','origin','main');git('merge','--ff-only','origin/main')
 
 def inspect(mode,state,persist,check_only=False,followup=False):
- now=dt.datetime.now(TZ);results={};targets=due(mode,now);verify_only=False
+ now=dt.datetime.now(TZ);results={};targets=due(mode,now);verify_only=(followup and mode=='daily')
  if followup and not targets:
   verify_only=True
   prior=state.get('last_result_'+mode,{})
-  targets={n:v['target'] for n,v in prior.items() if v.get('target') and n in MODULES}
+  targets={n:v['target'] for n,v in prior.items() if v.get('target')==now.date().isoformat() and n in MODULES}
   # Followups observe old closed targets, never start a live writer outside session.
   if not (560<=now.hour*60+now.minute<=695 or 775<=now.hour*60+now.minute<=905):targets.pop('live',None)
  for name,target in targets.items():
