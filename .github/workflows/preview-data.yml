@@ -15,6 +15,10 @@ on:
         description: 'Run ETF/global/turnover collection as well'
         type: boolean
         default: false
+      global_only:
+        description: 'Watchdog recovery: collect only global risk plus existing futures; no ETF/turnover coupling'
+        type: boolean
+        default: false
       verify_publish:
         description: 'Smoke-test existing Pages build request and verify collected files'
         type: boolean
@@ -65,19 +69,19 @@ jobs:
           exit "$code"
 
       - name: Setup Python + preview-tools deps (ACM .xls 需要 pinned xlrd)
-        if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
+        if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true || inputs.global_only == true
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install preview-tools requirements
-        if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
+        if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true || inputs.global_only == true
         shell: bash
         run: python3 -m pip install --disable-pip-version-check -r preview-tools/requirements.txt
 
       - name: Collect global risk independently (not coupled to ETF or turnover)
         id: global
         continue-on-error: true
-        if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
+        if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true || inputs.global_only == true
         shell: bash
         run: |
           set -euo pipefail
@@ -90,8 +94,9 @@ jobs:
 
       - name: Run collector (官方SSE+CFFEX; global容错)
         id: full
+        timeout-minutes: 2
         continue-on-error: true # Independent source failure must not discard valid futures additions.
-        if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
+        if: (github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true) && inputs.global_only != true
         shell: bash
         run: |
           set -euo pipefail
@@ -107,15 +112,17 @@ jobs:
 
       - name: Refresh intraday turnover baseline (post-close, 同时点对齐分母)
         id: baseline
+        timeout-minutes: 2
         continue-on-error: true
-        if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
+        if: (github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true) && inputs.global_only != true
         shell: bash
         run: python3 preview-tools/turnover_baseline.py
 
       - name: Refresh daily turnover history (新浪 60 分钟 K 按日累加回补)
         id: turnover
+        timeout-minutes: 2
         continue-on-error: true
-        if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
+        if: (github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true) && inputs.global_only != true
         shell: bash
         run: python3 preview-tools/turnover_history.py
 

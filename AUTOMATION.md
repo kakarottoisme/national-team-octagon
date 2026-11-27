@@ -52,7 +52,7 @@
 - 已入库但Pages落后先重试既有Pages构建并验证字节；不空提交。源暂不可用有限重试，源缺值保留原日期，不伪造。认证/数据结构不明/写入结果未知停止并留痕；需要新增权限或改变投资规则不自动处理。监控任务可按实际日志定位采集/推送/发布故障，必要的采集或发布小修必须保持来源、验证测试、限定相关文件和一次提交发布，不盲目改代码追绿。
 - 使用main最新版 `run_ashare_task.sh watch-intraday|watch-daily /home/user/Doubao/ashare-task-state`。每次隔离克隆，clone传输失败有限三次，认证失败停止；日更复用固定akshare环境。`--followup`允许同次复核不新建定时任务。持久 `dashboard-watchdog.json`/`watchdog-runs.jsonl` 包含checked_at、unresolved、预留状态和实际结果，不存凭证。
 - 旧live-health/live-recover监控规则由上述两类替代，不再额外运行旧监控循环；两融原09:05采集任务保留，18:05旧重复只读兜底移交日更巡检；IC换仓/信号变化/一日两算业务提醒不改变。
-- 全球采集现独立于国内源失败，成功模块独立提交、Pages核验，最终业务失败仍非零。ETF深市已接带size_date官方fund_jjgm；无日期规模快照仍不参与日度估算。份额工作流同步追加同源指数与历史概览，显式Pages构建核验。
+- 全球采集现独立于国内源失败，成功模块独立提交、Pages核验，最终业务失败仍非零。监控全球补跑使用既有preview-data.yml的global_only=true，仅全球和已发布期指，不再耦合ETF/成交额；原full_refresh保持全量。全量辅助采集单步限2分钟，避免耗尽整个任务预算把已成功模块卡在提交之前。ETF深市已接带size_date官方fund_jjgm；无日期规模快照仍不参与日度估算。份额工作流同步追加同源指数与历史概览，显式Pages构建核验。
 
 ## 验收
 `python3 -m unittest discover -s tests -p test_ashare_observers.py -v`覆盖18项新观察任务：排队/运行不重复启动、启动前持久预留、半日与每日去重、结果不明不重发、15分钟成功静默/失败提醒、交易窗口、首次基线、六字段变化、负C公式、持仓方向与手数差、无仓库写入。

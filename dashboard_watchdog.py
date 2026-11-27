@@ -91,7 +91,8 @@ def assess(name,target,now,reader=read):
   if target not in overview:problems.append('historical overview target missing')
  elif name=='global':
   stamp=dt.datetime.fromisoformat(d['generated_at']).astimezone(TZ)
-  if stamp.date().isoformat()<target or d.get('errors'):problems.append('global attempt or sources incomplete')
+  required=dt.datetime.combine(dt.date.fromisoformat(target),dt.time(23,30),tzinfo=TZ)
+  if stamp<required or d.get('errors'):problems.append('global final-node attempt or sources incomplete')
   import sys
   sys.path.insert(0,str(ROOT/'preview-tools'))
   import global_sources as g
@@ -151,7 +152,7 @@ def repair(name,state,key,persist,target=None):
   if state['attempts'].get(reservation):return 'node already attempted'
   state['attempts'][reservation]='reserved';persist(state)
   args=['workflow','run',workflow,'--repo',REPO,'--ref','main']
-  if name=='global':args+=['-f','full_refresh=true']
+  if name=='global':args+=['-f','global_only=true']
   gh(*args);state['attempts'][reservation]='accepted';persist(state);return 'existing workflow dispatched'
  if state['attempts'].get(key):return 'node already attempted'
  # Recheck direct targets immediately before reserving a write.
