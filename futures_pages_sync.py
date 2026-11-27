@@ -17,7 +17,10 @@ import urllib.request
 ROOT=Path(__file__).resolve().parent
 SITE='https://kakarottoisme.github.io/national-team-octagon/'
 REPO='kakarottoisme/national-team-octagon'
-ALLOWED={'data/ic_strategy.json',*[f'preview-data/official/futures/{p}.json' for p in ['IH','IF','IC','IM']]}
+ALLOWED={'data/ic_strategy.json','preview-data/global.json','preview-data/status.json',
+         'preview-data/official/history.json','preview-data/official/snapshot-latest.json',
+         'preview-data/turnover-baseline.json','preview-data/turnover-history.json',
+         *[f'preview-data/official/futures/{p}.json' for p in ['IH','IF','IC','IM']]}
 
 
 def served(paths,root=ROOT,read=None):

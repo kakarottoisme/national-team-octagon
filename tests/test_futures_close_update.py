@@ -207,7 +207,7 @@ class Workflow(unittest.TestCase):
         self.assertIn('Final business result',text)
         self.assertIn('--verify-date "$EXPECTED_DATA_DATE"',text)
         self.assertIn('TARGET_DATE="$TARGET"',text)
-        self.assertEqual(text.count("if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true"),5)
+        self.assertEqual(text.count("if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true"),6)
         # Exact UTC slots -> 15:35..17:55, old 17:40, evening fallbacks.
         slots=[7*60+m for m in [35,45,55]]+[h*60+m for h in [8,9] for m in [5,15,25,35,45,55]]
         local=[m+8*60 for m in slots]

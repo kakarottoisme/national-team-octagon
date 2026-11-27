@@ -436,12 +436,18 @@ async function refresh(){
   const runErrors=Array.isArray(d.errors)?d.errors:[];
   $('banner').style.display=runErrors.length?'block':'none';if(runErrors.length)$('banner').textContent='部分数据源本次采集失败，已保留可用数据；失败源：'+runErrors.map(e=>String(e).split(':')[0]).join('、');
   const attempted=d.generated_at;let lastRun='—';if(attempted){const stamp=new Date(attempted);if(!Number.isNaN(stamp.getTime()))lastRun=stamp.toLocaleString('sv-SE',{timeZone:'Asia/Shanghai',hour12:false}).slice(0,16)}
-  $('st').textContent='最近采集 '+lastRun+' · 已可观察 '+d.metrics.filter(m=>m.status==='connected').length+' 项 · 完整目录 '+d.metrics.length+' 项';
+  const observed=d.metrics.filter(m=>m.status==='connected'||m.status==='connected_stale');
+  const sourceDates=observed.map(m=>m.as_of).filter(v=>/^\d{4}-\d{2}-\d{2}$/.test(v||'')).sort();
+  const latestDate=sourceDates.length?sourceDates[sourceDates.length-1]:'—';
+  $('st').textContent='最近检查 '+lastRun+' · 最新源日期 '+latestDate+' · 已可观察 '+observed.length+' 项 · 完整目录 '+d.metrics.length+' 项';
   $('riskFoot').textContent='已接入 '+d.metrics.filter(isLicensed).length+' / '+d.metrics.length+' 项。数据日期、更新频率和来源见各指标详情。';
   renderGroups();render();
  }finally{busy=false;rb.disabled=false;rb.textContent='刷新'}
 }
 refresh();
+// Refresh only the static published snapshot; do not imply source dates advance every day.
+setInterval(()=>{if(!document.hidden)refresh()},5*60*1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
 window.addEventListener('resize',()=>{if(curveChart)curveChart.resize();if(realChart)realChart.resize();sparkCharts.forEach(c=>c.resize())});
 </script><script>
 /* ===== Unified dashboard dialogs and route continuity ===== */

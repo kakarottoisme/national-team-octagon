@@ -287,7 +287,7 @@ def growth_window(calendar_dates, valid_dates, as_of, n, blocked=None):
 
 
 # ------------------------------------------------------------------ main run
-def run(target_date=None, fetcher=None, now=None):
+def run(target_date=None, fetcher=None, now=None, skip_global=False):
     now = now or bj_now()
     fetcher = fetcher or Fetcher()
     errors = []
@@ -344,7 +344,7 @@ def run(target_date=None, fetcher=None, now=None):
     if sse_date is None:
         # Independent global sources must still run when the SSE share source
         # is unavailable; never let an unrelated domestic failure starve them.
-        g_state, g_info = maybe_collect_global()
+        g_state, g_info = ("skipped", {"reason": "independent_global_step"}) if skip_global else maybe_collect_global()
         snap = {"schema_version": SCHEMA_VERSION, "generated_at": iso(now),
                 "as_of": None, "run_status": "failed",
                 "message": "SSE 连续多日无发布(节假日/未发布/源失败)",
@@ -479,7 +479,7 @@ def run(target_date=None, fetcher=None, now=None):
         errors.append(f"futures_history module: {e}")
 
     # 8) global 容错调用
-    g_state, g_info = maybe_collect_global()
+    g_state, g_info = ("skipped", {"reason": "independent_global_step"}) if skip_global else maybe_collect_global()
     if sse_date and g_state in ("degraded_partial", "failed_nonblocking"):
         run_status = "partial"   # 国内ok但全球非连通,如实降级,不假成功
     elif sse_date:
@@ -554,13 +554,14 @@ if __name__ == "__main__":
     ap.add_argument("--date", help="强制 SSE 探测起始日 YYYYMMDD(默认当日)")
     ap.add_argument("--backfill", type=int, metavar="DAYS",
                     help="可重跑 bootstrap: 回补近 DAYS 自然日的沪市官方份额")
+    ap.add_argument("--skip-global", action="store_true", help="Global collection runs independently in its own workflow step")
     args = ap.parse_args()
     if args.backfill:
         res = backfill(args.backfill)
         print(json.dumps(res, ensure_ascii=False))
         sys.exit(0)
     tgt = dt.datetime.strptime(args.date, "%Y%m%d").date() if args.date else None
-    out = run(target_date=tgt)
+    out = run(target_date=tgt, skip_global=args.skip_global)
     print(json.dumps({"as_of": out.get("as_of"), "run_status": out.get("run_status", "ok"),
                       "etfs": len(out.get("etfs", [])),
                       "calendar_days": out.get("calendar_days"),

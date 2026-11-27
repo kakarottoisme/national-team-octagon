@@ -74,6 +74,20 @@ jobs:
         shell: bash
         run: python3 -m pip install --disable-pip-version-check -r preview-tools/requirements.txt
 
+      - name: Collect global risk independently (not coupled to ETF or turnover)
+        id: global
+        continue-on-error: true
+        if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 preview-tools/global_sources.py --output preview-data/global.json
+          python3 - << 'PY'
+          import json, sys
+          data = json.load(open('preview-data/global.json'))
+          sys.exit(0 if data.get('run_state') in ('ok', 'partial', 'degraded_cached') else 1)
+          PY
+
       - name: Run collector (官方SSE+CFFEX; global容错)
         id: full
         continue-on-error: true # Independent source failure must not discard valid futures additions.
@@ -82,7 +96,7 @@ jobs:
         run: |
           set -euo pipefail
           TARGET=$(python3 -c 'import datetime as d; from futures_close_update import strategy_target_day, TZ; print(strategy_target_day(d.datetime.now(TZ)).strftime("%Y%m%d"))')
-          python3 preview-tools/collect_preview.py --date "$TARGET"
+          python3 preview-tools/collect_preview.py --date "$TARGET" --skip-global
           TARGET_DATE="$TARGET" python3 - << 'PY'
           import json, os, sys
           data = json.load(open('preview-data/status.json'))
@@ -92,24 +106,53 @@ jobs:
           PY
 
       - name: Refresh intraday turnover baseline (post-close, 同时点对齐分母)
+        id: baseline
+        continue-on-error: true
         if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
         shell: bash
         run: python3 preview-tools/turnover_baseline.py
 
       - name: Refresh daily turnover history (新浪 60 分钟 K 按日累加回补)
+        id: turnover
+        continue-on-error: true
         if: github.event.schedule == '30 15 * * 1-5' || inputs.full_refresh == true
         shell: bash
         run: python3 preview-tools/turnover_history.py
 
       - name: Commit only preview-data/ then push (不force、不reset丢数据)
+        id: publish_data
+        if: ${{ !cancelled() }}
+        env:
+          GLOBAL_OUTCOME: ${{ steps.global.outcome }}
+          FULL_OUTCOME: ${{ steps.full.outcome }}
+          BASELINE_OUTCOME: ${{ steps.baseline.outcome }}
+          TURNOVER_OUTCOME: ${{ steps.turnover.outcome }}
         shell: bash
         run: |
           set -euo pipefail
           export GIT_TERMINAL_PROMPT=0
           STAMP=$(date -u +%Y-%m-%dT%H:%MZ)
 
-          # 只暂存隔离目录,绝不 add 其它路径
-          git add preview-data/official preview-data/status.json preview-data/global.json preview-data/turnover-baseline.json preview-data/turnover-history.json
+          # 每个模块只提交成功或明确保留有效缓存的结果，失败模块不阻断其它发布。
+          git add preview-data/official/futures
+          paths=(preview-data/official/futures/{IH,IF,IC,IM}.json)
+          if [[ "$GLOBAL_OUTCOME" == "success" ]]; then
+            git add preview-data/global.json
+            paths+=(preview-data/global.json)
+          fi
+          if [[ "$FULL_OUTCOME" == "success" ]]; then
+            git add preview-data/official/history.json preview-data/official/snapshot-latest.json preview-data/status.json
+            paths+=(preview-data/official/history.json preview-data/official/snapshot-latest.json preview-data/status.json)
+          fi
+          if [[ "$BASELINE_OUTCOME" == "success" ]]; then
+            git add preview-data/turnover-baseline.json
+            paths+=(preview-data/turnover-baseline.json)
+          fi
+          if [[ "$TURNOVER_OUTCOME" == "success" ]]; then
+            git add preview-data/turnover-history.json
+            paths+=(preview-data/turnover-history.json)
+          fi
+          printf 'paths=%s\n' "${paths[*]}" >> "$GITHUB_OUTPUT"
           if git diff --cached --quiet; then
             echo "preview-data 无变化,不提交"
             exit 0
@@ -134,7 +177,10 @@ jobs:
           exit 1
 
       - name: Ensure collected futures data is served by GitHub Pages
+        id: pages
+        if: ${{ !cancelled() && steps.publish_data.outcome == 'success' }}
         env:
+          PUBLISH_PATHS: ${{ steps.publish_data.outputs.paths }}
           GH_TOKEN: ${{ github.token }}
           VERIFY_PUBLISH: ${{ inputs.verify_publish }}
           EXPECTED_DATA_DATE: ${{ steps.members.outputs.data_date }}
@@ -143,7 +189,8 @@ jobs:
           set -euo pipefail
           args=()
           if [[ "$VERIFY_PUBLISH" == "true" ]]; then args+=(--request-build); fi
-          python3 futures_pages_sync.py preview-data/official/futures/{IH,IF,IC,IM}.json "${args[@]}"
+          read -r -a paths <<< "$PUBLISH_PATHS"
+          python3 futures_pages_sync.py "${paths[@]}" "${args[@]}"
           python3 futures_close_update.py --mode members --verify-date "$EXPECTED_DATA_DATE"
 
       - name: Final business result (never green on missing data)
@@ -151,7 +198,15 @@ jobs:
         env:
           MEMBERS_OUTCOME: ${{ steps.members.outcome }}
           FULL_OUTCOME: ${{ steps.full.outcome }}
+          GLOBAL_OUTCOME: ${{ steps.global.outcome }}
+          BASELINE_OUTCOME: ${{ steps.baseline.outcome }}
+          TURNOVER_OUTCOME: ${{ steps.turnover.outcome }}
+          PUBLISH_OUTCOME: ${{ steps.publish_data.outcome }}
+          PAGES_OUTCOME: ${{ steps.pages.outcome }}
         shell: bash
         run: |
           [[ "$MEMBERS_OUTCOME" == "success" ]] || exit 1
-          [[ "$FULL_OUTCOME" != "failure" ]] || exit 1
+          [[ "$PUBLISH_OUTCOME" == "success" && "$PAGES_OUTCOME" == "success" ]] || exit 1
+          for outcome in "$FULL_OUTCOME" "$GLOBAL_OUTCOME" "$BASELINE_OUTCOME" "$TURNOVER_OUTCOME"; do
+            [[ "$outcome" != "failure" ]] || exit 1
+          done

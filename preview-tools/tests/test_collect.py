@@ -162,6 +162,11 @@ class TestWindowsAndAnomaly(TempWorkdir):
 
 
 class TestSingleSourceFailure(TempWorkdir):
+    def test_separate_global_step_does_not_collect_twice(self):
+        cp.maybe_collect_global = lambda: self.fail('global must be collected in independent step')
+        snap = cp.run(target_date=dt.date(2026, 11, 3), fetcher=FakeFetcher(raise_sse=True), skip_global=True)
+        self.assertEqual(snap['global']['state'], 'skipped')
+
     def test_sse_failure_keeps_old_stale(self):
         # 先有一天正常数据
         ft1 = FakeFetcher(sse={"2026-11-02": sse_payload([("510300", 4400000.0)])})
