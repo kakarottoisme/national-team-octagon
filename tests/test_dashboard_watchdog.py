@@ -32,6 +32,10 @@ class WatchdogTests(unittest.TestCase):
   state={'attempts':{}}
   with patch('ashare_tasks.margin_missing',return_value=[]),patch.object(w,'verify_publication') as verify,patch.object(w,'load',return_value={}),patch('ashare_tasks.build_margin_update') as build:
    w.repair('margin',state,'test-margin',lambda _:None,'2026-11-26');build.assert_not_called();verify.assert_called_once()
+ def test_uncertain_dispatch_blocks_future_node(self):
+  state={'attempts':{'yesterday-ic-strategy.yml':'reserved'}}
+  with patch.object(w,'active',return_value=False),patch.object(w,'gh') as g:
+   out=w.repair('ic',state,'today-ic',lambda _:None);g.assert_not_called();self.assertIn('unconfirmed',out)
  def test_all_active_states_server_filter(self):
   calls=[]
   def gh(*a):

@@ -12,7 +12,7 @@ MODULES={
  'futures':('preview-data.yml',[f'preview-data/official/futures/{p}.json' for p in ['IH','IF','IC','IM']]),
  'ic':('ic-strategy.yml',['data/ic_strategy.json']),
  'cycle':('market-cycle.yml',['data/market_cycle.json']),
- 'flows':('etf-share-flows.yml',['data/etf_share_flows.json','data/etf_index_reference.json','data/historical_overview.json']),
+ 'flows':('etf-share-flows.yml',['data/etf_share_flows.json','data/etf_share_history.json','data/etf_index_reference.json','data/historical_overview.json']),
  'global':('preview-data.yml',['preview-data/global.json']),
  'margin':(None,['data/margin_balance.json']),
  'archive':(None,['data/history.json'])}
@@ -64,8 +64,9 @@ def assess(name,target,now,reader=read):
   try:validate_payload(d,now)
   except ValueError:problems.append('live minute completeness/date/time invalid')
  elif name=='futures':
-  from futures_close_update import member_missing_days
+  from futures_close_update import member_missing_days,verify_members_date
   if member_missing_days(ROOT,dt.date.fromisoformat(target)):problems.append('futures recent trading-day gap')
+  else:verify_members_date(ROOT,dt.date.fromisoformat(target))
   for p,x in docs.items():
    if x.get('records',{}).get(target,{}).get('source_status')!='published':problems.append(p+' missing '+target)
  elif name=='ic':
@@ -79,6 +80,15 @@ def assess(name,target,now,reader=read):
  elif name=='flows':
   if d.get('as_of','')<target or d.get('summary',{}).get('inflow_1d_covered',0)!=17:problems.append('ETF published date/coverage incomplete')
   if any(x.get('as_of','')<target for x in docs['data/etf_index_reference.json']['indices'].values()):problems.append('ETF benchmarks stale')
+  recent=dt.date.fromisoformat(target)-dt.timedelta(days=20)
+  history=docs['data/etf_share_history.json']['days'];overview=docs['data/historical_overview.json']['days']
+  while recent.isoformat()<=target:
+   day=recent.isoformat()
+   if is_trading_day(recent):
+    rows=history.get(day,{})
+    if len(rows)!=17 or any(x.get('stat_date')!=day or x.get('tot_vol_wan') is None for x in rows.values()):problems.append('ETF missing dated coverage '+day)
+   recent+=dt.timedelta(days=1)
+  if target not in overview:problems.append('historical overview target missing')
  elif name=='global':
   stamp=dt.datetime.fromisoformat(d['generated_at']).astimezone(TZ)
   if stamp.date().isoformat()<target or d.get('errors'):problems.append('global attempt or sources incomplete')
@@ -137,6 +147,7 @@ def repair(name,state,key,persist,target=None):
  if workflow:
   reservation=key.rsplit('-',1)[0]+'-'+workflow
   if active(workflow):return 'existing run; no duplicate'
+  if any(k.endswith('-'+workflow) and v=='reserved' for k,v in state['attempts'].items()):return 'prior dispatch unconfirmed; inspect logs before any new dispatch'
   if state['attempts'].get(reservation):return 'node already attempted'
   state['attempts'][reservation]='reserved';persist(state)
   args=['workflow','run',workflow,'--repo',REPO,'--ref','main']
@@ -183,7 +194,7 @@ def inspect(mode,state,persist,check_only=False,followup=False):
  now=dt.datetime.now(TZ);results={};targets=due(mode,now);verify_only=False
  if followup and not targets:
   verify_only=True
-  prior=state.get('last_result',{})
+  prior=state.get('last_result_'+mode,{})
   targets={n:v['target'] for n,v in prior.items() if v.get('target') and n in MODULES}
   # Followups observe old closed targets, never start a live writer outside session.
   if not (560<=now.hour*60+now.minute<=695 or 775<=now.hour*60+now.minute<=905):targets.pop('live',None)
@@ -205,7 +216,7 @@ def inspect(mode,state,persist,check_only=False,followup=False):
     try:action=repair(name,state,key,persist,target)
     except Exception:action='repair unconfirmed; no replay'
    results[name]={'target':target,'error':type(e).__name__,'action':action};state['unresolved'][name]=results[name]
- state['checked_at']=now.isoformat();state['last_result']=results;persist(state)
+ state['checked_at']=now.isoformat();state['last_result']=results;state['last_result_'+mode]=results;persist(state)
  return results
 
 def main():
